@@ -4,9 +4,8 @@ from json import load, dump
 
 with open("settings.json") as json_data:
     settings_json = load(json_data)
-    scrollinvert = settings_json["scrollinvert"]
+    scrollinvert = settings_json["Scroll Invert"]
 
-initial_settings_json = settings_json
 pygame.init()
 
 run = True
@@ -32,6 +31,7 @@ settingsbuttons = [
     Button("FPS", (200, 500), (160, 40), 5),
     Button("Sound Volume", (200, 600), (160, 40), 5),
     Button("Music Volume", (200, 700), (160, 40), 5),
+    Button("Scroll Invert", (200, 800), (160, 40), 5),
     Button("Exit", (200, 900), (160, 40), 5),
 ]
 
@@ -96,15 +96,29 @@ while run:
             case "Exit":
                 settings = False
                 menu = True
-            case _:
-                if tab:
-                    settings_json[tab] += mscroll
-                    if settings_json != initial_settings_json:
-                        initial_settings_json = settings_json
-                        with open("settings.json", "w") as json_data:
-                            dump(settings_json, json_data)
+            case "UI Size":
+                settings_json["UI Size"] = max(
+                    min(settings_json["UI Size"] + mscroll, 40), 14
+                )
+            case "Scroll Invert":
+                settings_json["Scroll Invert"] = (
+                    max(min(settings_json["Scroll Invert"] + mscroll, 1), 0) * -2 + 1
+                )
+            case "Sound Volume":
+                settings_json["Sound Volume"] = max(
+                    min(settings_json["Sound Volume"] + mscroll, 100), 0
+                )
+            case "Music Volume":
+                settings_json["Music Volume"] = max(
+                    min(settings_json["Music Volume"] + mscroll, 100), 0
+                )
+            case "FPS":
+                settings_json["FPS"] = max(settings_json["FPS"] + mscroll, 12)
+        with open("settings.json", "w") as json_data:
+            dump(settings_json, json_data)
 
         mtogg = False
         tab = 0
 
+    pygame.time.Clock().tick(settings_json["FPS"])
     pygame.display.update()
