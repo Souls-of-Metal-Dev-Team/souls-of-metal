@@ -2,7 +2,7 @@ import pygame
 from classes import Button, cwd
 from json import load
 
-with open("translation.json") as json_data:
+with open("translation.json", encoding='utf-8') as json_data:
     trans = load(json_data)
 
 pygame.init()
@@ -18,20 +18,20 @@ fps = 60
 sv, mv = 100, 100
 
 menubuttons = [
-    Button(trans["Start Game"], (200, 400), (160, 40), 5),
-    Button(trans["Continue Game"], (200, 500), (160, 40), 5),
-    Button(trans["Settings"], (200, 600), (160, 40), 5),
-    Button(trans["Credits"], (200, 700), (160, 40), 5),
-    Button(trans["Exit"], (200, 800), (160, 40), 5),
+    Button(trans["Start Game"], (200, 400), (160, 40), 5, "Start Game"),
+    Button(trans["Continue Game"], (200, 500), (160, 40), 5, "Continue Game"),
+    Button(trans["Settings"], (200, 600), (160, 40), 5, "Settings"),
+    Button(trans["Credits"], (200, 700), (160, 40), 5, "Credits"),
+    Button(trans["Exit"], (200, 800), (160, 40), 5, "Exit"),
 ]
 
 settingsbuttons = [
-    Button(f"{trans['UI Size']}: {uisize}", (200, 400), (160, 40), 5),
-    Button(f"{trans['FPS']}: {fps}", (200, 500), (160, 40), 5),
-    Button(f"{trans['Sound Volume']}: {sv}", (200, 600), (160, 40), 5),
-    Button(f"{trans['Music Volume']}: {mv}", (200, 700), (160, 40), 5),
-    Button(trans["Apply"], (200, 800), (160, 40), 5),
-    Button(trans["Exit"], (200, 900), (160, 40), 5),
+    Button(f"{trans['UI Size']}: {uisize}", (200, 400), (160, 40), 5, "UI Size"),
+    Button(f"{trans['FPS']}: {fps}", (200, 500), (160, 40), 5, "FPS"),
+    Button(f"{trans['Sound Volume']}: {sv}", (200, 600), (160, 40), 5, "Sound Volume"),
+    Button(f"{trans['Music Volume']}: {mv}", (200, 700), (160, 40), 5, "Music Volume"),
+    Button(trans["Apply"], (200, 800), (160, 40), 5, "Apply"),
+    Button(trans["Exit"], (200, 900), (160, 40), 5, "Exit"),
 ]
 
 screen = pygame.display.set_mode(
