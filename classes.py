@@ -1,6 +1,10 @@
 from pygame import draw, Rect, font
 from os import getcwd
 from json import load
+from settings import uisize, mv, sv, fps
+
+with open("translation.json") as json_data:
+    trans = load(json_data)
 
 with open("theme.json") as json_data:
     theme = load(json_data)
@@ -32,7 +36,7 @@ class Button:
             self.dim[1],
         )
 
-    def draw(self, screen, mpos, mtogg, tab):
+    def draw(self, screen, mpos, mtogg, tab, settings_json):
         if Rect.collidepoint(self.brect, mpos):
             draw.rect(
                 screen,
@@ -57,8 +61,6 @@ class Button:
                 (self.dim[1] >> 1) + self.thicc,
             )
 
-        print(self.id)
-
         draw.rect(
             screen,
             self.c3,
@@ -76,8 +78,14 @@ class Button:
             (self.pos[0] + (self.dim[0] >> 1), self.pos[1] + (self.dim[1] >> 1)),
             (self.dim[1] >> 1),
         )
+
+        text = (
+            f"{trans[self.id]}: {settings_json[self.id]}"
+            if self.id in settings_json
+            else self.id
+        )
         font_render = font.render(
-            self.id,
+            text,
             fontalias,
             secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary,
         )
