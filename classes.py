@@ -9,6 +9,8 @@ font = font.Font(f"{cwd}/ui/font.ttf", 24)
 
 
 class Button:
+    mouse_up = False
+
     def __init__(self, id, pos, dim, thicc):
         self.id = id
         self.pos = pos
@@ -23,6 +25,14 @@ class Button:
             self.dim[0],
             self.dim[1],
         )
+
+    def check(self, status, mpos):
+        if Rect.collidepoint(self.brect, mpos) and status == "up":
+            self.mouse_up = True
+        if Rect.collidepoint(self.brect, mpos) and status == "down" and self.mouse_up:
+            print(self.id)
+        if status == "down":
+            self.mouse_up = False
 
     def draw(self, screen, mpos):
         if Rect.collidepoint(self.brect, mpos):
@@ -67,11 +77,12 @@ class Button:
             (self.pos[0] + (self.dim[0] >> 1), self.pos[1] + (self.dim[1] >> 1)),
             (self.dim[1] >> 1),
         )
+        font_render = font.render(
+            self.id,
+            fontalias,
+            primary if Rect.collidepoint(self.brect, mpos) else secondary,
+        )
         screen.blit(
-            font.render(
-                self.id,
-                fontalias,
-                primary if Rect.collidepoint(self.brect, mpos) else secondary,
-            ),
-            (self.pos[0] - (self.dim[0] >> 1), self.pos[1] + self.thicc),
+            font_render,
+            (self.pos[0] - (font_render.get_width() >> 1), self.pos[1] + self.thicc),
         )
