@@ -5,6 +5,10 @@ from json import load
 with open("translation.json") as json_data:
     trans = load(json_data)
 
+with open("settings.json") as json_data:
+    settings_json = load(json_data)
+    scrollinvert = settings_json["scrollinvert"]
+
 pygame.init()
 
 run = True
@@ -12,6 +16,10 @@ menu = True
 settings = False
 # themeing shit
 menubg = pygame.image.load(f"{cwd}/ui/menu.png")
+menutab = [1]
+
+tick = mscroll = 0
+mtogg = False
 
 uisize = 14
 fps = 60
@@ -48,36 +56,50 @@ while run:
                 match event.key:
                     case pygame.K_F4:
                         pygame.display.toggle_fullscreen()
+            case pygame.MOUSEWHEEL:
+                mscroll = mscroll - scrollinvert * event.y
             case pygame.MOUSEBUTTONDOWN:
-                if menu:
-                    for i in menubuttons:
-                        i.check("up", mpos)
-                if settings:
-                    for i in settingsbuttons:
-                        i.check("up", mpos)
+                mtogg = True
+            # if menu:
+            #     for i in menubuttons:
+            #         i.check("up", mpos)
+            # if settings:
+            #     for i in settingsbuttons:
+            #         i.check("up", mpos)
             case pygame.MOUSEBUTTONUP:
-                if menu:
-                    for i in menubuttons:
-                        match i.check("down", mpos):
-                            case "Settings":
-                                settings = True
-                                menu = False
-                                break
-                            case "Exit":
-                                run = False
-                if settings:
-                    for i in settingsbuttons:
-                        match i.check("down", mpos):
-                            case "Exit":
-                                settings = False
-                                menu = True
-                                break
+                mtogg = False
+                # if menu:
+                #     for i in menubuttons:
+                #
+                # if settings:
+                #     for i in settingsbuttons:
+                #         match i.check("down", mpos):
+                #             case "Exit":
+                #                 settings = False
+                #                 menu = True
+                #                 break
+    # print(mscroll)
 
     if menu:
         for i in menubuttons:
-            i.draw(screen, mpos)
+            if i.draw(screen, mpos, mtogg, menutab):
+                menutab = i.draw(screen, mpos, mtogg, menutab)
+            match menutab:
+                case "Settings":
+                    settings = True
+                    menu = False
+                    break
+                case "Exit":
+                    run = False
     if settings:
         for i in settingsbuttons:
-            i.draw(screen, mpos)
+            if i.draw(screen, mpos, mtogg, menutab):
+                menutab = i.draw(screen, mpos, mtogg, menutab)
+            match menutab:
+                # case "Sound Volume":
+                case "Exit":
+                    settings = False
+                    menu = True
+                    break
 
     pygame.display.update()

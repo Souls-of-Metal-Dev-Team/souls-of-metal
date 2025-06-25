@@ -32,7 +32,7 @@ class Button:
             self.dim[1],
         )
 
-    def draw(self, screen, mpos):
+    def draw(self, screen, mpos, mtogg, tab):
         if Rect.collidepoint(self.brect, mpos):
             draw.rect(
                 screen,
@@ -56,6 +56,9 @@ class Button:
                 (self.pos[0] + (self.dim[0] >> 1), self.pos[1] + (self.dim[1] >> 1)),
                 (self.dim[1] >> 1) + self.thicc,
             )
+
+        print(self.id)
+
         draw.rect(
             screen,
             self.c3,
@@ -76,18 +79,12 @@ class Button:
         font_render = font.render(
             self.id,
             fontalias,
-            primary if Rect.collidepoint(self.brect, mpos) else secondary,
+            secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary,
         )
         screen.blit(
             font_render,
             (self.pos[0] - (font_render.get_width() >> 1), self.pos[1] + self.thicc),
         )
 
-    def check(self, status, mpos):
-        if Rect.collidepoint(self.brect, mpos):
-            if status == "up":
-                self.mouse_up = True
-            if status == "down" and self.mouse_up:
-                return self.id
-        if status == "down":
-            self.mouse_up = False
+        if Rect.collidepoint(self.brect, mpos) and mtogg:
+            return self.id
