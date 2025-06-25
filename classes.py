@@ -16,14 +16,15 @@ font = font.Font(f"{cwd}/ui/font.ttf", 24)
 
 
 class Button:
-    def __init__(self, id, pos, dim, thicc):
-        self.id = id
+    def __init__(self, text, pos, dim, thicc, command):
+        self.text = text
         self.pos = pos
         self.dim = dim
         self.thicc = thicc
         self.c1 = primary
         self.c2 = secondary
         self.c3 = tertiary
+        self.command = command
         self.mouse_up = False
         self.brect = Rect(
             self.pos[0] - (self.dim[0] >> 1),
@@ -74,7 +75,7 @@ class Button:
             (self.dim[1] >> 1),
         )
         font_render = font.render(
-            self.id,
+            self.text,
             fontalias,
             primary if Rect.collidepoint(self.brect, mpos) else secondary,
         )
@@ -88,6 +89,6 @@ class Button:
             if status == "up":
                 self.mouse_up = True
             if status == "down" and self.mouse_up:
-                return self.id
+                return self.command
         if status == "down":
             self.mouse_up = False
