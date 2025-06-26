@@ -1,5 +1,5 @@
 import pygame
-from classes import Button, cwd
+from classes import Button, cwd, MajorCountrySelect
 from json import load, dump
 
 with open("settings.json") as json_data:
@@ -11,11 +11,13 @@ pygame.init()
 run = True
 menu = True
 settings = False
+countryselect = False
 # themeing shit
 menubg = pygame.image.load(f"{cwd}/ui/menu.png")
 tab = [1]
 
 tick = mscroll = 0
+player_country = None
 mtogg = False
 
 menubuttons = [
@@ -35,6 +37,16 @@ settingsbuttons = [
     Button("Exit", (200, 900), (160, 40), 5),
 ]
 
+countryselectbuttons = [
+    Button("Back", (925, 570), (160, 40), 5),
+    Button("Map Select", (1175, 570), (160, 40), 5),
+    Button("Country List", (925, 670), (160, 40), 5),
+    Button("Start", (1175, 670), (160, 40), 5),
+]
+
+a = pygame.sprite.Group()
+countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", a)
+
 screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
 )
@@ -50,48 +62,42 @@ while run:
                     case pygame.K_F4:
                         pygame.display.toggle_fullscreen()
             case pygame.MOUSEWHEEL:
+                if countryselect and (
+                    ((countrymajor.min < 0) and (event.y < 0))
+                    or ((countrymajor.max > 1000) and (event.y > 0))
+                ):
+                    for i in countrymajor.majors:
+                        i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
+                        i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
+                        countrymajor.update()
                 mscroll = -scrollinvert * event.y
                 mtogg = True
             case pygame.MOUSEBUTTONDOWN:
                 mscroll = 0
                 mtogg = True
-            # if menu:
-            #     for i in menubuttons:
-            #         i.check("up", mpos)
-            # if settings:
-            #     for i in settingsbuttons:
-            #         i.check("up", mpos)
             case pygame.MOUSEBUTTONUP:
                 mscroll = 0
                 mtogg = False
-                # if menu:
-                #     for i in menubuttons:
-                #
-                # if settings:
-                #     for i in settingsbuttons:
-                #         match i.check("down", mpos):
-                #             case "Exit":
-                #                 settings = False
-                #                 menu = True
-                #                 break
-    # print(mscroll)
 
     if menu:
         for i in menubuttons:
-            if i.draw(screen, mpos, mtogg, tab, settings_json):
-                tab = i.draw(screen, mpos, mtogg, tab, settings_json)
+            if i.draw(screen, mpos, mtogg, settings_json):
+                tab = i.draw(screen, mpos, mtogg, settings_json)
 
         match tab:
             case "Settings":
                 settings = True
+                menu = False
+            case "Start Game":
+                countryselect = True
                 menu = False
             case "Exit":
                 run = False
         tab = 0
     if settings:
         for i in settingsbuttons:
-            if i.draw(screen, mpos, mtogg, tab, settings_json):
-                tab = i.draw(screen, mpos, mtogg, tab, settings_json)
+            if i.draw(screen, mpos, mtogg, settings_json):
+                tab = i.draw(screen, mpos, mtogg, settings_json)
         match tab:
             case "Exit":
                 settings = False
@@ -119,6 +125,28 @@ while run:
 
         mtogg = False
         tab = 0
+
+    if countryselect:
+        pygame.draw.rect(screen, (50, 50, 50), ((100, 40), (1200, 1000)), 0, 20)
+        pygame.draw.rect(screen, (40, 40, 40), ((800, 540), (500, 200)), 0, 20)
+        a.draw(screen)
+        countrymajor.update()
+        pygame.draw.rect(countrymajor.image, (40, 40, 40), ((0, 0), (700, 1000)), 0, 20)
+        for major in countrymajor.majors:
+            if major.draw(countrymajor.image, mpos, player_country, mtogg):
+                player_country = major.draw(
+                    countrymajor.image, mpos, player_country, mtogg
+                )
+        for i in countryselectbuttons:
+            if i.draw(screen, mpos, mtogg, settings_json):
+                tab = i.draw(screen, mpos, mtogg, settings_json)
+
+        match tab:
+            case "Back":
+                countryselect = False
+                menu = True
+        tab = 0
+        print(player_country)
 
     pygame.time.Clock().tick(settings_json["FPS"])
     pygame.display.update()

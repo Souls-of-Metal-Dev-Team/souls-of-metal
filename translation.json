@@ -8,5 +8,17 @@
   "FPS": "FPS",
   "Sound Volume": "Sound Volume",
   "Music Volume": "Music Volume",
-  "Scroll Invert": "Scroll Invert"
+  "Scroll Invert": "Scroll Invert",
+  "Back": "Back",
+  "Map Select": "Map Select",
+  "Country List": "Country List",
+  "Start": "Start",
+  "Russia": "Russian Federation",
+  "United_States": "United States of America",
+  "China": "People's Republic of China",
+  "India": "Republic of India",
+  "France": "France",
+  "United_Kingdom": "United Kingdom of Great Britain",
+  "Japan": "Japan",
+  "Germany": "Germany"
 }
