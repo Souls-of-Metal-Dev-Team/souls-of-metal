@@ -62,14 +62,14 @@ while run:
                     case pygame.K_F4:
                         pygame.display.toggle_fullscreen()
             case pygame.MOUSEWHEEL:
-                if countryselect and (
-                    ((countrymajor.min < 0) and (event.y < 0))
-                    or ((countrymajor.max > 1000) and (event.y > 0))
-                ):
-                    for i in countrymajor.majors:
-                        i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
-                        i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
-                        countrymajor.update()
+                # if countryselect and (
+                #     ((countrymajor.min < 0) and (event.y < 0))
+                #     or ((countrymajor.max > 1000) and (event.y > 0))
+                # ):
+                for i in countrymajor.majors:
+                    i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
+                    i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
+                    countrymajor.update()
                 mscroll = -scrollinvert * event.y
                 mtogg = True
             case pygame.MOUSEBUTTONDOWN:
