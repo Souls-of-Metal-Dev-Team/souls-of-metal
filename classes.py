@@ -2,6 +2,7 @@ from pygame import draw, Rect, font, Surface, sprite
 from os import getcwd
 from json import load
 import pygame
+from math import cos
 
 with open("translation.json") as json_data:
     trans = load(json_data)
@@ -23,11 +24,12 @@ font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
 
 
 class Button:
+    thicc = 0
     def __init__(self, id, pos, dim, thicc):
         self.id = id
         self.pos = pos
         self.dim = dim
-        self.thicc = thicc
+        self.thiccmax = thicc
         self.c1 = primary
         self.c2 = secondary
         self.c3 = tertiary
@@ -39,8 +41,9 @@ class Button:
             self.dim[1] * uiscale,
         )
 
-    def draw(self, screen, mpos, mtogg, settings_json):
+    def draw(self, screen, mpos, mtogg, settings_json,tick):
         if Rect.collidepoint(self.brect, mpos):
+            self.thicc = int( ( cos(tick/10)**2 )*(self.thiccmax/2) +(self.thiccmax/2) )
             draw.rect(
                 screen,
                 self.c2,
@@ -108,7 +111,7 @@ class Button:
             font_render,
             (
                 self.pos[0] - (font_render.get_width() >> 1),
-                self.pos[1] + (self.thicc * uiscale),
+                self.pos[1] + (self.thiccmax * uiscale),
             ),
         )
 
@@ -157,9 +160,11 @@ class MajorCountry:
         font_render = font.render(
             trans[self.id],
             fontalias,
-            secondary
-            if (Rect.collidepoint(self.brect, mpos) and mtogg) or select == self.id
-            else primary,
+            (
+                secondary
+                if (Rect.collidepoint(self.brect, mpos) and mtogg) or select == self.id
+                else primary
+            ),
         )
         screen.blit(font_render, (self.pos[0] + 25, self.pos[1] + 25))
         if Rect.collidepoint(self.brect, mpos) and mtogg:

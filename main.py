@@ -81,8 +81,8 @@ while run:
 
     if menu:
         for i in menubuttons:
-            if i.draw(screen, mpos, mtogg, settings_json):
-                tab = i.draw(screen, mpos, mtogg, settings_json)
+            if i.draw(screen, mpos, mtogg, settings_json,tick):
+                tab = i.draw(screen, mpos, mtogg, settings_json,tick)
 
         match tab:
             case "Settings":
@@ -96,8 +96,8 @@ while run:
         tab = 0
     if settings:
         for i in settingsbuttons:
-            if i.draw(screen, mpos, mtogg, settings_json):
-                tab = i.draw(screen, mpos, mtogg, settings_json)
+            if i.draw(screen, mpos, mtogg, settings_json,tick):
+                tab = i.draw(screen, mpos, mtogg, settings_json,tick)
         match tab:
             case "Exit":
                 settings = False
@@ -138,8 +138,8 @@ while run:
                     countrymajor.image, mpos, player_country, mtogg
                 )
         for i in countryselectbuttons:
-            if i.draw(screen, mpos, mtogg, settings_json):
-                tab = i.draw(screen, mpos, mtogg, settings_json)
+            if i.draw(screen, mpos, mtogg, settings_json,tick):
+                tab = i.draw(screen, mpos, mtogg, settings_json,tick)
 
         match tab:
             case "Back":
@@ -147,6 +147,7 @@ while run:
                 menu = True
         tab = 0
         print(player_country)
+    tick+=1
 
     pygame.time.Clock().tick(settings_json["FPS"])
     pygame.display.update()
