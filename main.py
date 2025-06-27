@@ -7,7 +7,9 @@ with open("settings.json") as json_data:
     scrollinvert = settings_json["Scroll Invert"]
 
 pygame.init()
-
+screen = pygame.display.set_mode(
+    (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
+)
 run = True
 menu = True
 settings = False
@@ -38,18 +40,16 @@ settingsbuttons = [
 ]
 
 countryselectbuttons = [
-    Button("Back", (925, 570), (160, 40), 5),
-    Button("Map Select", (1175, 570), (160, 40), 5),
-    Button("Country List", (925, 670), (160, 40), 5),
-    Button("Start", (1175, 670), (160, 40), 5),
+    Button("Back", (1125, 570), (160, 40), 5),
+    Button("Map Select", (1375, 570), (160, 40), 5),
+    Button("Country List", (1125, 670), (160, 40), 5),
+    Button("Start", (1375, 670), (160, 40), 5),
 ]
 
 a = pygame.sprite.Group()
-countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", a)
+countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, a )
 
-screen = pygame.display.set_mode(
-    (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-)
+
 while run:
     screen.blit(menubg, (0, 0))
     mpos = pygame.mouse.get_pos()
@@ -62,20 +62,17 @@ while run:
                     case pygame.K_F4:
                         pygame.display.toggle_fullscreen()
             case pygame.MOUSEWHEEL:
-                # if countryselect and (
-                #     ((countrymajor.min < 0) and (event.y < 0))
-                #     or ((countrymajor.max > 1000) and (event.y > 0))
-                # ):
-                for i in countrymajor.majors:
-                    i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
-                    i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
-                    countrymajor.update()
+                if countryselect:
+                    for i in countrymajor.majors:
+                        i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
+                        i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
+                        countrymajor.update()
                 mscroll = -scrollinvert * event.y
                 mtogg = True
             case pygame.MOUSEBUTTONDOWN:
                 mscroll = 0
                 mtogg = True
-            case pygame.MOUSEBUTTONUP:
+            case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
                 mscroll = 0
                 mtogg = False
 
@@ -127,8 +124,8 @@ while run:
         tab = 0
 
     if countryselect:
-        pygame.draw.rect(screen, (50, 50, 50), ((100, 40), (1200, 1000)), 0, 20)
-        pygame.draw.rect(screen, (40, 40, 40), ((800, 540), (500, 200)), 0, 20)
+        # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
+        # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
         a.draw(screen)
         countrymajor.update()
         pygame.draw.rect(countrymajor.image, (40, 40, 40), ((0, 0), (700, 1000)), 0, 20)
@@ -146,7 +143,6 @@ while run:
                 countryselect = False
                 menu = True
         tab = 0
-        print(player_country)
     tick+=1
 
     pygame.time.Clock().tick(settings_json["FPS"])
