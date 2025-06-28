@@ -4,6 +4,10 @@ from json import load
 import pygame
 from func import lerp,round_corners
 
+screen = pygame.display.set_mode(
+    (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
+)
+
 with open("translation.json") as json_data:
     trans = load(json_data)
 
@@ -119,23 +123,27 @@ class Button:
 
 
 class MajorCountrySelect(sprite.Sprite):
+    min = 0
+    max = 6
     def __init__(self, file, thicc, *groups):
         super().__init__(*groups)
         self.majors = []
         count = 0
         with open(file) as f:
             for k in f.read().split(", "):
-                self.majors.append(MajorCountry(k, (0, count), thicc))
+                self.majors.append(MajorCountry(k, [0, count], thicc))
                 count += 200
+        print(len(self.majors))
         self.image = Surface((700, 1000), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((300, 40), (700, 1000))
-        self.min = min([k.pos[1] for k in self.majors])
-        self.max = max([k.pos[1] for k in self.majors]) + 200
 
-    def update(self):
-        self.min = min([k.pos[1] for k in self.majors])
-        self.max = max([k.pos[1] for k in self.majors]) + 200
+    def update(self, scroll):
+        # self.min = 3
+        # self.max = 8
+        self.min = scroll
+        self.max = min(len( self.majors ), 6 + scroll)
+        print(self.min, self.max)
 
 
 class MajorCountry:
@@ -177,3 +185,18 @@ class MajorCountry:
         screen.blit(font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
         if Rect.collidepoint(self.brect, mpos) and mtogg:
             return self.id
+
+class Map:
+    sidebar= image.load('ui/sidebar.png').convert()
+    def __init__(self, scenario):
+        self.cmap = image.load(f'starts/{ scenario }/map.png').convert()
+        self.pmap = image.load(f'starts/{ scenario }/province.png').convert()
+        self.scale = 1080/self.cmap.get_height()
+        self.pmap =  transform.scale_by(self.pmap,self.scale)
+        self.cmap =  transform.scale_by(self.cmap,self.scale)
+    def draw(self,screen):
+        # self.pmap =  transform.scale_by(self.pmap,self.scale)
+        screen.blit(self.cmap,(0,0))
+        draw.rect(screen,tertiary,( (0,0),(1920,60) ))
+
+
