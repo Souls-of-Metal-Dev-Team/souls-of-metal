@@ -24,8 +24,7 @@ with open("settings.json") as json_data:
 cwd = getcwd()
 
 font.init()
-# NOTE(pol): Renamed it because it was shadowing font
-ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
+font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
 
 
 class Button:
@@ -106,11 +105,13 @@ class Button:
             if self.id in settings_json
             else self.id
         )
-        font_render = ui_font.render(
+
+        font_render = font.Font.render(
             text,
             fontalias,
-            secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary,
+            secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary
         )
+
         screen.blit(
             font_render,
             (
@@ -173,7 +174,7 @@ class MajorCountry:
     def draw(self, screen, mpos, select, mtogg):
         draw.rect(screen, tertiary, ((self.pos[0], self.pos[1]), (700, 180)), 0, 20)
         draw.rect(screen, secondary, ((self.pos[0], self.pos[1]), (700, 180)), 5, 20)
-        font_render = ui_font.render(
+        font_render = font.render(
             trans[self.id],
             fontalias,
             (

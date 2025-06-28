@@ -1,6 +1,9 @@
 import pygame
+import func
 from classes import Button, cwd, MajorCountrySelect, Map
 from json import load, dump
+
+import enum
 
 with open("settings.json") as json_data:
     settings_json = load(json_data)
@@ -10,12 +13,13 @@ pygame.init()
 screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
 )
-run = True
+
+# NOTE(pol): What is this variable for?
 menu = True
-main_menu= True
-settings = False
-game = False
-countryselect = False
+
+Menu = enum.Enum('Menu', 'main_menu countryselect settings game')
+current_menu = Menu.main_menu
+
 # themeing shit
 menubg = pygame.image.load(f"{cwd}/ui/menu.png")
 tab = [1]
@@ -52,22 +56,24 @@ countryselectbuttons = [
     Button("Start", (1375, 670), (160, 40), 5),
 ]
 
-a = pygame.sprite.Group()
-countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, a )
+sprites = pygame.sprite.Group()
+countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, sprites)
 
-
+run = True
 while run:
     mpos = pygame.mouse.get_pos()
     for event in pygame.event.get():
         match event.type:
             case pygame.QUIT:
                 run = False
-            case pygame.KEYUP:
+
+            case pygame.KEYDOWN:
                 match event.key:
                     case pygame.K_F4:
                         pygame.display.toggle_fullscreen()
+
             case pygame.MOUSEWHEEL:
-                if countryselect:
+                if current_menu == Menu.countryselect:
                     scroll = min(
                         max(scroll - scrollinvert * event.y, 0),
                         len( countrymajor.majors )-5,
@@ -80,71 +86,80 @@ while run:
                     mscroll = -scrollinvert * event.y
                     map.scale -= -scrollinvert * event.y if mtogg else 0
                 mtogg = True
+
             case pygame.MOUSEBUTTONDOWN:
                 mscroll = 0
                 mtogg = True
+
             case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
                 mscroll = 0
                 mtogg = False
 
-    if not game:
+    # NOTE(pol): I noticed a bunch of repeating patterns.
+    # This is not very nice for drawing UI elements, I might extract stuff
+    # into more convenient functions.
+    # Also, mixing button press logic and rendering seems evil but whatever.
+    if current_menu != Menu.game:
         screen.blit(menubg, (0, 0))
-        if main_menu:
+
+        if current_menu == Menu.main_menu:
             for i in menubuttons:
                 if i.draw(screen, mpos, mtogg, settings_json,tick):
                     tab = i.draw(screen, mpos, mtogg, settings_json,tick)
 
             match tab:
                 case "Settings":
-                    settings = True
-                    main_menu = False
+                    current_menu = Menu.settings
                 case "Start Game":
-                    countryselect = True
-                    main_menu = False
+                    current_menu = Menu.countryselect
                 case "Exit":
                     run = False
             tab = 0
-        if settings:
+
+        if current_menu == Menu.settings:
             for i in settingsbuttons:
                 if i.draw(screen, mpos, mtogg, settings_json,tick):
                     tab = i.draw(screen, mpos, mtogg, settings_json,tick)
+
             match tab:
                 case "Exit":
-                    settings = False
-                    main_menu = True
+                    current_menu = Menu.main_menu
+
                 case "UI Size":
-                    settings_json["UI Size"] = max(
-                        min(settings_json["UI Size"] + mscroll, 40), 14
-                    )
+                    settings_json["UI Size"] += mscroll
+                    settings_json["UI Size"] = func.clamp(settings_json["UI Size"] + mscroll, 14, 40)
+
                 case "Scroll Invert":
-                    settings_json["Scroll Invert"] = (
-                        max(min(settings_json["Scroll Invert"] + mscroll, 1), 0) * -2 + 1
-                    )
+                    settings_json["Scroll Invert"] = func.clamp(settings_json["Scroll Invert"], 0, 1)
+                    settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
+
                 case "Sound Volume":
-                    settings_json["Sound Volume"] = max(
-                        min(settings_json["Sound Volume"] + mscroll, 100), 0
-                    )
+                    settings_json["Sound Volume"] += mscroll
+                    settings_json["Sound Volume"] = func.clamp(settings_json["Sound Volume"], 0, 100)
+
                 case "Music Volume":
-                    settings_json["Music Volume"] = max(
-                        min(settings_json["Music Volume"] + mscroll, 100), 0
-                    )
+                    settings_json["Music Volume"] += mscroll
+                    settings_json["Music Volume"] = func.clamp(settings_json["Music Volume"], 0, 100)
+
                 case "FPS":
-                    settings_json["FPS"] = max(settings_json["FPS"] + mscroll, 12)
+                    settings_json["FPS"] += mscroll
+                    settings_json["FPS"] = max(settings_json["FPS"], 12)
+
             with open("settings.json", "w") as json_data:
                 dump(settings_json, json_data)
 
             mtogg = False
             tab = 0
 
-        if countryselect:
+        if current_menu == Menu.countryselect:
             # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
             # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
-            a.draw(screen)
+            sprites.draw(screen)
             pygame.draw.rect(countrymajor.image, (40, 40, 40), ((00, 0), (700, 1000)), 0, 20)
             i = 0
             for major in countrymajor.majors[countrymajor.min:countrymajor.max:]:
                 major.pos[1] = i 
-                i +=200
+                i += 200
                 if major.draw(countrymajor.image, mpos, player_country, mtogg):
                     player_country = major.draw(
                         countrymajor.image, mpos, player_country, mtogg
@@ -155,14 +170,13 @@ while run:
 
             match tab:
                 case "Start":
-                    countryselect = False
-                    game = True
+                    current_menu = Menu.game
                 case "Back":
-                    countryselect = False
-                    main_menu = True
+                    current_menu = Menu.main_menu
             tab = 0
     else:
         map.draw(screen)
+    
     tick+=1
 
     pygame.time.Clock().tick(settings_json["FPS"])
