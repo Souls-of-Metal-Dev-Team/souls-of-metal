@@ -1,6 +1,6 @@
 from pygame import draw, Rect, font, Surface, mouse, sprite, transform, image
 from os import getcwd
-from json import load
+from json import load, dump
 import pygame
 from func import lerp, round_corners
 
@@ -18,8 +18,18 @@ with open("theme.json") as json_data:
     tertiary = tuple(theme["tertiary"])
     fontalias = theme["fontalias"]
 
-with open("settings.json") as json_data:
-    uiscale = int(load(json_data)["UI Size"] / 14)
+settings_json = None
+
+try:
+    with open("settings.json") as json_data:
+        settings_json = load(json_data)
+except FileNotFoundError:
+    settings_json = {"Scroll Invert": -1, "UI Size": 14, "FPS": 139, "Sound Volume": 0, "Music Volume": 0}
+    with open("settings.json", "w") as json_data:
+        dump(settings_json, json_data)
+
+uiscale = int(settings_json["UI Size"] / 14)
+
 
 cwd = getcwd()
 

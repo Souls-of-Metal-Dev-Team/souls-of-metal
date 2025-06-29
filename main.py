@@ -5,9 +5,17 @@ from json import load, dump
 
 import enum
 
-with open("settings.json") as json_data:
-    settings_json = load(json_data)
-    scrollinvert = settings_json["Scroll Invert"]
+settings_json = None
+
+try:
+    with open("settings.json") as json_data:
+        settings_json = load(json_data)
+except FileNotFoundError:
+    settings_json = {"Scroll Invert": -1, "UI Size": 14, "FPS": 139, "Sound Volume": 0, "Music Volume": 0}
+    with open("settings.json", "w") as json_data:
+        dump(settings_json, json_data)
+
+scrollinvert = settings_json["Scroll Invert"]
 
 pygame.init()
 screen = pygame.display.set_mode(
