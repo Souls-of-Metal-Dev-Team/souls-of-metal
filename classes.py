@@ -2,7 +2,7 @@ from pygame import draw, Rect, font, Surface, mouse, sprite, transform, image
 from os import getcwd
 from json import load
 import pygame
-from func import lerp,round_corners
+from func import lerp, round_corners
 
 screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
@@ -24,7 +24,8 @@ with open("settings.json") as json_data:
 cwd = getcwd()
 
 font.init()
-font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
+# NOTE(pol): Renamed it because it was shadowing font
+ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
 
 
 class Button:
@@ -105,7 +106,7 @@ class Button:
             if self.id in settings_json
             else self.id
         )
-        font_render = font.render(
+        font_render = ui_font.render(
             text,
             fontalias,
             secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary,
@@ -172,7 +173,7 @@ class MajorCountry:
     def draw(self, screen, mpos, select, mtogg):
         draw.rect(screen, tertiary, ((self.pos[0], self.pos[1]), (700, 180)), 0, 20)
         draw.rect(screen, secondary, ((self.pos[0], self.pos[1]), (700, 180)), 5, 20)
-        font_render = font.render(
+        font_render = ui_font.render(
             trans[self.id],
             fontalias,
             (

@@ -1,5 +1,8 @@
 import pygame
 
+def clamp(value, a, b):
+    return max(min(value, b), a)
+
 def lerp(i, f, t, slow = 5):
     return int( (i * (1 - ( t/slow )) + (f * t/slow)) if t/slow < 1 else f )
 
