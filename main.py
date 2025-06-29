@@ -1,5 +1,5 @@
 import pygame
-from classes import Button, cwd, MajorCountrySelect, Map
+from classes import Button, cwd, MajorCountrySelect, Map, MinorCountrySelect
 from json import load, dump
 
 with open("settings.json") as json_data:
@@ -20,6 +20,7 @@ countryselect = False
 menubg = pygame.image.load(f"{cwd}/ui/menu.png")
 tab = [1]
 scroll = 0
+color = 0
 
 tick = mscroll = 0
 player_country = None
@@ -54,10 +55,12 @@ countryselectbuttons = [
 
 a = pygame.sprite.Group()
 countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, a )
+countryminor = MinorCountrySelect("starts/Modern World/minors.txt", 5, a)
 
 
 while run:
     mpos = pygame.mouse.get_pos()
+    print(player_country)
     for event in pygame.event.get():
         match event.type:
             case pygame.QUIT:
@@ -78,11 +81,18 @@ while run:
                     countrymajor.update(scroll)
                 else:
                     mscroll = -scrollinvert * event.y
-                    map.scale -= -scrollinvert * event.y if mtogg else 0
+                    if game:
+                        map.update(mscroll)
+                        # print(map.scale)
+                        # map.cvmap =  pygame.transform.scale_by(map.cmap,map.scale)
                 mtogg = True
             case pygame.MOUSEBUTTONDOWN:
                 mscroll = 0
                 mtogg = True
+                # if game:
+                    # color = screen.get_at(pygame.mouse.get_pos())
+
+
             case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
                 mscroll = 0
                 mtogg = False
@@ -149,6 +159,14 @@ while run:
                     player_country = major.draw(
                         countrymajor.image, mpos, player_country, mtogg
                     )
+            i = 0
+
+            for minor in countryminor.minors[countryminor.min:countryminor.max:]:
+                if minor.draw(countryminor.image, mpos, player_country, mtogg):
+                    player_country = minor.draw(
+                        countryminor.image, mpos, player_country, mtogg
+                    )
+
             for i in countryselectbuttons:
                 if i.draw(screen, mpos, mtogg, settings_json,tick):
                     tab = i.draw(screen, mpos, mtogg, settings_json,tick)
@@ -162,6 +180,7 @@ while run:
                     main_menu = True
             tab = 0
     else:
+        print( color )
         map.draw(screen)
     tick+=1
 
