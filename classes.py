@@ -2,7 +2,7 @@ from pygame import draw, Rect, font, Surface, mouse, sprite, transform, image
 from os import getcwd
 from json import load
 import pygame
-from func import lerp, round_corners
+from func import lerp, round_corners, clamp
 
 screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
@@ -256,7 +256,7 @@ class MinorCountry:
 class Map:
     sidebar= image.load('ui/sidebar.png').convert()
     scale = 1
-    pos = posf = [0,1]
+    pos = [0,1]
     def __init__(self, scenario):
         self.cmap = self.cvmap = image.load(f'starts/{ scenario }/map.png').convert()
         self.pmap = image.load(f'starts/{ scenario }/province.png').convert()
@@ -264,17 +264,25 @@ class Map:
         self.cmap =  transform.scale_by(self.cmap,1080/self.cmap.get_height())
         self.cvmap =  pygame.transform.scale_by(self.cmap,self.scale)
 
-    def update(self, scroll):
-        self.scale = min( max( self.scale + ( scroll/25 ), 1 ) ,2)
+    def update(self, scroll, mpos):
+        self.scale = clamp( self.scale + ( scroll/25 ), 1  ,2)
         self.cvmap =  pygame.transform.scale_by(self.cmap,self.scale)
-    def draw(self,screen):
+        self.pos[0] = -mpos[0]*(self.scale-1)
+        self.pos[1] = -mpos[1]*(self.scale-1)
+    def draw(self,screen, rel):
         match mouse.get_pressed():
             case (_,1,_):
-                self.posf = mouse.get_rel()
-                self.pos[0] = (self.pos[0] + self.posf[0]/(5*self.scale))
-                self.pos[1] = min( max( (self.pos[1] + self.posf[1]/(5*self.scale)), -1080*(self.scale-1)), 0)
-        print(self.posf)
+                self.pos[0] = (self.pos[0] + rel[0]/(5*self.scale))
+                self.pos[1] = clamp( (self.pos[1] + rel[1]/(5*self.scale)), -1080*(self.scale-1), 0)
         screen.blit(self.cvmap,self.pos)
-        draw.rect(screen,tertiary,( (0,0),(1920,60)))
+        pygame.draw.rect(screen,tertiary,( (0,0),(1920,60)))
+
+
+class CountryMenu():
+    def __init__(self):
+        pass
+    def draw(self,screen):
+        draw.rect(screen, tertiary,Rect((-32,-12),(524,1104)), border_radius=64 )
+        draw.rect(screen, secondary,Rect((-32,-12),(524,1104)), border_radius=64, width=12 )
 
 

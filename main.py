@@ -1,6 +1,6 @@
 import pygame
 import func
-from classes import Button, cwd, MajorCountrySelect, Map, MinorCountrySelect
+from classes import Button,  MajorCountrySelect, Map, MinorCountrySelect, CountryMenu
 from json import load, dump
 
 import enum
@@ -21,10 +21,10 @@ Menu = enum.Enum('Menu', 'main_menu countryselect settings game')
 current_menu = Menu.main_menu
 
 # themeing shit
-menubg = pygame.image.load(f"{cwd}/ui/menu.png")
+menubg = pygame.image.load("ui/menu.png")
 tab = [1]
 scroll = 0
-color = 0
+selected_country = 0
 
 tick = mscroll = 0
 player_country = None
@@ -57,6 +57,8 @@ countryselectbuttons = [
     Button("Start", (1375, 670), (160, 40), 5),
 ]
 
+selectmenu = CountryMenu()
+
 sprites = pygame.sprite.Group()
 countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, sprites )
 countryminor = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
@@ -88,7 +90,7 @@ while run:
                 else:
                     mscroll = -scrollinvert * event.y
                     if current_menu == Menu.game:
-                        map.update(mscroll)
+                        map.update(mscroll, mpos)
                         # print(map.scale)
                         # map.cvmap =  pygame.transform.scale_by(map.cmap,map.scale)
                 mtogg = True
@@ -96,8 +98,7 @@ while run:
             case pygame.MOUSEBUTTONDOWN:
                 mscroll = 0
                 mtogg = True
-                # if game:
-                    # color = screen.get_at(pygame.mouse.get_pos())
+                selected_country = screen.get_at(pygame.mouse.get_pos())
 
             case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
                 mscroll = 0
@@ -191,8 +192,9 @@ while run:
                     current_menu = Menu.main_menu
             tab = 0
     else:
-        print( color )
-        map.draw(screen)
+        map.draw(screen, pygame.mouse.get_rel())
+        if selected_country:
+            selectmenu.draw(screen)
     
     tick+=1
 
