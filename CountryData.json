@@ -1,0 +1,11 @@
+{
+  "Japan": [[195, 92, 109], ["provinces go here"], "Japanese", "liberal", 69],
+  "United_States": [
+    [20, 133, 237],
+    ["provinces go here"],
+    "Japanese",
+    "liberal",
+    69
+  ],
+  "Russia": [[56, 96, 56], ["provinces go here"], "Japanese", "liberal", 69]
+}
