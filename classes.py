@@ -36,11 +36,13 @@ cwd = getcwd()
 font.init()
 # NOTE(pol): Renamed it because it was shadowing font
 ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
+title_font = font.Font(f"{cwd}/ui/font.ttf", 64 * uiscale)
 
 
 class Button:
     thicc = 0
     i = 0
+
     def __init__(self, id, pos, dim, thicc):
         self.id = id
         self.pos = pos
@@ -54,8 +56,12 @@ class Button:
             self.dim[1] * uiscale,
         )
 
-    def draw(self, screen, mpos, mtogg, settings_json,tick):
-        self.thicc = lerp(self.thicc,self.thiccmax if Rect.collidepoint(self.brect, mpos) else 0,tick-self.i)
+    def draw(self, screen, mpos, mtogg, settings_json, tick):
+        self.thicc = lerp(
+            self.thicc,
+            self.thiccmax if Rect.collidepoint(self.brect, mpos) else 0,
+            tick - self.i,
+        )
         if not Rect.collidepoint(self.brect, mpos):
             self.i = tick
         draw.rect(
@@ -136,6 +142,7 @@ class Button:
 class MajorCountrySelect(sprite.Sprite):
     min = 0
     max = 6
+
     def __init__(self, file, thicc, *groups):
         super().__init__(*groups)
         self.majors = []
@@ -153,7 +160,7 @@ class MajorCountrySelect(sprite.Sprite):
         # self.min = 3
         # self.max = 8
         self.min = scroll
-        self.max = min(len( self.majors ), 6 + scroll)
+        self.max = min(len(self.majors), 6 + scroll)
         print(self.min, self.max)
 
 
@@ -164,38 +171,44 @@ class MajorCountry:
         self.thicc = thicc
 
         try:
-            self.img = image.load(f'flags/{self.id.lower()}_flag.png').convert_alpha()
+            self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load('unknown.jpg').convert_alpha()
+            self.img = image.load("unknown.jpg").convert_alpha()
 
         h = self.img.get_height()
-        scale = ( 180 - ( thicc <<1))/h 
-        self.img = round_corners( transform.scale_by(self.img,scale) ,5)
-        self.w,h = self.img.get_size()
+        scale = (180 - (thicc << 1)) / h
+        self.img = round_corners(transform.scale_by(self.img, scale), 5)
+        self.w, h = self.img.get_size()
         self.mouse_up = False
-        self.brect = Rect(
-            self.pos[0],
-            self.pos[1],
-            700 * uiscale,
-            200 * uiscale,
+        self.selected_font_render = ui_font.render(
+            trans[self.id],
+            fontalias,
+            secondary,
+        )
+        self.font_render = ui_font.render(
+            trans[self.id],
+            fontalias,
+            primary,
         )
 
     def draw(self, screen, mpos, select, mtogg):
-        draw.rect(screen, tertiary, ((self.pos[0], self.pos[1]), (700, 180)), 0, 20)
-        draw.rect(screen, secondary, ((self.pos[0], self.pos[1]), (700, 180)), 5, 20)
-        font_render = ui_font.render(
-            trans[self.id],
-            fontalias,
-            (
-                secondary
-                if (Rect.collidepoint(self.brect, mpos) and mtogg) or select == self.id
-                else primary
-            ),
+        brect = Rect(
+            self.pos[0],
+            self.pos[1],
+            700 * uiscale,
+            180 * uiscale,
         )
-        screen.blit(self.img, (self.pos[0] + (self.thicc), self.pos[1]+5 ))
-        screen.blit(font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
-        if Rect.collidepoint(self.brect, mpos) and mtogg:
-            return self.id
+        draw.rect(screen, tertiary, brect, 0, 20)
+        screen.blit(self.img, (self.pos[0] + (self.thicc), self.pos[1] + 5))
+        if (Rect.collidepoint(brect, mpos) and mtogg) or select == self.id:
+            draw.rect(screen, tertiary, brect, 9, 20)
+            screen.blit(
+                self.selected_font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25)
+            )
+        else:
+            screen.blit(self.font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
+        draw.rect(screen, secondary, brect, 5, 20)
+        return self.id if Rect.collidepoint(brect, mpos) and mtogg else None
 
 
 class MinorCountrySelect(sprite.Sprite):
@@ -208,12 +221,13 @@ class MinorCountrySelect(sprite.Sprite):
         count = 0
         with open(file) as f:
             for k in f.read().split(", "):
-                self.minors.append(MinorCountry(k, [count % 4 * 100 + 50, count // 4 * 60 + 15], thicc))
+                self.minors.append(
+                    MinorCountry(k, [count % 4 * 100 + 50, count // 4 * 60 + 15], thicc)
+                )
                 count += 1
         if len(self.minors) > 32:
             self.minors = self.minors[0:32]
 
-        print(len(self.minors))
         self.image = Surface((500, 500), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((1000, 40), (200, 1000))
@@ -226,7 +240,6 @@ class MinorCountrySelect(sprite.Sprite):
         print(self.min, self.max)
 
 
-
 class MinorCountry:
     def __init__(self, id, pos, thicc):
         self.id = id
@@ -234,9 +247,9 @@ class MinorCountry:
         self.thicc = thicc
 
         try:
-            self.img = image.load(f'flags/{self.id.lower()}_flag.png').convert_alpha()
+            self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load('unknown.jpg').convert_alpha()
+            self.img = image.load("unknown.jpg").convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h / 4
@@ -259,40 +272,63 @@ class MinorCountry:
         )
         screen.blit(self.img, (self.pos[0], self.pos[1]))
         if select == self.id:
-            draw.rect(screen, secondary, self.brect, border_radius = 9, width= 3)
-        if Rect.collidepoint(b, mpos) and mtogg:
-            return self.id
+            draw.rect(screen, tertiary, self.brect, border_radius=9, width=5)
+            draw.rect(screen, secondary, self.brect, border_radius=9, width=3)
+        return self.id if Rect.collidepoint(b, mpos) and mtogg else None
+
 
 class Map:
-    sidebar= image.load('ui/sidebar.png').convert()
+    sidebar = image.load("ui/sidebar.png").convert()
     scale = 1
-    pos = [0,1]
+    pos = [0, 1]
+
     def __init__(self, scenario):
-        self.cmap = self.cvmap = image.load(f'starts/{ scenario }/map.png').convert()
-        self.pmap = image.load(f'starts/{ scenario }/province.png').convert()
-        self.pmap =  transform.scale_by(self.pmap,1080/self.cmap.get_height())
-        self.cmap =  transform.scale_by(self.cmap,1080/self.cmap.get_height())
-        self.cvmap =  pygame.transform.scale_by(self.cmap,self.scale)
+        self.cmap = self.cvmap = image.load(f"starts/{scenario}/map.png").convert()
+        self.pmap = image.load(f"starts/{scenario}/province.png").convert()
+        self.pmap = transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
+        self.cmap = transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
+        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
 
     def update(self, scroll, mpos):
-        self.scale = clamp( self.scale + ( scroll/25 ), 1  ,2)
-        self.cvmap =  pygame.transform.scale_by(self.cmap,self.scale)
-        self.pos[0] = -mpos[0]*(self.scale-1)
-        self.pos[1] = -mpos[1]*(self.scale-1)
-    def draw(self,screen, rel):
+        self.scale = clamp(self.scale - (scroll / 25), 1, 2)
+        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        self.pos[0] = -mpos[0] * (self.scale - 1)
+        self.pos[1] = -mpos[1] * (self.scale - 1)
+
+    def draw(self, screen, rel):
         match mouse.get_pressed():
-            case (_,1,_):
-                self.pos[0] = (self.pos[0] + rel[0]/(5*self.scale))
-                self.pos[1] = clamp( (self.pos[1] + rel[1]/(5*self.scale)), -1080*(self.scale-1), 0)
-        screen.blit(self.cvmap,self.pos)
-        pygame.draw.rect(screen,tertiary,( (0,0),(1920,60)))
+            case (_, 1, _):
+                self.pos[0] = self.pos[0] + rel[0] / (5 * self.scale)
+                self.pos[1] = clamp(
+                    (self.pos[1] + rel[1] / (5 * self.scale)),
+                    -1080 * (self.scale - 1),
+                    0,
+                )
+        screen.blit(self.cvmap, self.pos)
+        pygame.draw.rect(screen, tertiary, ((0, 0), (1920, 60)))
 
 
-class CountryMenu():
+class CountryMenu:
     def __init__(self):
         pass
-    def draw(self,screen):
-        draw.rect(screen, tertiary,Rect((-32,-12),(524,1104)), border_radius=64 )
-        draw.rect(screen, secondary,Rect((-32,-12),(524,1104)), border_radius=64, width=12 )
 
+    def draw(self, screen, country):
+        draw.rect(screen, tertiary, Rect((-32, -12), (524, 1104)), border_radius=64)
+        draw.rect(
+            screen, secondary, Rect((-32, -12), (524, 1104)), border_radius=64, width=12
+        )
+        screen.blit(
+            round_corners(
+                image.load(f"flags/{country.lower()}_flag.png").convert_alpha(), 16
+            ),
+            (30, 30),
+        )
 
+        screen.blit(
+            title_font.render(
+                trans[country],
+                fontalias,
+                primary,
+            ),
+            (30, 300),
+        )

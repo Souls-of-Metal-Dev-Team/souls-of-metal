@@ -5,8 +5,8 @@ class Countries:
     def __init__(self):
         # i manually did the country example
         self.countryData = {"Japan": [(195, 92, 109),
-                    (52, 62, 105, 115, 117, 119, 169, 176, 192, 193, 258, 270, 305, 310, 311, 312, 313, 314, 417, 440, 441, 480, 501, 508, 538, 575, 581, 582, 583, 597, 608, 618, 638, 664, 676, 677, 709, 716, 737, 738, 773, 787, 797, 809, 810, 826, 882, 895, 896, 907, 922, 938, 958, 961, 977, 1028, 1075)
-                    , "Japanese",
+                    (),
+                    "Japanese",
                     "liberal", 69]}
 
         self.colorsToCountries = {v[0]: k for k, v in self.countryData.items()}
