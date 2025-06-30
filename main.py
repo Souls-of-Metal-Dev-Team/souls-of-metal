@@ -117,7 +117,7 @@ def main():
                 case pygame.MOUSEBUTTONDOWN:
                     mouse_pressed = True
                     mouse_scroll = 0
-                    r, g, b = screen.get_at(pygame.mouse.get_pos())
+                    r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
                     selected_country = (r, g, b)
 
                 case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
