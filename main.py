@@ -10,11 +10,12 @@ from classes import (
     title_font,
     fontalias,
     primary,
+    screen,
 )
 from json import load, dump
 from enum import Enum
 
-
+Menu = Enum("Menu", "main_menu countryselect settings game")
 
 menubuttons = [
     Button("Start Game", (200, 400), (160, 40), 5),
@@ -62,16 +63,23 @@ def main():
     countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, sprites)
     countryminor = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
     selectmenu = CountryMenu()
-    countries = Countries()
+    with open("CountryData.json") as json_data:
+        countries_data = load(json_data)
+    countries = Countries(countries_data)
     map = Map("Modern World")
 
     settings_json = None
-
     try:
         with open("settings.json") as json_data:
             settings_json = load(json_data)
     except FileNotFoundError:
-        settings_json = {"Scroll Invert": -1, "UI Size": 14, "FPS": 139, "Sound Volume": 0, "Music Volume": 0}
+        settings_json = {
+                "Scroll Invert": -1,
+                "UI Size": 14,
+                "FPS": 139,
+                "Sound Volume": 0,
+                "Music Volume": 0,
+                }
         with open("settings.json", "w") as json_data:
             dump(settings_json, json_data)
 
@@ -229,7 +237,9 @@ def main():
             map.draw(screen, pygame.mouse.get_rel())
             print(selected_country)
             if selected_country in countries.colorsToCountries:
-                selectmenu.draw(screen, countries.colorsToCountries[selected_country])
+                selectmenu.draw(
+                    screen, countries, countries.colorsToCountries[selected_country]
+                )
 
         tick += 1
 

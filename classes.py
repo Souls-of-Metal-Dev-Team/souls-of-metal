@@ -28,7 +28,13 @@ try:
     with open("settings.json") as json_data:
         settings_json = load(json_data)
 except FileNotFoundError:
-    settings_json = {"Scroll Invert": -1, "UI Size": 14, "FPS": 139, "Sound Volume": 0, "Music Volume": 0}
+    settings_json = {
+        "Scroll Invert": -1,
+        "UI Size": 14,
+        "FPS": 139,
+        "Sound Volume": 0,
+        "Music Volume": 0,
+    }
     with open("settings.json", "w") as json_data:
         dump(settings_json, json_data)
 
@@ -319,18 +325,15 @@ class CountryMenu:
     def __init__(self):
         pass
 
-    def draw(self, screen, country):
+    def draw(self, screen, CountryData, country):
         draw.rect(screen, tertiary, Rect((-32, -12), (524, 1104)), border_radius=64)
         draw.rect(
             screen, secondary, Rect((-32, -12), (524, 1104)), border_radius=64, width=12
         )
         screen.blit(
-            round_corners(
-                image.load(f"flags/{country.lower()}_flag.png").convert_alpha(), 16
-            ),
+            CountryData.countriesToFlags[country],
             (30, 30),
         )
-
         screen.blit(
             title_font.render(
                 trans[country],
