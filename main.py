@@ -10,6 +10,7 @@ from classes import (
     title_font,
     fontalias,
     primary,
+    screen,
 )
 from json import load, dump
 
@@ -17,20 +18,26 @@ import enum
 
 settings_json = None
 
+with open("CountryData.json") as json_data:
+    data = load(json_data)
+
 try:
     with open("settings.json") as json_data:
         settings_json = load(json_data)
 except FileNotFoundError:
-    settings_json = {"Scroll Invert": -1, "UI Size": 14, "FPS": 139, "Sound Volume": 0, "Music Volume": 0}
+    settings_json = {
+        "Scroll Invert": -1,
+        "UI Size": 14,
+        "FPS": 139,
+        "Sound Volume": 0,
+        "Music Volume": 0,
+    }
     with open("settings.json", "w") as json_data:
         dump(settings_json, json_data)
 
 scrollinvert = settings_json["Scroll Invert"]
 
 pygame.init()
-screen = pygame.display.set_mode(
-    (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-)
 
 # NOTE(pol): What is this variable for?
 menu = True
@@ -50,7 +57,7 @@ mtogg = False
 
 map = Map("Modern World")
 
-countrydata = Countries()
+countrydata = Countries(data)
 
 game_title = title_font.render("Souls Of Metal", fontalias, primary)
 
@@ -235,7 +242,9 @@ while run:
         map.draw(screen, pygame.mouse.get_rel())
         print(selected_country)
         if selected_country in countrydata.colorsToCountries:
-            selectmenu.draw(screen, countrydata.colorsToCountries[selected_country])
+            selectmenu.draw(
+                screen, countrydata, countrydata.colorsToCountries[selected_country]
+            )
 
     tick += 1
 

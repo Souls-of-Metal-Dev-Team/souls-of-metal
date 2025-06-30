@@ -1,20 +1,30 @@
 import random
+from pygame import image, transform
+from func import round_corners
+
 
 class Countries:
-
-    def __init__(self):
-        # i manually did the country example
-        self.countryData = {"Japan": [(195, 92, 109),
-                    (),
-                    "Japanese",
-                    "liberal", 69]}
-
-        self.colorsToCountries = {v[0]: k for k, v in self.countryData.items()}
+    def __init__(self, data):
+        self.countryData = data
+        self.colorsToCountries = {tuple(v[0]): k for k, v in self.countryData.items()}
+        self.countriesToFlags = {
+            k: round_corners(
+                transform.scale_by(
+                    image.load(f"flags/{k.lower()}_flag.png"),
+                    (300 / image.load(f"flags/{k.lower()}_flag.png").get_width()),
+                ),
+                16,
+            )
+            for k in self.countryData
+        }
 
     def getCountryType(self, culture, ideology=None):
         if not ideology == None:
             for country in self.countryData.keys():
-                if self.getCulture(country) == culture and self.getIdeology(country) == ideology:
+                if (
+                    self.getCulture(country) == culture
+                    and self.getIdeology(country) == ideology
+                ):
                     return country
         else:
             countries = [i for i in self.countryData.keys()]
@@ -54,7 +64,12 @@ class Countries:
         return self.countryData.get(country)[-1]
 
     def getIdeologyName(self, country):
-        ideologies = {'liberal': [-0.5, 0.5], 'communist': [-0.5, -0.5], 'monarchist': [0.5, 0.5], 'nationalist': [0.5, -0.5]}
+        ideologies = {
+            "liberal": [-0.5, 0.5],
+            "communist": [-0.5, -0.5],
+            "monarchist": [0.5, 0.5],
+            "nationalist": [0.5, -0.5],
+        }
         return ideologies.get(str(self.countryData.get(country)[3]), [0, 0])
 
     def getCultures(self):
@@ -63,5 +78,3 @@ class Countries:
             if data[2] not in cultureList:
                 cultureList.append(data[2])
         return cultureList
-a = Countries()
-print(a.getCultures())
