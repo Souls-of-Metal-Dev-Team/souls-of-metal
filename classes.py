@@ -4,6 +4,10 @@ from json import load, dump
 import pygame
 from func import lerp, round_corners, clamp
 
+# FIXME(pol): Holy hell this script is executed first, not main.py !!!
+# Find a way to move everything to main.py
+
+# This screen variable is unused.
 screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
 )
@@ -34,7 +38,8 @@ uiscale = int(settings_json["UI Size"] / 14)
 cwd = getcwd()
 
 font.init()
-# NOTE(pol): Renamed it because it was shadowing font
+# NOTE(pol): These should be created in main.py and passed to functions that
+# need to render text.
 ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
 title_font = font.Font(f"{cwd}/ui/font.ttf", 64 * uiscale)
 
@@ -140,28 +145,30 @@ class Button:
 
 
 class MajorCountrySelect(sprite.Sprite):
-    min = 0
-    max = 6
-
     def __init__(self, file, thicc, *groups):
         super().__init__(*groups)
+        self.min = 0
+        self.max = 6
         self.majors = []
         count = 0
         with open(file) as f:
             for k in f.read().split(", "):
                 self.majors.append(MajorCountry(k, [0, count], thicc))
                 count += 200
-        print(len(self.majors))
+        # print(len(self.majors))
         self.image = Surface((700, 1000), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((300, 40), (700, 1000))
+        self.scroll = 0
 
-    def update(self, scroll):
+    def update(self, mouse_scroll):
         # self.min = 3
         # self.max = 8
-        self.min = scroll
-        self.max = min(len(self.majors), 6 + scroll)
-        print(self.min, self.max)
+        self.scroll -= mouse_scroll
+        self.scroll = clamp(self.scroll, 0, len(self.majors)-5)
+        self.min = self.scroll
+        self.max = min(len(self.majors), 6 + self.scroll)
+        # print(self.min, self.max)
 
 
 class MajorCountry:
