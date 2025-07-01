@@ -81,7 +81,7 @@ def main():
                 "Sound Volume": 0,
                 "Music Volume": 0,
                 }
-        with open("settings.json", "w") as json_data:
+        with open(os.path.join(base_path, "settings.json"), "w") as json_data:
             dump(settings_json, json_data)
 
     scrollinvert = settings_json["Scroll Invert"]
