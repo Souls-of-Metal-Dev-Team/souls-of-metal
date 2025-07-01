@@ -18,18 +18,10 @@ class Button:
 
     def __init__(self, id, pos, size, thicc):
         self.id = id
-        self.pos = pygame.Vector2(pos)
-        self.size = pygame.Vector2(size)
         self.thicc = 0
         self.thiccmax = thicc
-        # NOTE(pol): x and y are the center
-        self.rect = pygame.Rect(
-            self.pos.x - (self.size.x * globals.ui_scale / 2),
-            self.pos.y,
-            self.size.x * globals.ui_scale,
-            self.size.y * globals.ui_scale,
-        )
-        # self.mouse_up = False
+        scaled_size = pygame.Vector2(size * globals.ui_scale)
+        self.rect = pygame.Rect(pos, scaled_size)
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
         _ = tick
@@ -54,53 +46,53 @@ class Button:
             screen,
             secondary,
             pygame.Rect(
-                self.pos.x - self.rect.w / 2,
-                self.pos.y - scaled_thicc,
-                self.rect.w,
-                self.rect.h + scaled_thicc * 2
+                self.rect.x,
+                self.rect.y - scaled_thicc,
+                self.rect.width,
+                self.rect.height + scaled_thicc * 2
             )
         )
         pygame.draw.circle(
             screen,
             secondary,
             (
-                self.pos.x - self.rect.w / 2,
-                self.pos.y + self.rect.h / 2,
+                self.rect.x,
+                self.rect.centery
             ),
-            self.rect.h / 2 + scaled_thicc
+            self.rect.height / 2 + scaled_thicc
         )
         pygame.draw.circle(
             screen,
             secondary,
             (
-                self.pos.x + self.rect.w / 2,
-                self.pos.y + self.rect.h / 2,
+                self.rect.right,
+                self.rect.centery,
             ),
-            self.rect.h / 2 + scaled_thicc
+            self.rect.height / 2 + scaled_thicc
         )
 
         pygame.draw.rect(
             screen,
             tertiary,
-            self.rect,
+            self.rect
         )
         pygame.draw.circle(
             screen,
             tertiary,
             (
-                self.pos.x - self.rect.w / 2,
-                self.pos.y + self.rect.h / 2,
+                self.rect.x,
+                self.rect.centery,
             ),
-            self.rect.h / 2
+            self.rect.height / 2
         )
         pygame.draw.circle(
             screen,
             tertiary,
             (
-                self.pos.x + self.rect.w / 2,
-                self.pos.y + self.rect.h / 2,
+                self.rect.right,
+                self.rect.centery,
             ),
-            self.rect.h / 2
+            self.rect.height / 2
         )
 
         text = (
@@ -108,17 +100,17 @@ class Button:
             if self.id in settings_json
             else self.id
         )
-        font_render = ui_font.render(
+        text_surface = ui_font.render(
             text,
             fontalias,
-            secondary if hovered and mouse_pressed else primary,
+            secondary if hovered and mouse_pressed else primary
         )
         screen.blit(
-            font_render,
+            text_surface,
             (
-                self.pos.x - (font_render.get_width() / 2),
-                self.pos.y + (self.thiccmax * globals.ui_scale),
-            ),
+                self.rect.centerx - text_surface.get_width() / 2,
+                self.rect.y + (self.thiccmax * globals.ui_scale)
+            )
         )
 
         return hovered
