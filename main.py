@@ -50,7 +50,6 @@ def main():
         with open(os.path.join(base_path, "settings.json"), "w") as json_data:
             dump(settings_json, json_data)
 
-    scrollinvert = settings_json["Scroll Invert"]
     globals.ui_scale = int(settings_json["UI Size"] / 14)
 
     pygame.font.init()
@@ -123,7 +122,7 @@ def main():
 
                 case pygame.MOUSEWHEEL:
                     # mouse_pressed = True
-                    mouse_scroll = -scrollinvert * event.y
+                    mouse_scroll = -settings_json["Scroll Invert"] * event.y
 
                     if current_menu == Menu.countryselect:
                         major_country_select.update(mouse_scroll)
