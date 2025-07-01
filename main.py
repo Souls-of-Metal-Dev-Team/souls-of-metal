@@ -14,6 +14,8 @@ from classes import (
 from json import load, dump
 from enum import Enum
 import globals
+import os
+base_path = os.path.dirname(__file__)
 
 Menu = Enum("Menu", "main_menu countryselect settings game")
 
@@ -23,9 +25,19 @@ def main():
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
     )
 
+
+    current_menu = Menu.main_menu
+    tick = 0
+    mouse_pressed = False
+    mouse_scroll = 0
+
+    with open(os.path.join(base_path, "CountryData.json")) as json_data:
+        countries_data = load(json_data)
+    countries = Countries(countries_data)
+
     settings_json = None
     try:
-        with open("settings.json") as json_data:
+        with open(os.path.join(base_path, "settings.json")) as json_data:
             settings_json = load(json_data)
     except FileNotFoundError:
         settings_json = {
@@ -35,7 +47,7 @@ def main():
                 "Sound Volume": 0,
                 "Music Volume": 0,
                 }
-        with open("settings.json", "w") as json_data:
+        with open(os.path.join(base_path, "settings.json"), "w") as json_data:
             dump(settings_json, json_data)
 
     scrollinvert = settings_json["Scroll Invert"]
@@ -46,17 +58,17 @@ def main():
     ui_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 24 * globals.ui_scale)
     title_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 64 * globals.ui_scale)
 
-    menubg = pygame.image.load("ui/menu.png")
+    menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load("ui/logo.png").convert_alpha()
+    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
     current_menu = Menu.main_menu
     tick = 0
     mouse_pressed = False
 
     sprites = pygame.sprite.Group()
-    major_country_select = MajorCountrySelect("starts/Modern World/majors.txt", 5, ui_font, sprites)
-    minor_country_select = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
+    major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
+    minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
     selectmenu = CountryMenu()
     with open("CountryData.json") as json_data:
         countries_data = load(json_data)
@@ -151,6 +163,8 @@ def main():
                     if not mouse_pressed or not hovered:
                         continue
 
+                    # NOTE(pol): Eat input
+                    mouse_pressed = False
                     match button.id:
                         case "Settings":
                             current_menu = Menu.settings
@@ -202,7 +216,7 @@ def main():
                             )
 
                         case "Save Settings":
-                            with open("settings.json", "w") as json_data:
+                            with open(os.path.join(base_path, "settings.json"), "w") as json_data:
                                 dump(settings_json, json_data)
 
                         case "Exit":
@@ -228,13 +242,13 @@ def main():
 
                 for minor in minor_country_select.minors[minor_country_select.min : minor_country_select.max :]:
                     hovered = minor.draw(minor_country_select.image, mouse_pos, player_country, mouse_pressed)
-                    if not mouse_pressed or hovered:
+                    if not mouse_pressed or not hovered:
                         continue
                     player_country = minor.id
 
                 for button in countryselectbuttons:
                     hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
-                    if not mouse_pressed or hovered:
+                    if not mouse_pressed or not hovered:
                         continue
 
                     match button.id:
