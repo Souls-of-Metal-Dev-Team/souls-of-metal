@@ -14,7 +14,8 @@ from classes import (
 )
 from json import load, dump
 from enum import Enum
-
+import os
+base_path = os.path.dirname(__file__)
 Menu = Enum("Menu", "main_menu countryselect settings game")
 
 menubuttons = [
@@ -49,9 +50,9 @@ def main():
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
     )
 
-    menubg = pygame.image.load("ui/menu.png")
+    menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load("ui/logo.png").convert_alpha()
+    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
     current_menu = Menu.main_menu
     tab = [1]
@@ -60,17 +61,17 @@ def main():
     mouse_scroll = 0
 
     sprites = pygame.sprite.Group()
-    countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, sprites)
-    countryminor = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
+    countrymajor = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, sprites)
+    countryminor = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
     selectmenu = CountryMenu()
-    with open("CountryData.json") as json_data:
+    with open(os.path.join(base_path, "CountryData.json")) as json_data:
         countries_data = load(json_data)
     countries = Countries(countries_data)
     map = Map("Modern World")
 
     settings_json = None
     try:
-        with open("settings.json") as json_data:
+        with open(os.path.join(base_path, "settings.json")) as json_data:
             settings_json = load(json_data)
     except FileNotFoundError:
         settings_json = {
