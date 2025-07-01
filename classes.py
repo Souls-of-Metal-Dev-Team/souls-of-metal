@@ -5,11 +5,6 @@ from func import round_corners, clamp
 import globals
 
 base_path = os.path.dirname(__file__)
-# FIXME(pol): Holy hell this script is executed first, not main.py !!!
-# Find a way to move everything to main.py
-
-with open(os.path.join(base_path, "translation.json")) as json_data:
-    language_translations = load(json_data)
 
 with open(os.path.join(base_path, "theme.json")) as json_data:
     theme = load(json_data)
@@ -109,7 +104,7 @@ class Button:
         )
 
         text = (
-            f"{language_translations[self.id]}: {settings_json[self.id]}"
+            f"{globals.language_translations[self.id]}: {settings_json[self.id]}"
             if self.id in settings_json
             else self.id
         )
@@ -162,12 +157,12 @@ class MajorCountry:
         self.w, h = self.img.get_size()
         self.mouse_up = False
         self.selected_font_render = ui_font.render(
-            language_translations[self.id],
+            globals.language_translations[self.id],
             fontalias,
             secondary,
         )
         self.font_render = ui_font.render(
-            language_translations[self.id],
+            globals.language_translations[self.id],
             fontalias,
             primary,
         )
@@ -282,25 +277,3 @@ class Map:
         screen.blit(self.cvmap, self.pos)
         pygame.draw.rect(screen, tertiary, ((0, 0), (1920, 60)))
 
-
-class CountryMenu:
-    def __init__(self):
-        pass
-
-    def draw(self, screen, CountryData, country, title_font):
-        pygame.draw.rect(screen, tertiary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64)
-        pygame.draw.rect(
-            screen, secondary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64, width=12
-        )
-        screen.blit(
-            CountryData.countriesToFlags[country],
-            (30, 30),
-        )
-        screen.blit(
-            title_font.render(
-                language_translations[country],
-                fontalias,
-                primary,
-            ),
-            (30, 300),
-        )

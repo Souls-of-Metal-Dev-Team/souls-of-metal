@@ -7,9 +7,10 @@ from classes import (
     MajorCountrySelect,
     Map,
     MinorCountrySelect,
-    CountryMenu,
     fontalias,
-    primary
+    primary,
+    secondary,
+    tertiary
 )
 from json import load, dump
 from enum import Enum
@@ -17,7 +18,7 @@ import globals
 import os
 base_path = os.path.dirname(__file__)
 
-Menu = Enum("Menu", "main_menu countryselect settings game")
+Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS GAME")
 
 def main():
     pygame.init()
@@ -25,8 +26,10 @@ def main():
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
     )
 
+    with open(os.path.join(base_path, "translation.json")) as json_data:
+        globals.language_translations = load(json_data)
 
-    current_menu = Menu.main_menu
+    current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
     mouse_scroll = 0
@@ -34,6 +37,7 @@ def main():
     with open(os.path.join(base_path, "CountryData.json")) as json_data:
         countries_data = load(json_data)
     countries = Countries(countries_data)
+
 
     settings_json = None
     try:
@@ -61,14 +65,13 @@ def main():
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
     game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
-    current_menu = Menu.main_menu
+    current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
 
     sprites = pygame.sprite.Group()
     major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
     minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
-    selectmenu = CountryMenu()
     with open("CountryData.json") as json_data:
         countries_data = load(json_data)
     countries = Countries(countries_data)
@@ -124,7 +127,7 @@ def main():
                     # mouse_pressed = True
                     mouse_scroll = -settings_json["Scroll Invert"] * event.y
 
-                    if current_menu == Menu.countryselect:
+                    if current_menu == Menu.COUNTRY_SELECT:
                         major_country_select.update(mouse_scroll)
                         major_country_select.scroll -= mouse_scroll
                         major_country_select.scroll = func.clamp(
@@ -134,24 +137,26 @@ def main():
                         )
                         major_country_select.min = major_country_select.scroll
                         major_country_select.max = min(len(major_country_select.majors), 6 + major_country_select.scroll)
-                    elif current_menu == Menu.game:
+                    elif current_menu == Menu.GAME:
                         map.scale = func.clamp(map.scale - (mouse_scroll / 25), 1, 2)
                         map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
                         map.pos[0] = -mouse_pos[0] * (map.scale - 1)
                         map.pos[1] = -mouse_pos[1] * (map.scale - 1)
 
                 case pygame.MOUSEBUTTONDOWN:
-                    mouse_pressed = True
-                    r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
-                    selected_country_rgb = (r, g, b)
+                    if event.button == 1:
+                        mouse_pressed = True
+                        r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
+                        selected_country_rgb = (r, g, b)
 
                 case pygame.MOUSEBUTTONUP:
-                    mouse_pressed = False
+                    if event.button == 1:
+                        mouse_pressed = False
 
-        if current_menu != Menu.game:
+        if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
 
-            if current_menu == Menu.main_menu:
+            if current_menu == Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
 
                 # NOTE(soi): dear god someone make the logo position look better
@@ -166,13 +171,13 @@ def main():
                     mouse_pressed = False
                     match button.id:
                         case "Settings":
-                            current_menu = Menu.settings
+                            current_menu = Menu.SETTINGS
                         case "Start Game":
-                            current_menu = Menu.countryselect
+                            current_menu = Menu.COUNTRY_SELECT
                         case "Exit":
                             global_run = False
 
-            elif current_menu == Menu.settings:
+            elif current_menu == Menu.SETTINGS:
                 for button in settingsbuttons:
                     hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
 
@@ -219,9 +224,9 @@ def main():
                                 dump(settings_json, json_data)
 
                         case "Exit":
-                            current_menu = Menu.main_menu
+                            current_menu = Menu.MAIN_MENU
 
-            elif current_menu == Menu.countryselect:
+            elif current_menu == Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
                 # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
                 sprites.draw(screen)
@@ -252,18 +257,29 @@ def main():
 
                     match button.id:
                         case "Start":
-                            current_menu = Menu.game
+                            current_menu = Menu.GAME
                         case "Back":
-                            current_menu = Menu.main_menu
+                            current_menu = Menu.MAIN_MENU
         else:
             map.draw(screen, mouse_rel)
             # print(selected_country_rgb)
             if selected_country_rgb in countries.colorsToCountries:
-                selectmenu.draw(
-                    screen,
-                    countries,
-                    countries.colorsToCountries[selected_country_rgb],
-                    title_font
+                pygame.draw.rect(screen, tertiary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64)
+                pygame.draw.rect(
+                    screen, secondary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64, width=12
+                )
+                country = countries.colorsToCountries[selected_country_rgb]
+                screen.blit(
+                    countries.countriesToFlags[country],
+                    (30, 30),
+                )
+                screen.blit(
+                    title_font.render(
+                        globals.language_translations[country],
+                        fontalias,
+                        primary,
+                    ),
+                    (30, 300),
                 )
 
         tick += 1
