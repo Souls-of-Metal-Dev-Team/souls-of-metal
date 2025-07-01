@@ -1,25 +1,30 @@
+import os
 import random
 from pygame import image, transform
 from func import round_corners
 
+# Get the base path where this file resides
+base_path = os.path.dirname(__file__)
 
 class Countries:
     def __init__(self, data):
         self.countryData = data
         self.colorsToCountries = {tuple(v[0]): k for k, v in self.countryData.items()}
-        self.countriesToFlags = {
-            k: round_corners(
-                transform.scale_by(
-                    image.load(f"flags/{k.lower()}_flag.png"),
-                    (300 / image.load(f"flags/{k.lower()}_flag.png").get_width()),
-                ),
-                16,
-            )
-            for k in self.countryData
-        }
+        self.countriesToFlags = {}
+
+        for k in self.countryData:
+            try:
+                flag_path = os.path.join(base_path, "flags", f"{k.lower()}_flag.png")
+                raw_flag = image.load(flag_path)
+            except FileNotFoundError:
+                raw_flag = image.load(os.path.join(base_path, "unknown.jpg"))
+
+            scaled = transform.scale_by(raw_flag, 300 / raw_flag.get_width())
+            rounded = round_corners(scaled, 16)
+            self.countriesToFlags[k] = rounded
 
     def getCountryType(self, culture, ideology=None):
-        if not ideology == None:
+        if ideology is not None:
             for country in self.countryData.keys():
                 if (
                     self.getCulture(country) == culture
@@ -38,7 +43,7 @@ class Countries:
         return [i for i in self.countryData.keys() if self.countryData[i][2] == culture]
 
     def getEveryCountry(self):
-        return [i for i in self.countryData.keys()]
+        return list(self.countryData.keys())
 
     def colorToCountry(self, color):
         return self.colorsToCountries.get(color)
@@ -59,9 +64,8 @@ class Countries:
         return self.countryData.get(country)[3]
 
     def getBaseStability(self, country):
-        if type(self.countryData.get(country)[-1]) == str:
-            return 60
-        return self.countryData.get(country)[-1]
+        val = self.countryData.get(country)[-1]
+        return 60 if isinstance(val, str) else val
 
     def getIdeologyName(self, country):
         ideologies = {
@@ -73,8 +77,4 @@ class Countries:
         return ideologies.get(str(self.countryData.get(country)[3]), [0, 0])
 
     def getCultures(self):
-        cultureList = []
-        for data in self.countryData.values():
-            if data[2] not in cultureList:
-                cultureList.append(data[2])
-        return cultureList
+        return list({data[2] for data in self.countryData.values()})

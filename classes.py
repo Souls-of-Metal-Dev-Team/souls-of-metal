@@ -1,9 +1,10 @@
 from pygame import draw, Rect, font, Surface, mouse, sprite, transform, image
-from os import getcwd
+import os
 from json import load, dump
 import pygame
 from func import lerp, round_corners, clamp
 
+base_path = os.path.dirname(__file__)
 # FIXME(pol): Holy hell this script is executed first, not main.py !!!
 # Find a way to move everything to main.py
 
@@ -12,20 +13,19 @@ screen = pygame.display.set_mode(
     (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
 )
 
-with open("translation.json") as json_data:
+with open(os.path.join(base_path, "translation.json")) as json_data:
     trans = load(json_data)
 
-with open("theme.json") as json_data:
+with open(os.path.join(base_path, "theme.json")) as json_data:
     theme = load(json_data)
     primary = tuple(theme["primary"])
     secondary = tuple(theme["secondary"])
     tertiary = tuple(theme["tertiary"])
     fontalias = theme["fontalias"]
 
-settings_json = None
-
+settings_path = os.path.join(base_path, "settings.json")
 try:
-    with open("settings.json") as json_data:
+    with open(settings_path) as json_data:
         settings_json = load(json_data)
 except FileNotFoundError:
     settings_json = {
@@ -35,19 +35,18 @@ except FileNotFoundError:
         "Sound Volume": 0,
         "Music Volume": 0,
     }
-    with open("settings.json", "w") as json_data:
+    with open(settings_path, "w") as json_data:
         dump(settings_json, json_data)
 
 uiscale = int(settings_json["UI Size"] / 14)
 
 
-cwd = getcwd()
 
 font.init()
 # NOTE(pol): These should be created in main.py and passed to functions that
 # need to render text.
-ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
-title_font = font.Font(f"{cwd}/ui/font.ttf", 64 * uiscale)
+ui_font = font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * uiscale)
+title_font = font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * uiscale)
 
 
 class Button:
@@ -186,7 +185,8 @@ class MajorCountry:
         try:
             self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load("unknown.jpg").convert_alpha()
+            self.img = image.load(os.path.join(base_path, "unknown.jpg")).convert_alpha()
+
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h
@@ -262,7 +262,7 @@ class MinorCountry:
         try:
             self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load("unknown.jpg").convert_alpha()
+            self.img = image.load(os.path.join(base_path, "unknown.jpg")).convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h / 4
@@ -291,13 +291,13 @@ class MinorCountry:
 
 
 class Map:
-    sidebar = image.load("ui/sidebar.png").convert()
+    sidebar = image.load(os.path.join(base_path, "ui", "sidebar.png")).convert()
     scale = 1
     pos = [0, 1]
 
     def __init__(self, scenario):
-        self.cmap = self.cvmap = image.load(f"starts/{scenario}/map.png").convert()
-        self.pmap = image.load(f"starts/{scenario}/province.png").convert()
+        self.cmap = self.cvmap = image.load(os.path.join(base_path, "starts", scenario, "map.png")).convert()
+        self.pmap = image.load(os.path.join(base_path, "starts", scenario, "province.png")).convert()
         self.pmap = transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
         self.cmap = transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
         self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
