@@ -3,11 +3,11 @@ import pygame
 def clamp(value, a, b):
     return max(min(value, b), a)
 
-def lerp(i, f, t, slow = 5):
-    return int( (i * (1 - ( t/slow )) + (f * t/slow)) if t/slow < 1 else f )
+# If you change this function the ui breaks for some reason
+def lerp(v0, v1, t):
+    return v0*(1 - t) + v1*t
 
 def round_corners(surface, radius):
-    radius *=3
     # Create a new surface with the same size as the input surface, but with an alpha channel
     rounded_surface = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
     

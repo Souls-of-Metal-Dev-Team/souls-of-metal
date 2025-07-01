@@ -1,45 +1,19 @@
 import pygame
 from CountryData import Countries
 import func
+from os import getcwd
 from classes import (
     Button,
     MajorCountrySelect,
     Map,
     MinorCountrySelect,
     CountryMenu,
-    title_font,
     fontalias,
-    primary,
-    screen,
+    primary
 )
 from json import load, dump
 from enum import Enum
-
-Menu = Enum("Menu", "main_menu countryselect settings game")
-
-menubuttons = [
-    Button("Start Game", (200, 400), (160, 40), 5),
-    Button("Continue Game", (200, 500), (160, 40), 5),
-    Button("Settings", (200, 600), (160, 40), 5),
-    Button("Credits", (200, 700), (160, 40), 5),
-    Button("Exit", (200, 800), (160, 40), 5),
-]
-
-settingsbuttons = [
-    Button("UI Size", (200, 400), (160, 40), 5),
-    Button("FPS", (200, 500), (160, 40), 5),
-    Button("Sound Volume", (200, 600), (160, 40), 5),
-    Button("Music Volume", (200, 700), (160, 40), 5),
-    Button("Scroll Invert", (200, 800), (160, 40), 5),
-    Button("Exit", (200, 900), (160, 40), 5),
-]
-
-countryselectbuttons = [
-    Button("Back", (1125, 570), (160, 40), 5),
-    Button("Map Select", (1375, 570), (160, 40), 5),
-    Button("Country List", (1125, 670), (160, 40), 5),
-    Button("Start", (1375, 670), (160, 40), 5),
-]
+import globals
 
 Menu = Enum("Menu", "main_menu countryselect settings game")
 
@@ -48,25 +22,6 @@ def main():
     screen = pygame.display.set_mode(
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
     )
-
-    menubg = pygame.image.load("ui/menu.png")
-    game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load("ui/logo.png").convert_alpha()
-
-    current_menu = Menu.main_menu
-    tab = [1]
-    tick = 0
-    mouse_pressed = False
-    mouse_scroll = 0
-
-    sprites = pygame.sprite.Group()
-    countrymajor = MajorCountrySelect("starts/Modern World/majors.txt", 5, sprites)
-    countryminor = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
-    selectmenu = CountryMenu()
-    with open("CountryData.json") as json_data:
-        countries_data = load(json_data)
-    countries = Countries(countries_data)
-    map = Map("Modern World")
 
     settings_json = None
     try:
@@ -84,15 +39,66 @@ def main():
             dump(settings_json, json_data)
 
     scrollinvert = settings_json["Scroll Invert"]
+    globals.ui_scale = int(settings_json["UI Size"] / 14)
+
+    pygame.font.init()
+    cwd = getcwd()
+    ui_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 24 * globals.ui_scale)
+    title_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 64 * globals.ui_scale)
+
+    menubg = pygame.image.load("ui/menu.png")
+    game_title = title_font.render("Souls Of Metal", fontalias, primary)
+    game_logo = pygame.image.load("ui/logo.png").convert_alpha()
+
+    current_menu = Menu.main_menu
+    tick = 0
+    mouse_pressed = False
+
+    sprites = pygame.sprite.Group()
+    major_country_select = MajorCountrySelect("starts/Modern World/majors.txt", 5, ui_font, sprites)
+    minor_country_select = MinorCountrySelect("starts/Modern World/minors.txt", 5, sprites)
+    selectmenu = CountryMenu()
+    with open("CountryData.json") as json_data:
+        countries_data = load(json_data)
+    countries = Countries(countries_data)
+    map = Map("Modern World", (0, 0), 1)
 
     player_country = None
 
-    selected_country = 0
+    selected_country_rgb = 0
+
+    menubuttons = [
+        Button("Start Game", (200, 400), (160, 40), 5),
+        Button("Continue Game", (200, 500), (160, 40), 5),
+        Button("Settings", (200, 600), (160, 40), 5),
+        Button("Credits", (200, 700), (160, 40), 5),
+        Button("Exit", (200, 800), (160, 40), 5)
+    ]
+
+    settingsbuttons = [
+        Button("UI Size",       (200, 200), (160, 40), 5),
+        Button("FPS",           (200, 300), (160, 40), 5),
+        Button("Sound Volume",  (200, 400), (160, 40), 5),
+        Button("Music Volume",  (200, 500), (160, 40), 5),
+        Button("Scroll Invert", (200, 600), (160, 40), 5),
+        Button("Save Settings", (200, 800), (160, 40), 5),
+        Button("Exit", (200, 900), (160, 40), 5)
+    ]
+
+    countryselectbuttons = [
+        Button("Back", (1125, 570), (160, 40), 5),
+        Button("Map Select", (1375, 570), (160, 40), 5),
+        Button("Country List", (1125, 670), (160, 40), 5),
+        Button("Start", (1375, 670), (160, 40), 5)
+    ]
 
     global global_run
     global_run = True
     while global_run:
-        mpos = pygame.mouse.get_pos()
+        mouse_rel = pygame.mouse.get_rel()
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_scroll = 0
+
         for event in pygame.event.get():
             match event.type:
                 case pygame.QUIT:
@@ -104,33 +110,32 @@ def main():
                             pygame.display.toggle_fullscreen()
 
                 case pygame.MOUSEWHEEL:
-                    # NOTE(pol): Why are we enabling mtogg here?
-                    mouse_pressed = True
-
+                    # mouse_pressed = True
                     mouse_scroll = -scrollinvert * event.y
 
                     if current_menu == Menu.countryselect:
-                        countrymajor.update(mouse_scroll)
-                        # NOTE(pol): Delete?
-                        # for i in countrymajor.majors:
-                        #     i.pos = (i.pos[0], i.pos[1] - scrollinvert * event.y * 200)
-                        #     i.brect = pygame.Rect(i.pos[0], i.pos[1], 700, 200)
-
+                        major_country_select.update(mouse_scroll)
+                        major_country_select.scroll -= mouse_scroll
+                        major_country_select.scroll = func.clamp(
+                            major_country_select.scroll,
+                            0,
+                            len(major_country_select.majors) - 5
+                        )
+                        major_country_select.min = major_country_select.scroll
+                        major_country_select.max = min(len(major_country_select.majors), 6 + major_country_select.scroll)
                     elif current_menu == Menu.game:
-                            map.update(mouse_scroll, mpos)
-                            # NOTE(pol): Delete?
-                            # print(map.scale)
-                            # map.cvmap =  pygame.transform.scale_by(map.cmap,map.scale)
+                        map.scale = func.clamp(map.scale - (mouse_scroll / 25), 1, 2)
+                        map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
+                        map.pos[0] = -mouse_pos[0] * (map.scale - 1)
+                        map.pos[1] = -mouse_pos[1] * (map.scale - 1)
 
                 case pygame.MOUSEBUTTONDOWN:
                     mouse_pressed = True
-                    mouse_scroll = 0
                     r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
-                    selected_country = (r, g, b)
+                    selected_country_rgb = (r, g, b)
 
-                case pygame.MOUSEBUTTONUP | pygame.MOUSEMOTION:
+                case pygame.MOUSEBUTTONUP:
                     mouse_pressed = False
-                    mouse_scroll = 0
 
         if current_menu != Menu.game:
             screen.blit(menubg, (0, 0))
@@ -141,104 +146,111 @@ def main():
                 # NOTE(soi): dear god someone make the logo position look better
                 screen.blit(game_logo, (30, 30))
 
-                for i in menubuttons:
-                    # NOTE(soi): the fact that draw is called twice isnt very efficient so imma store in ina third temp variable
-                    temp = i.draw(screen, mpos, mouse_pressed, settings_json, tick)
-                    if temp:
-                        tab = temp
+                for button in menubuttons:
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
+                    if not mouse_pressed or not hovered:
+                        continue
 
-                match tab:
-                    case "Settings":
-                        current_menu = Menu.settings
-                    case "Start Game":
-                        current_menu = Menu.countryselect
-                    case "Exit":
-                        global_run = False
-                tab = 0
+                    match button.id:
+                        case "Settings":
+                            current_menu = Menu.settings
+                        case "Start Game":
+                            current_menu = Menu.countryselect
+                        case "Exit":
+                            global_run = False
 
-            if current_menu == Menu.settings:
-                for i in settingsbuttons:
-                    temp = i.draw(screen, mpos, mouse_pressed, settings_json, tick)
-                    if temp:
-                        tab = temp
+            elif current_menu == Menu.settings:
+                for button in settingsbuttons:
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
 
-                match tab:
-                    case "Exit":
-                        current_menu = Menu.main_menu
+                    if not hovered:
+                        continue
 
-                    case "UI Size":
-                        settings_json["UI Size"] += mouse_scroll
-                        settings_json["UI Size"] = func.clamp(
-                            settings_json["UI Size"] + mouse_scroll, 14, 40
-                        )
+                    match button.id:
+                        case "UI Size":
+                            settings_json["UI Size"] += mouse_scroll
+                            settings_json["UI Size"] = func.clamp(
+                                settings_json["UI Size"] + mouse_scroll, 14, 40
+                            )
 
-                    case "Scroll Invert":
-                        settings_json["Scroll Invert"] = func.clamp(
-                            settings_json["Scroll Invert"], 0, 1
-                        )
-                        settings_json["Scroll Invert"] = (
-                            settings_json["Scroll Invert"] * -2 + 1
-                        )
+                        case "Sound Volume":
+                            settings_json["Sound Volume"] += mouse_scroll
+                            settings_json["Sound Volume"] = func.clamp(
+                                settings_json["Sound Volume"], 0, 100
+                            )
 
-                    case "Sound Volume":
-                        settings_json["Sound Volume"] += mouse_scroll
-                        settings_json["Sound Volume"] = func.clamp(
-                            settings_json["Sound Volume"], 0, 100
-                        )
+                        case "Music Volume":
+                            settings_json["Music Volume"] += mouse_scroll
+                            settings_json["Music Volume"] = func.clamp(
+                                settings_json["Music Volume"], 0, 100
+                            )
 
-                    case "Music Volume":
-                        settings_json["Music Volume"] += mouse_scroll
-                        settings_json["Music Volume"] = func.clamp(
-                            settings_json["Music Volume"], 0, 100
-                        )
+                        case "FPS":
+                            settings_json["FPS"] += mouse_scroll
+                            settings_json["FPS"] = max(settings_json["FPS"], 12)
 
-                    case "FPS":
-                        settings_json["FPS"] += mouse_scroll
-                        settings_json["FPS"] = max(settings_json["FPS"], 12)
+                    if not mouse_pressed:
+                        continue
+                        
+                    match button.id:
+                        case "Scroll Invert":
+                            settings_json["Scroll Invert"] = func.clamp(
+                                settings_json["Scroll Invert"], 0, 1
+                            )
+                            settings_json["Scroll Invert"] = (
+                                settings_json["Scroll Invert"] * -2 + 1
+                            )
 
-                with open("settings.json", "w") as json_data:
-                    dump(settings_json, json_data)
+                        case "Save Settings":
+                            with open("settings.json", "w") as json_data:
+                                dump(settings_json, json_data)
 
-                mouse_pressed = False
-                tab = 0
+                        case "Exit":
+                            current_menu = Menu.main_menu
 
-            if current_menu == Menu.countryselect:
+            elif current_menu == Menu.countryselect:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
                 # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
                 sprites.draw(screen)
                 pygame.draw.rect(
-                    countrymajor.image, (40, 40, 40), ((00, 0), (700, 1000)), 0, 20
+                    major_country_select.image, (40, 40, 40), ((00, 0), (700, 1000)), 0, 20
                 )
-                i = 0
-                for major in countrymajor.majors[countrymajor.min : countrymajor.max :]:
-                    major.pos[1] = i
-                    i += 200
-                    temp = major.draw(countrymajor.image, mpos, player_country, mouse_pressed)
-                    if temp:
-                        player_country = temp
-                i = 0
 
-                for minor in countryminor.minors[countryminor.min : countryminor.max :]:
-                    temp = minor.draw(countryminor.image, mpos, player_country, mouse_pressed)
-                    if temp:
-                        player_country = temp
-                for i in countryselectbuttons:
-                    temp = i.draw(screen, mpos, mouse_pressed, settings_json, tick)
-                    if temp:
-                        tab = temp
+                country_height = 0
+                for major in major_country_select.majors[major_country_select.min : major_country_select.max :]:
+                    major.pos[1] = country_height
+                    country_height += 200
+                    hovered = major.draw(major_country_select.image, mouse_pos, player_country, mouse_pressed)
+                    if not mouse_pressed or not hovered:
+                        continue
 
-                match tab:
-                    case "Start":
-                        current_menu = Menu.game
-                    case "Back":
-                        current_menu = Menu.main_menu
-                tab = 0
+                    player_country = major.id
+
+                for minor in minor_country_select.minors[minor_country_select.min : minor_country_select.max :]:
+                    hovered = minor.draw(minor_country_select.image, mouse_pos, player_country, mouse_pressed)
+                    if not mouse_pressed or hovered:
+                        continue
+                    player_country = minor.id
+
+                for button in countryselectbuttons:
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
+                    if not mouse_pressed or hovered:
+                        continue
+
+                    match button.id:
+                        case "Start":
+                            current_menu = Menu.game
+                        case "Back":
+                            current_menu = Menu.main_menu
         else:
-            map.draw(screen, pygame.mouse.get_rel())
-            print(selected_country)
-            if selected_country in countries.colorsToCountries:
+            map.draw(screen, mouse_rel)
+            # print(selected_country_rgb)
+            if selected_country_rgb in countries.colorsToCountries:
                 selectmenu.draw(
-                    screen, countries, countries.colorsToCountries[selected_country]
+                    screen,
+                    countries,
+                    countries.colorsToCountries[selected_country_rgb],
+                    title_font
                 )
 
         tick += 1

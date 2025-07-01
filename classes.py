@@ -1,19 +1,13 @@
-from pygame import draw, Rect, font, Surface, mouse, sprite, transform, image
-from os import getcwd
-from json import load, dump
 import pygame
+from json import load
 from func import lerp, round_corners, clamp
+import globals
 
 # FIXME(pol): Holy hell this script is executed first, not main.py !!!
 # Find a way to move everything to main.py
 
-# This screen variable is unused.
-screen = pygame.display.set_mode(
-    (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-)
-
 with open("translation.json") as json_data:
-    trans = load(json_data)
+    language_translations = load(json_data)
 
 with open("theme.json") as json_data:
     theme = load(json_data)
@@ -22,136 +16,118 @@ with open("theme.json") as json_data:
     tertiary = tuple(theme["tertiary"])
     fontalias = theme["fontalias"]
 
-settings_json = None
-
-try:
-    with open("settings.json") as json_data:
-        settings_json = load(json_data)
-except FileNotFoundError:
-    settings_json = {
-        "Scroll Invert": -1,
-        "UI Size": 14,
-        "FPS": 139,
-        "Sound Volume": 0,
-        "Music Volume": 0,
-    }
-    with open("settings.json", "w") as json_data:
-        dump(settings_json, json_data)
-
-uiscale = int(settings_json["UI Size"] / 14)
-
-
-cwd = getcwd()
-
-font.init()
-# NOTE(pol): These should be created in main.py and passed to functions that
-# need to render text.
-ui_font = font.Font(f"{cwd}/ui/font.ttf", 24 * uiscale)
-title_font = font.Font(f"{cwd}/ui/font.ttf", 64 * uiscale)
-
-
 class Button:
-    thicc = 0
-    i = 0
+    # last_tick = 0
 
-    def __init__(self, id, pos, dim, thicc):
+    def __init__(self, id, pos, size, thicc):
         self.id = id
-        self.pos = pos
-        self.dim = dim
+        self.pos = pygame.Vector2(pos)
+        self.size = pygame.Vector2(size)
+        self.thicc = 0
         self.thiccmax = thicc
-        self.mouse_up = False
-        self.brect = Rect(
-            self.pos[0] - (self.dim[0] * uiscale >> 1),
-            self.pos[1],
-            self.dim[0] * uiscale,
-            self.dim[1] * uiscale,
+        # NOTE(pol): x and y are the center
+        self.rect = pygame.Rect(
+            self.pos.x - (self.size.x * globals.ui_scale / 2),
+            self.pos.y,
+            self.size.x * globals.ui_scale,
+            self.size.y * globals.ui_scale,
+        )
+        # self.mouse_up = False
+
+    def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
+        _ = tick
+
+        hovered = pygame.Rect.collidepoint(self.rect, mouse_pos)
+
+        if hovered:
+            if self.thicc < self.thiccmax:
+                self.thicc += 1
+                # self.thicc = lerp(
+                #     self.thicc,
+                #     self.thiccmax,
+                #     (tick - self.last_tick) / 5,
+                # )
+        else:
+            self.thicc = 0
+            # self.last_tick = tick
+
+        scaled_thicc = self.thicc * globals.ui_scale
+
+        pygame.draw.rect(
+            screen,
+            secondary,
+            pygame.Rect(
+                self.pos.x - self.rect.w / 2,
+                self.pos.y - scaled_thicc,
+                self.rect.w,
+                self.rect.h + scaled_thicc * 2
+            )
+        )
+        pygame.draw.circle(
+            screen,
+            secondary,
+            (
+                self.pos.x - self.rect.w / 2,
+                self.pos.y + self.rect.h / 2,
+            ),
+            self.rect.h / 2 + scaled_thicc
+        )
+        pygame.draw.circle(
+            screen,
+            secondary,
+            (
+                self.pos.x + self.rect.w / 2,
+                self.pos.y + self.rect.h / 2,
+            ),
+            self.rect.h / 2 + scaled_thicc
         )
 
-    def draw(self, screen, mpos, mtogg, settings_json, tick):
-        self.thicc = lerp(
-            self.thicc,
-            self.thiccmax if Rect.collidepoint(self.brect, mpos) else 0,
-            tick - self.i,
-        )
-        if not Rect.collidepoint(self.brect, mpos):
-            self.i = tick
-        draw.rect(
-            screen,
-            secondary,
-            Rect(
-                self.pos[0] - (self.dim[0] * uiscale >> 1),
-                self.pos[1] - (self.thicc * uiscale),
-                self.dim[0] * uiscale,
-                self.dim[1] * uiscale + (self.thicc * uiscale << 1),
-            ),
-        )
-        draw.circle(
-            screen,
-            secondary,
-            (
-                self.pos[0] - (self.dim[0] * uiscale >> 1),
-                self.pos[1] + (self.dim[1] * uiscale >> 1),
-            ),
-            (self.dim[1] * uiscale >> 1) + self.thicc * uiscale,
-        )
-        draw.circle(
-            screen,
-            secondary,
-            (
-                self.pos[0] + (self.dim[0] * uiscale >> 1),
-                self.pos[1] + (self.dim[1] * uiscale >> 1),
-            ),
-            (self.dim[1] * uiscale >> 1) + self.thicc * uiscale,
-        )
-
-        draw.rect(
+        pygame.draw.rect(
             screen,
             tertiary,
-            self.brect,
+            self.rect,
         )
-        draw.circle(
+        pygame.draw.circle(
             screen,
             tertiary,
             (
-                self.pos[0] - (self.dim[0] * uiscale >> 1),
-                self.pos[1] + (self.dim[1] * uiscale >> 1),
+                self.pos.x - self.rect.w / 2,
+                self.pos.y + self.rect.h / 2,
             ),
-            (self.dim[1] * uiscale >> 1),
+            self.rect.h / 2
         )
-        draw.circle(
+        pygame.draw.circle(
             screen,
             tertiary,
             (
-                self.pos[0] + (self.dim[0] * uiscale >> 1),
-                self.pos[1] + (self.dim[1] * uiscale >> 1),
+                self.pos.x + self.rect.w / 2,
+                self.pos.y + self.rect.h / 2,
             ),
-            (self.dim[1] * uiscale >> 1),
+            self.rect.h / 2
         )
 
         text = (
-            f"{trans[self.id]}: {settings_json[self.id]}"
+            f"{language_translations[self.id]}: {settings_json[self.id]}"
             if self.id in settings_json
             else self.id
         )
         font_render = ui_font.render(
             text,
             fontalias,
-            secondary if Rect.collidepoint(self.brect, mpos) and mtogg else primary,
+            secondary if hovered and mouse_pressed else primary,
         )
         screen.blit(
             font_render,
             (
-                self.pos[0] - (font_render.get_width() >> 1),
-                self.pos[1] + (self.thiccmax * uiscale),
+                self.pos.x - (font_render.get_width() / 2),
+                self.pos.y + (self.thiccmax * globals.ui_scale),
             ),
         )
 
-        if Rect.collidepoint(self.brect, mpos) and mtogg:
-            return self.id
+        return hovered
 
-
-class MajorCountrySelect(sprite.Sprite):
-    def __init__(self, file, thicc, *groups):
+class MajorCountrySelect(pygame.sprite.Sprite):
+    def __init__(self, file, thicc, ui_font, *groups):
         super().__init__(*groups)
         self.min = 0
         self.max = 6
@@ -159,72 +135,62 @@ class MajorCountrySelect(sprite.Sprite):
         count = 0
         with open(file) as f:
             for k in f.read().split(", "):
-                self.majors.append(MajorCountry(k, [0, count], thicc))
+                self.majors.append(MajorCountry(k, [0, count], thicc, ui_font))
                 count += 200
         # print(len(self.majors))
-        self.image = Surface((700, 1000), pygame.SRCALPHA)
+        self.image = pygame.Surface((700, 1000), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((300, 40), (700, 1000))
         self.scroll = 0
 
-    def update(self, mouse_scroll):
-        # self.min = 3
-        # self.max = 8
-        self.scroll -= mouse_scroll
-        self.scroll = clamp(self.scroll, 0, len(self.majors)-5)
-        self.min = self.scroll
-        self.max = min(len(self.majors), 6 + self.scroll)
-        # print(self.min, self.max)
-
-
 class MajorCountry:
-    def __init__(self, id, pos, thicc):
+    def __init__(self, id, pos, thicc, ui_font):
         self.id = id
         self.pos = pos
         self.thicc = thicc
 
         try:
-            self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
+            self.img = pygame.image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load("unknown.jpg").convert_alpha()
+            self.img = pygame.image.load("unknown.jpg").convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h
-        self.img = round_corners(transform.scale_by(self.img, scale), 5)
+        self.img = round_corners(pygame.transform.scale_by(self.img, scale), 5)
         self.w, h = self.img.get_size()
         self.mouse_up = False
         self.selected_font_render = ui_font.render(
-            trans[self.id],
+            language_translations[self.id],
             fontalias,
             secondary,
         )
         self.font_render = ui_font.render(
-            trans[self.id],
+            language_translations[self.id],
             fontalias,
             primary,
         )
 
-    def draw(self, screen, mpos, select, mtogg):
-        brect = Rect(
+    def draw(self, screen, mouse_pos, select, mouse_pressed):
+        brect = pygame.Rect(
             self.pos[0],
             self.pos[1],
-            700 * uiscale,
-            180 * uiscale,
+            700 * globals.ui_scale,
+            180 * globals.ui_scale,
         )
-        draw.rect(screen, tertiary, brect, 0, 20)
+        pygame.draw.rect(screen, tertiary, brect, 0, 20)
         screen.blit(self.img, (self.pos[0] + (self.thicc), self.pos[1] + 5))
-        if (Rect.collidepoint(brect, mpos) and mtogg) or select == self.id:
-            draw.rect(screen, tertiary, brect, 9, 20)
+        if (pygame.Rect.collidepoint(brect, mouse_pos) and mouse_pressed) or select == self.id:
+            pygame.draw.rect(screen, tertiary, brect, 9, 20)
             screen.blit(
                 self.selected_font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25)
             )
         else:
             screen.blit(self.font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
-        draw.rect(screen, secondary, brect, 5, 20)
-        return self.id if Rect.collidepoint(brect, mpos) and mtogg else None
+        pygame.draw.rect(screen, secondary, brect, 5, 20)
+        return pygame.Rect.collidepoint(brect, mouse_pos) and mouse_pressed
 
 
-class MinorCountrySelect(sprite.Sprite):
+class MinorCountrySelect(pygame.sprite.Sprite):
     min = 0
     max = 32
 
@@ -241,7 +207,7 @@ class MinorCountrySelect(sprite.Sprite):
         if len(self.minors) > 32:
             self.minors = self.minors[0:32]
 
-        self.image = Surface((500, 500), pygame.SRCALPHA)
+        self.image = pygame.Surface((500, 500), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((1000, 40), (200, 1000))
 
@@ -260,16 +226,16 @@ class MinorCountry:
         self.thicc = thicc
 
         try:
-            self.img = image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
+            self.img = pygame.image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = image.load("unknown.jpg").convert_alpha()
+            self.img = pygame.image.load("unknown.jpg").convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h / 4
-        self.img = round_corners(transform.scale_by(self.img, scale), 3)
+        self.img = round_corners(pygame.transform.scale_by(self.img, scale), 3)
         self.w, self.h = self.img.get_size()
         self.mouse_up = False
-        self.brect = Rect(
+        self.brect = pygame.Rect(
             self.pos[0],
             self.pos[1],
             self.w,
@@ -277,7 +243,7 @@ class MinorCountry:
         )
 
     def draw(self, screen, mpos, select, mtogg):
-        b = Rect(
+        b = pygame.Rect(
             self.pos[0] + 1000,
             self.pos[1] + 40,
             self.w,
@@ -285,31 +251,25 @@ class MinorCountry:
         )
         screen.blit(self.img, (self.pos[0], self.pos[1]))
         if select == self.id:
-            draw.rect(screen, tertiary, self.brect, border_radius=9, width=5)
-            draw.rect(screen, secondary, self.brect, border_radius=9, width=3)
-        return self.id if Rect.collidepoint(b, mpos) and mtogg else None
+            pygame.draw.rect(screen, tertiary, self.brect, border_radius=9, width=5)
+            pygame.draw.rect(screen, secondary, self.brect, border_radius=9, width=3)
+        return pygame.Rect.collidepoint(b, mpos) and mtogg
 
 
 class Map:
-    sidebar = image.load("ui/sidebar.png").convert()
-    scale = 1
-    pos = [0, 1]
+    # sidebar = pygame.image.load("ui/sidebar.png").convert()
 
-    def __init__(self, scenario):
-        self.cmap = self.cvmap = image.load(f"starts/{scenario}/map.png").convert()
-        self.pmap = image.load(f"starts/{scenario}/province.png").convert()
-        self.pmap = transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
-        self.cmap = transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
+    def __init__(self, scenario, pos, scale):
+        self.scale = scale
+        self.pos = pygame.Vector2(pos)
+        self.cmap = self.cvmap = pygame.image.load(f"starts/{scenario}/map.png").convert()
+        self.pmap = pygame.image.load(f"starts/{scenario}/province.png").convert()
+        self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
+        self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
         self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
-
-    def update(self, scroll, mpos):
-        self.scale = clamp(self.scale - (scroll / 25), 1, 2)
-        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
-        self.pos[0] = -mpos[0] * (self.scale - 1)
-        self.pos[1] = -mpos[1] * (self.scale - 1)
 
     def draw(self, screen, rel):
-        match mouse.get_pressed():
+        match pygame.mouse.get_pressed():
             case (_, 1, _):
                 self.pos[0] = self.pos[0] + rel[0] / (5 * self.scale)
                 self.pos[1] = clamp(
@@ -325,10 +285,10 @@ class CountryMenu:
     def __init__(self):
         pass
 
-    def draw(self, screen, CountryData, country):
-        draw.rect(screen, tertiary, Rect((-32, -12), (524, 1104)), border_radius=64)
-        draw.rect(
-            screen, secondary, Rect((-32, -12), (524, 1104)), border_radius=64, width=12
+    def draw(self, screen, CountryData, country, title_font):
+        pygame.draw.rect(screen, tertiary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64)
+        pygame.draw.rect(
+            screen, secondary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64, width=12
         )
         screen.blit(
             CountryData.countriesToFlags[country],
@@ -336,7 +296,7 @@ class CountryMenu:
         )
         screen.blit(
             title_font.render(
-                trans[country],
+                language_translations[country],
                 fontalias,
                 primary,
             ),
