@@ -196,6 +196,7 @@ def main():
                     match button.id:
                         case "Settings": current_menu = Menu.SETTINGS
                         case "Start Game": current_menu = Menu.COUNTRY_SELECT
+                        case "Credits": current_menu = Menu.CREDITS
                         case "Exit": global_run = False
 
             elif current_menu == Menu.SETTINGS:
