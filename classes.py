@@ -268,7 +268,7 @@ class MinorCountry:
         screen.blit(self.img, (self.pos[0], self.pos[1]))
         if pygame.Rect.collidepoint(b, mpos) or select == self.id:
             if self.thicc < self.thiccmax:
-                self.thicc += 2
+                self.thicc += 1
             pygame.draw.rect(
                 screen, tertiary, self.brect, border_radius=9, width=self.thicc
             )
@@ -307,4 +307,8 @@ class Map:
                     0,
                 )
         screen.blit(self.cvmap, self.pos)
-        pygame.draw.rect(screen, tertiary, ((0, 0), (1920, 60)))
+        pygame.draw.rect(
+            screen,
+            tertiary,
+            ((0, 0), (1920, 60)),
+        )

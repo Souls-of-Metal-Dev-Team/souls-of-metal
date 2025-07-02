@@ -17,6 +17,8 @@ from enum import Enum
 import globals
 import os
 import sys
+import datetime
+
 
 base_path = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
@@ -28,6 +30,9 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
 
 
 def main():
+    speed = 4  # NOTE(soi): put this somewhere better
+    date = datetime.date(2025, 1, 1)
+    display_date = date.strftime("%A, %B %e, %Y")
     pygame.init()
     screen = pygame.display.set_mode(
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
@@ -348,6 +353,15 @@ def main():
                 division_pos += delta.normalize()
 
             map.draw(screen, mouse_rel)
+            # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
+            screen.blit(
+                ui_font.render(
+                    display_date,
+                    fontalias,
+                    primary,
+                ),
+                (1600, 10),
+            )
             pygame.draw.circle(screen, secondary, division_pos, 5)
             # print(selected_country_rgb)
             if selected_country_rgb in countries.colorsToCountries:
@@ -355,13 +369,15 @@ def main():
                     screen,
                     tertiary,
                     pygame.Rect((-32, -12), (524, 1104)),
-                    border_radius=64,
+                    border_bottom_right_radius=64,
+                    border_top_right_radius=64,
                 )
                 pygame.draw.rect(
                     screen,
                     secondary,
                     pygame.Rect((-32, -12), (524, 1104)),
-                    border_radius=64,
+                    border_bottom_right_radius=64,
+                    border_top_right_radius=64,
                     width=12,
                 )
                 country = countries.colorsToCountries[selected_country_rgb]
@@ -375,8 +391,11 @@ def main():
                         fontalias,
                         primary,
                     ),
-                    (30, 300),
+                    (30, 0),
                 )
+            if not tick % ((8 - speed) * 10):
+                date += datetime.timedelta(days=1)
+                display_date = date.strftime("%A, %B %e, %Y")
 
         tick += 1
 
