@@ -75,8 +75,8 @@ def main():
 
     pygame.font.init()
     cwd = getcwd()
-    ui_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 24 * globals.ui_scale)
-    title_font = pygame.font.Font(f"{cwd}/ui/font.ttf", 64 * globals.ui_scale)
+    ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
+    title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
@@ -89,7 +89,7 @@ def main():
     sprites = pygame.sprite.Group()
     major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
     minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
-    with open("CountryData.json") as f:
+    with open(os.path.join(base_path, "CountryData.json")) as f: #REMEMBER NOT TO USE HARDCODED PATH -minh-
         countries_data = load(f)
     countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
