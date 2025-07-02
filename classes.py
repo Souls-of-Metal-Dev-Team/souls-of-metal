@@ -6,8 +6,8 @@ import globals
 
 base_path = os.path.dirname(__file__)
 
-with open(os.path.join(base_path, "theme.json")) as json_data:
-    theme = load(json_data)
+with open(os.path.join(base_path, "theme.json")) as f:
+    theme = load(f)
     primary = tuple(theme["primary"])
     secondary = tuple(theme["secondary"])
     tertiary = tuple(theme["tertiary"])

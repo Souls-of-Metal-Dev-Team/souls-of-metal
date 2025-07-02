@@ -16,9 +16,15 @@ from json import load, dump
 from enum import Enum
 import globals
 import os
-base_path = os.path.dirname(__file__)
+import sys
 
-Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS GAME")
+base_path = os.path.dirname(__file__)
+if getattr(sys, 'frozen', False):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+else:
+    base_path = os.path.dirname(os.path.abspath(__file__))
+
+Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
 
 def main():
     pygame.init()
@@ -26,33 +32,44 @@ def main():
         (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
     )
 
-    with open(os.path.join(base_path, "translation.json")) as json_data:
-        globals.language_translations = load(json_data)
+    pygame.mixer.init()
+
+    # Load music
+    music_path = os.path.join(base_path, "sound", "music", "background.mp3")
+    if os.path.exists(music_path):
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+    else:
+        print("[WARNING] Music file not found at:", music_path)
+
+    with open(os.path.join(base_path, "translation.json")) as f:
+        globals.language_translations = load(f)
 
     current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
     mouse_scroll = 0
 
-    with open(os.path.join(base_path, "CountryData.json")) as json_data:
-        countries_data = load(json_data)
+    with open(os.path.join(base_path, "CountryData.json")) as f:
+        countries_data = load(f)
     countries = Countries(countries_data)
 
 
     settings_json = None
     try:
-        with open(os.path.join(base_path, "settings.json")) as json_data:
-            settings_json = load(json_data)
+        with open(os.path.join(base_path, "settings.json")) as f:
+            settings_json = load(f)
     except FileNotFoundError:
         settings_json = {
-                "Scroll Invert": -1,
+                "Scroll Invert": 1,
                 "UI Size": 14,
-                "FPS": 139,
-                "Sound Volume": 0,
-                "Music Volume": 0,
+                "FPS": 144,
+                "Sound Volume": 100,
+                "Music Volume": 100,
                 }
-        with open(os.path.join(base_path, "settings.json"), "w") as json_data:
-            dump(settings_json, json_data)
+        with open(os.path.join(base_path, "settings.json"), "w") as f:
+            dump(settings_json, f)
 
     globals.ui_scale = int(settings_json["UI Size"] / 14)
 
@@ -72,8 +89,8 @@ def main():
     sprites = pygame.sprite.Group()
     major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
     minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
-    with open("CountryData.json") as json_data:
-        countries_data = load(json_data)
+    with open("CountryData.json") as f:
+        countries_data = load(f)
     countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
 
@@ -125,6 +142,9 @@ def main():
                     match event.key:
                         case pygame.K_F4:
                             pygame.display.toggle_fullscreen()
+                        case pygame.K_ESCAPE:
+                            if current_menu == Menu.CREDITS:
+                                current_menu = Menu.MAIN_MENU
 
                 case pygame.MOUSEWHEEL:
                     # mouse_pressed = True
@@ -163,7 +183,6 @@ def main():
             if current_menu == Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
 
-                # NOTE(soi): dear god someone make the logo position look better
                 screen.blit(game_logo, (30, 30))
 
                 for button in menubuttons:
@@ -173,13 +192,11 @@ def main():
 
                     # NOTE(pol): Eat input
                     mouse_pressed = False
+
                     match button.id:
-                        case "Settings":
-                            current_menu = Menu.SETTINGS
-                        case "Start Game":
-                            current_menu = Menu.COUNTRY_SELECT
-                        case "Exit":
-                            global_run = False
+                        case "Settings": current_menu = Menu.SETTINGS
+                        case "Start Game": current_menu = Menu.COUNTRY_SELECT
+                        case "Exit": global_run = False
 
             elif current_menu == Menu.SETTINGS:
                 for button in settingsbuttons:
@@ -224,11 +241,10 @@ def main():
                             )
 
                         case "Save Settings":
-                            with open(os.path.join(base_path, "settings.json"), "w") as json_data:
-                                dump(settings_json, json_data)
+                            with open(os.path.join(base_path, "settings.json"), "w") as f:
+                                dump(settings_json, f)
 
-                        case "Exit":
-                            current_menu = Menu.MAIN_MENU
+                        case "Exit": current_menu = Menu.MAIN_MENU
 
             elif current_menu == Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
@@ -260,10 +276,22 @@ def main():
                         continue
 
                     match button.id:
-                        case "Start":
-                            current_menu = Menu.GAME
-                        case "Back":
-                            current_menu = Menu.MAIN_MENU
+                        case "Start": current_menu = Menu.GAME
+                        case "Back": current_menu = Menu.MAIN_MENU
+            elif current_menu == Menu.CREDITS:
+                screen.fill((0, 0, 0))
+                font = pygame.font.SysFont("arial", 36)
+                lines = [
+                    "Souls Of Metal",
+                    "Created by: Your Name",
+                    "Thanks to: Pygame, OpenAI",
+                    "",
+                    "Press ESC to return"
+                ]
+                for i, line in enumerate(lines):
+                    text = font.render(line, True, (255, 255, 255))
+                    screen.blit(text, (100, 100 + i * 50))
+
         else:
             delta = division_target - division_pos
             if delta.length() > 1:
