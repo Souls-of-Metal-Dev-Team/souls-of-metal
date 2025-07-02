@@ -23,7 +23,8 @@ class Button:
         self.thicc = 0
         self.thiccmax = thicc
         scaled_size = pygame.Vector2(size * globals.ui_scale)
-        self.rect = pygame.Rect(pos, scaled_size)
+        scaled_size[0] += 2 * scaled_size[1]
+        self.rect = pygame.Rect((pos[0] - scaled_size[1], pos[1]), scaled_size)
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
         _ = tick
@@ -44,16 +45,18 @@ class Button:
 
         scaled_thicc = self.thicc * globals.ui_scale
 
-        pygame.draw.rect(
-            screen,
-            secondary,
-            pygame.Rect(
-                self.rect.x,
-                self.rect.y - scaled_thicc,
-                self.rect.width,
-                self.rect.height + scaled_thicc * 2,
-            ),
-        )
+        if scaled_thicc:
+            pygame.draw.rect(
+                screen,
+                secondary,
+                pygame.Rect(
+                    self.rect.x - scaled_thicc,
+                    self.rect.y - scaled_thicc,
+                    self.rect.width + scaled_thicc * 2,
+                    self.rect.height + scaled_thicc * 2,
+                ),
+                border_radius=self.rect.height * scaled_thicc // 2,
+            )
         # pygame.draw.circle(
         #     screen,
         #     secondary,
@@ -70,25 +73,25 @@ class Button:
         #     self.rect.height / 2 + scaled_thicc,
         # )
 
-        pygame.draw.rect(screen, tertiary, self.rect)
-        pygame.draw.circle(
-            screen,
-            tertiary,
-            (
-                self.rect.x,
-                self.rect.centery,
-            ),
-            self.rect.height / 2,
-        )
-        pygame.draw.circle(
-            screen,
-            tertiary,
-            (
-                self.rect.right,
-                self.rect.centery,
-            ),
-            self.rect.height / 2,
-        )
+        pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
+        # pygame.draw.circle(
+        #     screen,
+        #     tertiary,
+        #     (
+        #         self.rect.x,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2,
+        # )
+        # pygame.draw.circle(
+        #     screen,
+        #     tertiary,
+        #     (
+        #         self.rect.right,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2,
+        # )
 
         text = (
             f"{globals.language_translations[self.id]}: {settings_json[self.id]}"
