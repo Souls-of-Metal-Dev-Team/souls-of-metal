@@ -54,21 +54,21 @@ class Button:
                 self.rect.height + scaled_thicc * 2,
             ),
         )
-        pygame.draw.circle(
-            screen,
-            secondary,
-            (self.rect.x, self.rect.centery),
-            self.rect.height / 2 + scaled_thicc,
-        )
-        pygame.draw.circle(
-            screen,
-            secondary,
-            (
-                self.rect.right,
-                self.rect.centery,
-            ),
-            self.rect.height / 2 + scaled_thicc,
-        )
+        # pygame.draw.circle(
+        #     screen,
+        #     secondary,
+        #     (self.rect.x, self.rect.centery),
+        #     self.rect.height / 2 + scaled_thicc,
+        # )
+        # pygame.draw.circle(
+        #     screen,
+        #     secondary,
+        #     (
+        #         self.rect.right,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2 + scaled_thicc,
+        # )
 
         pygame.draw.rect(screen, tertiary, self.rect)
         pygame.draw.circle(
