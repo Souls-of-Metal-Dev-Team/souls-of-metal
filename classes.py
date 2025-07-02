@@ -1,6 +1,7 @@
 import os
 from json import load
 import pygame
+from pygame.rect import Rect
 from func import round_corners, clamp
 import globals
 
@@ -22,7 +23,8 @@ class Button:
         self.thicc = 0
         self.thiccmax = thicc
         scaled_size = pygame.Vector2(size * globals.ui_scale)
-        self.rect = pygame.Rect(pos, scaled_size)
+        scaled_size[0] += 2 * scaled_size[1]
+        self.rect = pygame.Rect((pos[0] - scaled_size[1], pos[1]), scaled_size)
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
         _ = tick
@@ -43,51 +45,53 @@ class Button:
 
         scaled_thicc = self.thicc * globals.ui_scale
 
-        pygame.draw.rect(
-            screen,
-            secondary,
-            pygame.Rect(
-                self.rect.x,
-                self.rect.y - scaled_thicc,
-                self.rect.width,
-                self.rect.height + scaled_thicc * 2,
-            ),
-        )
-        pygame.draw.circle(
-            screen,
-            secondary,
-            (self.rect.x, self.rect.centery),
-            self.rect.height / 2 + scaled_thicc,
-        )
-        pygame.draw.circle(
-            screen,
-            secondary,
-            (
-                self.rect.right,
-                self.rect.centery,
-            ),
-            self.rect.height / 2 + scaled_thicc,
-        )
+        if scaled_thicc:
+            pygame.draw.rect(
+                screen,
+                secondary,
+                pygame.Rect(
+                    self.rect.x - scaled_thicc,
+                    self.rect.y - scaled_thicc,
+                    self.rect.width + scaled_thicc * 2,
+                    self.rect.height + scaled_thicc * 2,
+                ),
+                border_radius=self.rect.height * scaled_thicc // 2,
+            )
+        # pygame.draw.circle(
+        #     screen,
+        #     secondary,
+        #     (self.rect.x, self.rect.centery),
+        #     self.rect.height / 2 + scaled_thicc,
+        # )
+        # pygame.draw.circle(
+        #     screen,
+        #     secondary,
+        #     (
+        #         self.rect.right,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2 + scaled_thicc,
+        # )
 
-        pygame.draw.rect(screen, tertiary, self.rect)
-        pygame.draw.circle(
-            screen,
-            tertiary,
-            (
-                self.rect.x,
-                self.rect.centery,
-            ),
-            self.rect.height / 2,
-        )
-        pygame.draw.circle(
-            screen,
-            tertiary,
-            (
-                self.rect.right,
-                self.rect.centery,
-            ),
-            self.rect.height / 2,
-        )
+        pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
+        # pygame.draw.circle(
+        #     screen,
+        #     tertiary,
+        #     (
+        #         self.rect.x,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2,
+        # )
+        # pygame.draw.circle(
+        #     screen,
+        #     tertiary,
+        #     (
+        #         self.rect.right,
+        #         self.rect.centery,
+        #     ),
+        #     self.rect.height / 2,
+        # )
 
         text = (
             f"{globals.language_translations[self.id]}: {settings_json[self.id]}"
@@ -158,6 +162,15 @@ class MajorCountry:
         )
 
     def draw(self, screen, mouse_pos, select, mouse_pressed):
+        pygame.draw.rect(
+            screen,
+            (
+                255,
+                255,
+                255,
+            ),
+            Rect(mouse_pos, (1, 1)),
+        )
         brect = pygame.Rect(
             self.pos[0],
             self.pos[1],
@@ -255,7 +268,7 @@ class MinorCountry:
         screen.blit(self.img, (self.pos[0], self.pos[1]))
         if pygame.Rect.collidepoint(b, mpos) or select == self.id:
             if self.thicc < self.thiccmax:
-                self.thicc += 2
+                self.thicc += 1
             pygame.draw.rect(
                 screen, tertiary, self.brect, border_radius=9, width=self.thicc
             )
@@ -294,4 +307,8 @@ class Map:
                     0,
                 )
         screen.blit(self.cvmap, self.pos)
-        pygame.draw.rect(screen, tertiary, ((0, 0), (1920, 60)))
+        pygame.draw.rect(
+            screen,
+            tertiary,
+            ((0, 0), (1920, 60)),
+        )
