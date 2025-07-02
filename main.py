@@ -106,6 +106,9 @@ def main():
         Button("Start", (1375, 670), (160, 40), 5)
     ]
 
+    division_pos = pygame.Vector2(screen.get_width()/2, screen.get_height()/2)
+    division_target = division_pos
+
     global global_run
     global_run = True
     while global_run:
@@ -148,6 +151,7 @@ def main():
                         mouse_pressed = True
                         r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
                         selected_country_rgb = (r, g, b)
+                        division_target = pygame.Vector2(mouse_pos)
 
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -261,7 +265,12 @@ def main():
                         case "Back":
                             current_menu = Menu.MAIN_MENU
         else:
+            delta = division_target - division_pos
+            if delta.length() > 1:
+                division_pos += delta.normalize()
+
             map.draw(screen, mouse_rel)
+            pygame.draw.circle(screen, secondary, division_pos, 5)
             # print(selected_country_rgb)
             if selected_country_rgb in countries.colorsToCountries:
                 pygame.draw.rect(screen, tertiary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64)
