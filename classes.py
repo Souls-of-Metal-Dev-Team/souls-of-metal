@@ -1,6 +1,7 @@
 import os
 from json import load
 import pygame
+from pygame.rect import Rect
 from func import round_corners, clamp
 import globals
 
@@ -158,6 +159,15 @@ class MajorCountry:
         )
 
     def draw(self, screen, mouse_pos, select, mouse_pressed):
+        pygame.draw.rect(
+            screen,
+            (
+                255,
+                255,
+                255,
+            ),
+            Rect(mouse_pos, (1, 1)),
+        )
         brect = pygame.Rect(
             self.pos[0],
             self.pos[1],

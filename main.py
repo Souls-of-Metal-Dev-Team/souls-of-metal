@@ -10,7 +10,7 @@ from classes import (
     fontalias,
     primary,
     secondary,
-    tertiary
+    tertiary,
 )
 from json import load, dump
 from enum import Enum
@@ -19,12 +19,13 @@ import os
 import sys
 
 base_path = os.path.dirname(__file__)
-if getattr(sys, 'frozen', False):
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+if getattr(sys, "frozen", False):
+    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
+
 
 def main():
     pygame.init()
@@ -55,19 +56,18 @@ def main():
         countries_data = load(f)
     countries = Countries(countries_data)
 
-
     settings_json = None
     try:
         with open(os.path.join(base_path, "settings.json")) as f:
             settings_json = load(f)
     except FileNotFoundError:
         settings_json = {
-                "Scroll Invert": 1,
-                "UI Size": 14,
-                "FPS": 144,
-                "Sound Volume": 100,
-                "Music Volume": 100,
-                }
+            "Scroll Invert": 1,
+            "UI Size": 14,
+            "FPS": 144,
+            "Sound Volume": 100,
+            "Music Volume": 100,
+        }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
 
@@ -80,15 +80,24 @@ def main():
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
+    game_logo = pygame.image.load(
+        os.path.join(base_path, "ui", "logo.png")
+    ).convert_alpha()
 
     current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
 
     sprites = pygame.sprite.Group()
-    major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
-    minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
+    major_country_select = MajorCountrySelect(
+        os.path.join(base_path, "starts", "Modern World", "majors.txt"),
+        5,
+        ui_font,
+        sprites,
+    )
+    minor_country_select = MinorCountrySelect(
+        os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites
+    )
     with open("CountryData.json") as f:
         countries_data = load(f)
     countries = Countries(countries_data)
@@ -103,27 +112,27 @@ def main():
         Button("Continue Game", (200, 500), (160, 40), 5),
         Button("Settings", (200, 600), (160, 40), 5),
         Button("Credits", (200, 700), (160, 40), 5),
-        Button("Exit", (200, 800), (160, 40), 5)
+        Button("Exit", (200, 800), (160, 40), 5),
     ]
 
     settingsbuttons = [
-        Button("UI Size",       (200, 200), (160, 40), 5),
-        Button("FPS",           (200, 300), (160, 40), 5),
-        Button("Sound Volume",  (200, 400), (160, 40), 5),
-        Button("Music Volume",  (200, 500), (160, 40), 5),
+        Button("UI Size", (200, 200), (160, 40), 5),
+        Button("FPS", (200, 300), (160, 40), 5),
+        Button("Sound Volume", (200, 400), (160, 40), 5),
+        Button("Music Volume", (200, 500), (160, 40), 5),
         Button("Scroll Invert", (200, 600), (160, 40), 5),
         Button("Save Settings", (200, 800), (160, 40), 5),
-        Button("Exit", (200, 900), (160, 40), 5)
+        Button("Exit", (200, 900), (160, 40), 5),
     ]
 
     countryselectbuttons = [
         Button("Back", (1125, 570), (160, 40), 5),
         Button("Map Select", (1375, 570), (160, 40), 5),
         Button("Country List", (1125, 670), (160, 40), 5),
-        Button("Start", (1375, 670), (160, 40), 5)
+        Button("Start", (1375, 670), (160, 40), 5),
     ]
 
-    division_pos = pygame.Vector2(screen.get_width()/2, screen.get_height()/2)
+    division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
 
     global global_run
@@ -156,10 +165,13 @@ def main():
                         major_country_select.scroll = func.clamp(
                             major_country_select.scroll,
                             0,
-                            len(major_country_select.majors) - 5
+                            len(major_country_select.majors) - 5,
                         )
                         major_country_select.min = major_country_select.scroll
-                        major_country_select.max = min(len(major_country_select.majors), 6 + major_country_select.scroll)
+                        major_country_select.max = min(
+                            len(major_country_select.majors),
+                            6 + major_country_select.scroll,
+                        )
                     elif current_menu == Menu.GAME:
                         map.scale = func.clamp(map.scale - (mouse_scroll / 25), 1, 2)
                         map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
@@ -186,7 +198,9 @@ def main():
                 screen.blit(game_logo, (30, 30))
 
                 for button in menubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
+                    hovered = button.draw(
+                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
+                    )
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -194,14 +208,20 @@ def main():
                     mouse_pressed = False
 
                     match button.id:
-                        case "Settings": current_menu = Menu.SETTINGS
-                        case "Start Game": current_menu = Menu.COUNTRY_SELECT
-                        case "Credits": current_menu = Menu.CREDITS
-                        case "Exit": global_run = False
+                        case "Settings":
+                            current_menu = Menu.SETTINGS
+                        case "Start Game":
+                            current_menu = Menu.COUNTRY_SELECT
+                        case "Credits":
+                            current_menu = Menu.CREDITS
+                        case "Exit":
+                            global_run = False
 
             elif current_menu == Menu.SETTINGS:
                 for button in settingsbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
+                    hovered = button.draw(
+                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
+                    )
 
                     if not hovered:
                         continue
@@ -231,7 +251,7 @@ def main():
 
                     if not mouse_pressed:
                         continue
-                        
+
                     match button.id:
                         case "Scroll Invert":
                             settings_json["Scroll Invert"] = func.clamp(
@@ -242,43 +262,72 @@ def main():
                             )
 
                         case "Save Settings":
-                            with open(os.path.join(base_path, "settings.json"), "w") as f:
+                            with open(
+                                os.path.join(base_path, "settings.json"), "w"
+                            ) as f:
                                 dump(settings_json, f)
 
-                        case "Exit": current_menu = Menu.MAIN_MENU
+                        case "Exit":
+                            current_menu = Menu.MAIN_MENU
 
             elif current_menu == Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
                 # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
                 sprites.draw(screen)
                 pygame.draw.rect(
-                    major_country_select.image, (40, 40, 40), ((00, 0), (700, 1000)), 0, 20
+                    major_country_select.image,
+                    (40, 40, 40),
+                    ((00, 0), (700, 1000)),
+                    0,
+                    20,
                 )
 
                 country_height = 0
-                for major in major_country_select.majors[major_country_select.min : major_country_select.max :]:
+                for major in major_country_select.majors[
+                    major_country_select.min : major_country_select.max :
+                ]:
                     major.pos[1] = country_height
                     country_height += 200
-                    hovered = major.draw(major_country_select.image, mouse_pos, player_country, mouse_pressed)
+                    # NOTE(soi): there has to be a better wat to handle this
+                    hovered = major.draw(
+                        major_country_select.image,
+                        (
+                            mouse_pos[0] - major_country_select.rect[0][0],
+                            mouse_pos[1] - major_country_select.rect[0][1],
+                        ),
+                        player_country,
+                        mouse_pressed,
+                    )
                     if not mouse_pressed or not hovered:
                         continue
 
                     player_country = major.id
 
-                for minor in minor_country_select.minors[minor_country_select.min : minor_country_select.max :]:
-                    hovered = minor.draw(minor_country_select.image, mouse_pos, player_country, mouse_pressed)
+                for minor in minor_country_select.minors[
+                    minor_country_select.min : minor_country_select.max :
+                ]:
+                    hovered = minor.draw(
+                        minor_country_select.image,
+                        mouse_pos,
+                        player_country,
+                        mouse_pressed,
+                    )
                     if not mouse_pressed or not hovered:
                         continue
                     player_country = minor.id
 
                 for button in countryselectbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font)
+                    hovered = button.draw(
+                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
+                    )
                     if not mouse_pressed or not hovered:
                         continue
 
                     match button.id:
-                        case "Start": current_menu = Menu.GAME
-                        case "Back": current_menu = Menu.MAIN_MENU
+                        case "Start":
+                            current_menu = Menu.GAME
+                        case "Back":
+                            current_menu = Menu.MAIN_MENU
             elif current_menu == Menu.CREDITS:
                 screen.fill((0, 0, 0))
                 font = pygame.font.SysFont("arial", 36)
@@ -287,7 +336,7 @@ def main():
                     "Created by: Your Name",
                     "Thanks to: Pygame, OpenAI",
                     "",
-                    "Press ESC to return"
+                    "Press ESC to return",
                 ]
                 for i, line in enumerate(lines):
                     text = font.render(line, True, (255, 255, 255))
@@ -302,9 +351,18 @@ def main():
             pygame.draw.circle(screen, secondary, division_pos, 5)
             # print(selected_country_rgb)
             if selected_country_rgb in countries.colorsToCountries:
-                pygame.draw.rect(screen, tertiary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64)
                 pygame.draw.rect(
-                    screen, secondary, pygame.Rect((-32, -12), (524, 1104)), border_radius=64, width=12
+                    screen,
+                    tertiary,
+                    pygame.Rect((-32, -12), (524, 1104)),
+                    border_radius=64,
+                )
+                pygame.draw.rect(
+                    screen,
+                    secondary,
+                    pygame.Rect((-32, -12), (524, 1104)),
+                    border_radius=64,
+                    width=12,
                 )
                 country = countries.colorsToCountries[selected_country_rgb]
                 screen.blit(
@@ -324,5 +382,6 @@ def main():
 
         pygame.time.Clock().tick(settings_json["FPS"])
         pygame.display.update()
+
 
 main()
