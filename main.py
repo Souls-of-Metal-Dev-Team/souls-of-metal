@@ -154,7 +154,7 @@ def main():
                 lines = [
                     "Souls Of Metal",
                     "Created by: Your Name",
-                    "Thanks to: Pygame, OpenAI",
+                    "Thanks to: Pygame, stoopid",
                     "",
                     "Press ESC to return"
                 ]
