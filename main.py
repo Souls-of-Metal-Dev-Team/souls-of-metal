@@ -1,7 +1,6 @@
 import pygame
 from CountryData import Countries
 import func
-from os import getcwd
 from classes import (
     Button,
     MajorCountrySelect,
@@ -59,8 +58,6 @@ def main():
 
     with open(os.path.join(BASE_PATH, "translation.json")) as f:
         globals.language_translations = load(f)
-    with open(os.path.join(BASE_PATH, "CountryData.json")) as f:
-        countries = Countries(load(f))
 
     settings_json = None
     try:
@@ -80,8 +77,12 @@ def main():
     globals.ui_scale = int(settings_json["UI Size"] / 14)
 
     pygame.font.init()
-    ui_font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 24 * globals.ui_scale)
-    title_font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 64 * globals.ui_scale)
+    ui_font = pygame.font.Font(
+        os.path.join(BASE_PATH, "ui", "font.ttf"), 24 * globals.ui_scale
+    )
+    title_font = pygame.font.Font(
+        os.path.join(BASE_PATH, "ui", "font.ttf"), 64 * globals.ui_scale
+    )
 
     menubg = pygame.image.load(os.path.join(BASE_PATH, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
@@ -96,9 +97,22 @@ def main():
 
     sprites = pygame.sprite.Group()
 
-    major_country_select = MajorCountrySelect(os.path.join(BASE_PATH, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
-    minor_country_select = MinorCountrySelect(os.path.join(BASE_PATH, "starts", "Modern World", "minors.txt"), 5, sprites)
+    major_country_select = MajorCountrySelect(
+        os.path.join(BASE_PATH, "starts", "Modern World", "majors.txt"),
+        5,
+        ui_font,
+        sprites,
+    )
+    minor_country_select = MinorCountrySelect(
+        os.path.join(BASE_PATH, "starts", "Modern World", "minors.txt"), 5, sprites
+    )
 
+    with open(
+        os.path.join(BASE_PATH, "CountryData.json")
+    ) as f:  # REMEMBER NOT TO USE HARDCODED PATH -minh-
+        countries_data = load(f)
+
+    countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
 
     player_country = None
@@ -130,8 +144,20 @@ def main():
         Button("Start", (1375, 670), (160, 40), 5),
     ]
 
+    mapbuttons = [
+        Button("Diplomacy", (45, 5), (120, 40), 5),
+        Button("Building", (175, 5), (120, 40), 5),
+        Button("Military", (305, 5), (120, 40), 5),
+        Button("Estates", (435, 5), (120, 40), 5),
+        Button("-", (785, 5), (40, 40), 5),
+        Button("+", (1165, 5), (40, 40), 5),
+        # NOTE(soi): oh so thats why buttons should have ids
+        Button(display_date, (835, 5), (320, 40), 5),
+    ]
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
+
+    speed = 4
 
     global global_run
     global_run = True
@@ -188,7 +214,7 @@ def main():
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_pressed = False
-                        
+
                 case pygame.K_ESCAPE:
                     if event.button == 1:
                         current_menu = Menu.MAIN_MENU
@@ -331,7 +357,9 @@ def main():
                             current_menu = Menu.MAIN_MENU
             elif current_menu == Menu.CREDITS:
                 screen.fill((0, 0, 0))
-                font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 36 * globals.ui_scale)
+                font = pygame.font.Font(
+                    os.path.join(BASE_PATH, "ui", "font.ttf"), 36 * globals.ui_scale
+                )
                 lines = [
                     "                                                                       Souls Of Metal",
                     "                                                                       Original Creator: 123456",
@@ -351,36 +379,29 @@ def main():
 
             map.draw(screen, mouse_rel)
             # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
-            screen.blit(
-                ui_font.render(
-                    display_date,
-                    fontalias,
-                    primary,
-                ),
-                (1600, 10),
-            )
+
             pygame.draw.circle(screen, secondary, division_pos, 5)
             # print(selected_country_rgb)
             if selected_country_rgb in countries.colorsToCountries:
                 pygame.draw.rect(
                     screen,
                     tertiary,
-                    pygame.Rect((-32, -12), (524, 1104)),
+                    pygame.Rect((-10, 50), (625, 1030)),
                     border_bottom_right_radius=64,
                     border_top_right_radius=64,
                 )
                 pygame.draw.rect(
                     screen,
                     secondary,
-                    pygame.Rect((-32, -12), (524, 1104)),
+                    pygame.Rect((-10, 50), (625, 1030)),
                     border_bottom_right_radius=64,
                     border_top_right_radius=64,
-                    width=12,
+                    width=10,
                 )
                 country = countries.colorsToCountries[selected_country_rgb]
                 screen.blit(
                     countries.countriesToFlags[country],
-                    (30, 30),
+                    (30, 85),
                 )
                 screen.blit(
                     title_font.render(
@@ -388,13 +409,28 @@ def main():
                         fontalias,
                         primary,
                     ),
-                    (30, 0),
+                    (30, 300),
+                )
+            for button in mapbuttons:
+                hovered = button.draw(
+                    screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
                 )
 
-            speed = 4
-            if not tick % ((8 - speed) * 10):
+                if not mouse_pressed or not hovered:
+                    continue
+
+                match button.id:
+                    case "-": speed -= 1
+                    case "+": speed += 1
+
+                speed = func.clamp(speed, 0, 7)
+
+            # NOTE(soi): i feel like we should indicate time based on the day night map thing
+            if (not tick % ((8 - speed) * 10)) and speed:
                 date += datetime.timedelta(days=1)
                 display_date = date.strftime("%A, %B %e, %Y")
+                # NOTE(soi): theres probably a better way to do this
+                mapbuttons[-1] = Button(display_date, (835, 5), (320, 40), 5)
 
         tick += 1
 

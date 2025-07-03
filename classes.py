@@ -23,7 +23,9 @@ class Button:
         self.thicc = 0
         self.thiccmax = thicc
         scaled_size = pygame.Vector2(size * globals.ui_scale)
-        scaled_size[0] += 2 * scaled_size[1]
+        # NOTE(soi): might fuck up some buttons widths but idc i want my buttonsto ble like my women
+        # R O T U N D
+        # scaled_size[0] += 2 * scaled_size[1]
         self.rect = pygame.Rect((pos[0] - scaled_size[1], pos[1]), scaled_size)
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
@@ -162,15 +164,6 @@ class MajorCountry:
         )
 
     def draw(self, screen, mouse_pos, select, mouse_pressed):
-        pygame.draw.rect(
-            screen,
-            (
-                255,
-                255,
-                255,
-            ),
-            Rect(mouse_pos, (1, 1)),
-        )
         brect = pygame.Rect(
             self.pos[0],
             self.pos[1],
@@ -307,8 +300,3 @@ class Map:
                     0,
                 )
         screen.blit(self.cvmap, self.pos)
-        pygame.draw.rect(
-            screen,
-            tertiary,
-            ((0, 0), (1920, 60)),
-        )
