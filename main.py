@@ -154,14 +154,14 @@ def main():
     ]
 
     mapbuttons = [
-        Button("Diplomacy", (45, 5), (80, 40), 5),
-        Button("Building", (210, 5), (80, 40), 5),
-        Button("Military", (375, 5), (80, 40), 5),
-        Button("Estates", (540, 5), (80, 40), 5),
-        Button("-", (1790, 5), (0, 40), 5),
-        Button("+", (1875, 5), (0, 40), 5),
+        Button("Diplomacy", (45, 5), (120, 40), 5),
+        Button("Building", (175, 5), (120, 40), 5),
+        Button("Military", (305, 5), (120, 40), 5),
+        Button("Estates", (435, 5), (120, 40), 5),
+        Button("-", (785, 5), (40, 40), 5),
+        Button("+", (1165, 5), (40, 40), 5),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (835, 5), (250, 40), 5),
+        Button(display_date, (835, 5), (320, 40), 5),
     ]
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
@@ -437,7 +437,7 @@ def main():
                 date += datetime.timedelta(days=1)
                 display_date = date.strftime("%A, %B %e, %Y")
                 # NOTE(soi): theres probably a better way to do this
-                mapbuttons[-1] = Button(display_date, (835, 5), (250, 40), 5)
+                mapbuttons[-1] = Button(display_date, (835, 5), (320, 40), 5)
 
         tick += 1
 
