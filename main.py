@@ -35,7 +35,7 @@ def main():
 
     with open(file_path) as f:
         lines = f.readlines()
-        ymd = lines[1].strip().split(',')
+        ymd = lines[0].strip().split(',')
         year = int(ymd[0])
         month = int(ymd[1])
         day = int(ymd[2])
@@ -88,7 +88,6 @@ def main():
     globals.ui_scale = int(settings_json["UI Size"] / 14)
 
     pygame.font.init()
-    cwd = getcwd()
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
 
