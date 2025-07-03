@@ -30,8 +30,17 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
 
 
 def main():
-    speed = 4  # NOTE(soi): put this somewhere better
-    date = datetime.date(2025, 1, 1)
+    speed = 4
+    file_path = os.path.join(base_path, "date.txt")
+
+    with open(file_path) as f:
+        lines = f.readlines()
+        ymd = lines[1].strip().split(',')
+        year = int(ymd[0])
+        month = int(ymd[1])
+        day = int(ymd[2])
+        date = datetime.date(year, month, day)
+
     display_date = date.strftime("%A, %B %e, %Y")
     pygame.init()
     screen = pygame.display.set_mode(
@@ -154,6 +163,8 @@ def main():
                         case pygame.K_ESCAPE:
                             if current_menu == Menu.CREDITS:
                                 current_menu = Menu.MAIN_MENU
+                            if current_menu == Menu.GAME:
+                                current_menu = Menu.MAIN_MENU
 
                 case pygame.MOUSEWHEEL:
                     # mouse_pressed = True
@@ -188,6 +199,10 @@ def main():
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_pressed = False
+                        
+                case pygame.K_ESCAPE:
+                    if event.button == 1:
+                        current_menu = Menu.MAIN_MENU
 
         if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
@@ -330,13 +345,14 @@ def main():
                             current_menu = Menu.MAIN_MENU
             elif current_menu == Menu.CREDITS:
                 screen.fill((0, 0, 0))
-                font = pygame.font.SysFont("arial", 36)
+                font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 36 * globals.ui_scale)
                 lines = [
-                    "Souls Of Metal",
-                    "Created by: Your Name",
-                    "Thanks to: Pygame, OpenAI",
+                    "                                                                       Souls Of Metal",
+                    "                                                                       Original Creator: 123456",
+                    "                                                     Developer(s): 123456789, 1234567890, 12345678",
+                    "                                                                       Tester(s): 1234567",
                     "",
-                    "Press ESC to return",
+                    "                                                                       Thanks for Playing! :3",
                 ]
                 for i, line in enumerate(lines):
                     text = font.render(line, True, (255, 255, 255))
