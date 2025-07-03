@@ -307,8 +307,3 @@ class Map:
                     0,
                 )
         screen.blit(self.cvmap, self.pos)
-        pygame.draw.rect(
-            screen,
-            tertiary,
-            ((0, 0), (1920, 60)),
-        )
