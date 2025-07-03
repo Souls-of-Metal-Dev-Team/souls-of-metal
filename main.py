@@ -19,38 +19,25 @@ import os
 import sys
 import datetime
 
-
-base_path = os.path.dirname(__file__)
+BASE_PATH = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
-    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    BASE_PATH = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 else:
-    base_path = os.path.dirname(os.path.abspath(__file__))
+    BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
 
-
-def main():
-    speed = 4
-    file_path = os.path.join(base_path, "date.txt")
-
-    with open(file_path) as f:
+def load_start_date(path):
+    with path as f:
         lines = f.readlines()
-        ymd = lines[0].strip().split(',')
-        year = int(ymd[0])
-        month = int(ymd[1])
-        day = int(ymd[2])
-        date = datetime.date(year, month, day)
+        start_date = lines[0].strip().split(',')
+        year = int(start_date[0])
+        month = int(start_date[1])
+        day = int(start_date[2])
+        return datetime.date(year, month, day)
 
-    display_date = date.strftime("%A, %B %e, %Y")
-    pygame.init()
-    screen = pygame.display.set_mode(
-        (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-    )
-
-    pygame.mixer.init()
-
-    # Load music
-    music_path = os.path.join(base_path, "sound", "music", "background.mp3")
+def load_music(filename):
+    music_path = os.path.join(BASE_PATH, "sound", "music", filename)
     if os.path.exists(music_path):
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(0.5)
@@ -58,21 +45,26 @@ def main():
     else:
         print("[WARNING] Music file not found at:", music_path)
 
-    with open(os.path.join(base_path, "translation.json")) as f:
+def main():
+    date = load_start_date(open(os.path.join(BASE_PATH, "date.txt")))
+    display_date = date.strftime("%A, %B %e, %Y")
+
+    pygame.init()
+    screen = pygame.display.set_mode(
+        (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
+    )
+
+    pygame.mixer.init()
+    load_music("background.mp3")
+
+    with open(os.path.join(BASE_PATH, "translation.json")) as f:
         globals.language_translations = load(f)
-
-    current_menu = Menu.MAIN_MENU
-    tick = 0
-    mouse_pressed = False
-    mouse_scroll = 0
-
-    with open(os.path.join(base_path, "CountryData.json")) as f:
-        countries_data = load(f)
-    countries = Countries(countries_data)
+    with open(os.path.join(BASE_PATH, "CountryData.json")) as f:
+        countries = Countries(load(f))
 
     settings_json = None
     try:
-        with open(os.path.join(base_path, "settings.json")) as f:
+        with open(os.path.join(BASE_PATH, "settings.json")) as f:
             settings_json = load(f)
     except FileNotFoundError:
         settings_json = {
@@ -82,33 +74,31 @@ def main():
             "Sound Volume": 100,
             "Music Volume": 100,
         }
-        with open(os.path.join(base_path, "settings.json"), "w") as f:
+        with open(os.path.join(BASE_PATH, "settings.json"), "w") as f:
             dump(settings_json, f)
 
     globals.ui_scale = int(settings_json["UI Size"] / 14)
 
     pygame.font.init()
-    ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
-    title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
+    ui_font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 24 * globals.ui_scale)
+    title_font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 64 * globals.ui_scale)
 
-    menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
+    menubg = pygame.image.load(os.path.join(BASE_PATH, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
     game_logo = pygame.image.load(
-        os.path.join(base_path, "ui", "logo.png")
+        os.path.join(BASE_PATH, "ui", "logo.png")
     ).convert_alpha()
 
     current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
+    mouse_scroll = 0
 
     sprites = pygame.sprite.Group()
 
-    major_country_select = MajorCountrySelect(os.path.join(base_path, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
-    minor_country_select = MinorCountrySelect(os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites)
-    with open(os.path.join(base_path, "CountryData.json")) as f: #REMEMBER NOT TO USE HARDCODED PATH -minh-
+    major_country_select = MajorCountrySelect(os.path.join(BASE_PATH, "starts", "Modern World", "majors.txt"), 5, ui_font, sprites)
+    minor_country_select = MinorCountrySelect(os.path.join(BASE_PATH, "starts", "Modern World", "minors.txt"), 5, sprites)
 
-        countries_data = load(f)
-    countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
 
     player_country = None
@@ -167,7 +157,7 @@ def main():
 
                 case pygame.MOUSEWHEEL:
                     # mouse_pressed = True
-                    mouse_scroll = -settings_json["Scroll Invert"] * event.y
+                    mouse_scroll = -event.y * globals.scroll_invert
 
                     if current_menu == Menu.COUNTRY_SELECT:
                         major_country_select.update(mouse_scroll)
@@ -242,10 +232,11 @@ def main():
 
                     match button.id:
                         case "UI Size":
-                            settings_json["UI Size"] += mouse_scroll
-                            settings_json["UI Size"] = func.clamp(
-                                settings_json["UI Size"] + mouse_scroll, 14, 40
+                            globals.ui_scale += mouse_scroll
+                            globals.ui_scale = func.clamp(
+                                globals.ui_scale + mouse_scroll, 14, 40
                             )
+                            settings_json["UI Size"] = globals.ui_scale
 
                         case "Sound Volume":
                             settings_json["Sound Volume"] += mouse_scroll
@@ -268,16 +259,12 @@ def main():
 
                     match button.id:
                         case "Scroll Invert":
-                            settings_json["Scroll Invert"] = func.clamp(
-                                settings_json["Scroll Invert"], 0, 1
-                            )
-                            settings_json["Scroll Invert"] = (
-                                settings_json["Scroll Invert"] * -2 + 1
-                            )
+                            globals.scroll_invert *= -1
+                            settings_json["Scroll Invert"] = globals.scroll_invert
 
                         case "Save Settings":
                             with open(
-                                os.path.join(base_path, "settings.json"), "w"
+                                os.path.join(BASE_PATH, "settings.json"), "w"
                             ) as f:
                                 dump(settings_json, f)
 
@@ -344,7 +331,7 @@ def main():
                             current_menu = Menu.MAIN_MENU
             elif current_menu == Menu.CREDITS:
                 screen.fill((0, 0, 0))
-                font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 36 * globals.ui_scale)
+                font = pygame.font.Font(os.path.join(BASE_PATH, "ui", "font.ttf"), 36 * globals.ui_scale)
                 lines = [
                     "                                                                       Souls Of Metal",
                     "                                                                       Original Creator: 123456",
@@ -403,6 +390,8 @@ def main():
                     ),
                     (30, 0),
                 )
+
+            speed = 4
             if not tick % ((8 - speed) * 10):
                 date += datetime.timedelta(days=1)
                 display_date = date.strftime("%A, %B %e, %Y")
