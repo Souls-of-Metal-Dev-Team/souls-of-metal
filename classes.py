@@ -22,11 +22,16 @@ class Button:
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
-        scaled_size = pygame.Vector2(size * globals.ui_scale)
+        # NOTE(soi): uhh poleve yk u cant just multiply like this right?
+        # scaled_size = pygame.Vector2(size * globals.ui_scale)
+        # print(globals.ui_scale)
+        scaled_size = [i * globals.ui_scale for i in size]
         # NOTE(soi): might fuck up some buttons widths but idc i want my buttonsto ble like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
-        self.rect = pygame.Rect((pos[0] - scaled_size[1], pos[1]), scaled_size)
+        self.rect = pygame.Rect((0, 0), scaled_size)
+        # NOTE(soi): yea pygame already has a thing for centering rects, should read the documentation more smsmsmh
+        self.rect.center = (pos[0], pos[1])
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
         _ = tick
@@ -136,7 +141,7 @@ class MajorCountry:
     def __init__(self, id, pos, thicc, ui_font):
         self.id = id
         self.pos = pos
-        self.thiccmax = self.thicc = thicc
+        self.thiccmax = self.thicc = thicc * globals.ui_scale
 
         try:
             self.img = pygame.image.load(
@@ -164,6 +169,7 @@ class MajorCountry:
         )
 
     def draw(self, screen, mouse_pos, select, mouse_pressed):
+        # NOTE(soi): pygames rect has an update function and idk if i should implement it here
         brect = pygame.Rect(
             self.pos[0],
             self.pos[1],

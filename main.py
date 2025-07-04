@@ -85,7 +85,7 @@ def main():
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
 
-    globals.ui_scale = int(settings_json["UI Size"] / 14)
+    globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
     cwd = getcwd()
@@ -154,14 +154,14 @@ def main():
     ]
 
     mapbuttons = [
-        Button("Diplomacy", (45, 5), (120, 40), 5),
-        Button("Building", (175, 5), (120, 40), 5),
-        Button("Military", (305, 5), (120, 40), 5),
-        Button("Estates", (435, 5), (120, 40), 5),
-        Button("-", (785, 5), (40, 40), 5),
-        Button("+", (1165, 5), (40, 40), 5),
+        Button("Diplomacy", (65, 25), (120, 40), 5),
+        Button("Building", (195, 25), (120, 40), 5),
+        Button("Military", (325, 25), (120, 40), 5),
+        Button("Estates ", (455, 25), (120, 40), 5),
+        Button("-", (770, 25), (40, 40), 5),
+        Button("+", (1150, 25), (40, 40), 5),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (835, 5), (320, 40), 5),
+        Button(display_date, (960, 25), (320, 40), 5),
     ]
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
@@ -314,7 +314,7 @@ def main():
                 pygame.draw.rect(
                     major_country_select.image,
                     (40, 40, 40),
-                    ((00, 0), (700, 1000)),
+                    ((00, 0), (700 * globals.ui_scale, 180 * globals.ui_scale)),
                     0,
                     20,
                 )
@@ -396,14 +396,14 @@ def main():
                 pygame.draw.rect(
                     screen,
                     tertiary,
-                    pygame.Rect((-10, 50), (625, 1030)),
+                    pygame.Rect((-10, 15), (625, 1065)),
                     border_bottom_right_radius=64,
                     border_top_right_radius=64,
                 )
                 pygame.draw.rect(
                     screen,
                     secondary,
-                    pygame.Rect((-10, 50), (625, 1030)),
+                    pygame.Rect((-10, 15), (625, 1065)),
                     border_bottom_right_radius=64,
                     border_top_right_radius=64,
                     width=10,
@@ -437,7 +437,7 @@ def main():
                 date += datetime.timedelta(days=1)
                 display_date = date.strftime("%A, %B %e, %Y")
                 # NOTE(soi): theres probably a better way to do this
-                mapbuttons[-1] = Button(display_date, (835, 5), (320, 40), 5)
+                mapbuttons[-1].id = display_date
 
         tick += 1
 
