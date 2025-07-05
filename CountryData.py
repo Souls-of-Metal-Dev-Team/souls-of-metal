@@ -14,14 +14,14 @@ class Countries:
         self.countriesToFlags = {}
 
         for k in self.countryData:
-            print(f'''"{k}": "{k.replace("_", " ")}",''')
+            # print(f'''"{k}": "{k.replace("_", " ")}",''')
             try:
                 flag_path = os.path.join(base_path, "flags", f"{k.lower()}_flag.png")
                 raw_flag = image.load(flag_path)
             except FileNotFoundError:
                 raw_flag = image.load(os.path.join(base_path, "unknown.jpg"))
 
-            scaled = transform.scale_by(raw_flag, 300 / raw_flag.get_width())
+            scaled = transform.scale_by(raw_flag, 475 / raw_flag.get_width())
             rounded = round_corners(scaled, 16)
             self.countriesToFlags[k] = rounded
 

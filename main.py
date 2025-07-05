@@ -29,8 +29,9 @@ else:
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
 def main():
-    speed = 4
+    speed = 0
     sidebar_tab = ""
+    sidebar_pos = 0
     file_path = os.path.join(base_path, "date.txt")
 
     with open(file_path) as f:
@@ -61,7 +62,8 @@ def main():
     with open(os.path.join(base_path, "translation.json")) as f:
         globals.language_translations = load(f)
 
-    current_menu = Menu.MAIN_MENU
+    # NOTE(soi): kepping this at game for debugging reasons
+    current_menu = Menu.GAME
     tick = 0
     mouse_pressed = False
     mouse_scroll = 0
@@ -483,22 +485,23 @@ def main():
 
                 pygame.draw.circle(screen, secondary, division_pos, 5)
                 # print(selected_country_rgb)
+                pygame.draw.rect(
+                    screen,
+                    tertiary,
+                    pygame.Rect((sidebar_pos, 15), (625, 1065)),
+                    border_bottom_right_radius=64,
+                    border_top_right_radius=64,
+                )
+                pygame.draw.rect(
+                    screen,
+                    secondary,
+                    pygame.Rect((sidebar_pos, 15), (625, 1065)),
+                    border_bottom_right_radius=64,
+                    border_top_right_radius=64,
+                    width=10,
+                )
                 if sidebar_tab:
-                    pygame.draw.rect(
-                        screen,
-                        tertiary,
-                        pygame.Rect((-10, 15), (625, 1065)),
-                        border_bottom_right_radius=64,
-                        border_top_right_radius=64,
-                    )
-                    pygame.draw.rect(
-                        screen,
-                        secondary,
-                        pygame.Rect((-10, 15), (625, 1065)),
-                        border_bottom_right_radius=64,
-                        border_top_right_radius=64,
-                        width=10,
-                    )
+                    sidebar_pos = min(sidebar_pos * 5, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient
                         case "Diplomacy":
@@ -508,7 +511,7 @@ def main():
                                 ]
                                 screen.blit(
                                     countries.countriesToFlags[country],
-                                    (30, 85),
+                                    (70, 85),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -516,11 +519,18 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (30, 300),
+                                    (70, 400),
                                 )
                         case _:
+<<<<<<< HEAD
                             print("uhoh")
 
+=======
+                            sidebar_pos = max(sidebar_pos / 5, -625)
+
+                else:
+                    sidebar_pos = max(sidebar_pos / 5, -625)
+>>>>>>> 8463a76 (tried to animate the sidebar and failed miserably)
                 for button in mapbuttons:
                     hovered = button.draw(
                         screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
