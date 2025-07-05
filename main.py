@@ -28,7 +28,6 @@ else:
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME")
 
-
 def main():
     speed = 4
     file_path = os.path.join(base_path, "date.txt")
@@ -166,6 +165,9 @@ def main():
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
 
+    camera_pos = pygame.Vector2()
+    zoom = 10
+
     global global_run
     global_run = True
     while global_run:
@@ -205,11 +207,11 @@ def main():
                             len(major_country_select.majors),
                             6 + major_country_select.scroll,
                         )
-                    elif current_menu == Menu.GAME:
-                        map.scale = func.clamp(map.scale - (mouse_scroll / 25), 1, 2)
-                        map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
-                        map.pos[0] = -mouse_pos[0] * (map.scale - 1)
-                        map.pos[1] = -mouse_pos[1] * (map.scale - 1)
+                    # elif current_menu == Menu.GAME:
+                        # map.scale = func.clamp(map.scale - (mouse_scroll / 25), 1, 2)
+                        # map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
+                        # map.pos[0] = -mouse_pos[0] * (map.scale - 1)
+                        # map.pos[1] = -mouse_pos[1] * (map.scale - 1)
 
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -225,6 +227,8 @@ def main():
                 case pygame.K_ESCAPE:
                     if event.button == 1:
                         current_menu = Menu.MAIN_MENU
+
+        screen.fill((0, 0, 0))
 
         if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
@@ -387,7 +391,35 @@ def main():
             if delta.length() > 1:
                 division_pos += delta.normalize()
 
-            map.draw(screen, mouse_rel)
+            # Zoom
+            map.scale += mouse_scroll
+            map.scale = func.clamp(map.scale, 1, 15)
+
+            # Panning
+            mouse_sensitivity = 1/5
+            match pygame.mouse.get_pressed():
+                case (_, 1, _):
+                    camera_pos.x -= mouse_rel[0] * mouse_sensitivity
+
+            # Render map
+            scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
+            map_rect = scaled_map.get_rect()
+            map_rect.x -= int(camera_pos.x)
+            map_rect.y -= int(camera_pos.y)
+            screen.blit(scaled_map, map_rect.topleft)
+
+            # Get selected country
+            pressed = map_rect.collidepoint(mouse_pos)
+            if (pressed):
+                coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
+                pixel = pygame.Vector2()
+                pixel.x = coord.x * map.cmap.get_width() / map_rect.width
+                pixel.y = coord.y * map.cmap.get_height() / map_rect.height
+                r, g, b, _ = map.cmap.get_at((int(pixel.x), int(pixel.y)))
+                print((r, g, b))
+                selected_country_rgb = (r, g, b)
+
+            # map.draw(screen, mouse_rel)
             # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
 
             pygame.draw.circle(screen, secondary, division_pos, 5)

@@ -22,10 +22,7 @@ class Button:
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
-        # NOTE(soi): uhh poleve yk u cant just multiply like this right?
-        # scaled_size = pygame.Vector2(size * globals.ui_scale)
-        # print(globals.ui_scale)
-        scaled_size = [i * globals.ui_scale for i in size]
+        scaled_size = pygame.Vector2(size) * globals.ui_scale
         # NOTE(soi): might fuck up some buttons widths but idc i want my buttonsto ble like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
@@ -293,16 +290,15 @@ class Map:
             os.path.join(base_path, "starts", scenario, "province.png")
         ).convert()
         self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
-        self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
-        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        # self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
+        # self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
 
-    def draw(self, screen, rel):
-        match pygame.mouse.get_pressed():
-            case (_, 1, _):
-                self.pos[0] = self.pos[0] + rel[0] / (5 * self.scale)
-                self.pos[1] = clamp(
-                    (self.pos[1] + rel[1] / (5 * self.scale)),
-                    -1080 * (self.scale - 1),
-                    0,
-                )
-        screen.blit(self.cvmap, self.pos)
+    # def draw(self, screen, rel):
+        # match pygame.mouse.get_pressed():
+            # case (_, 1, _):
+                # self.pos[0] = self.pos[0] + rel[0] / (5 * self.scale)
+                # self.pos[1] = clamp(
+                #     (self.pos[1] + rel[1] / (5 * self.scale)),
+                #     -1080 * (self.scale - 1),
+                #     0,
+                # )
