@@ -297,6 +297,7 @@ class Map:
         self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
         self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
         self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        self.mapwidth = self.cvmap.get_width()
 
     def draw(self, screen, rel):
         match pygame.mouse.get_pressed():
@@ -307,5 +308,14 @@ class Map:
                     -1080 * (self.scale - 1),
                     0,
                 )
-        screen.blit(self.cvmap, ((self.pos[0] % 1920), self.pos[1]))
-        screen.blit(self.cvmap, (((self.pos[0]) % 1920) - 1920, self.pos[1]))
+        screen.blit(
+            self.cvmap, ((self.pos[0] % (self.mapwidth * self.scale)), self.pos[1])
+        )
+        screen.blit(
+            self.cvmap,
+            (
+                ((self.pos[0]) % (self.mapwidth * self.scale))
+                - (self.mapwidth * self.scale),
+                self.pos[1],
+            ),
+        )
