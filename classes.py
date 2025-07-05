@@ -2,11 +2,13 @@ import os
 from json import load
 import pygame
 from pygame.rect import Rect
+from pygame.transform import scale
 from func import round_corners, clamp
 import globals
 
 base_path = os.path.dirname(__file__)
 
+cwd = os.getcwd()
 with open(os.path.join(base_path, "theme.json")) as f:
     theme = load(f)
     primary = tuple(theme["primary"])
@@ -305,4 +307,5 @@ class Map:
                     -1080 * (self.scale - 1),
                     0,
                 )
-        screen.blit(self.cvmap, self.pos)
+        screen.blit(self.cvmap, ((self.pos[0] % 1920), self.pos[1]))
+        screen.blit(self.cvmap, (((self.pos[0]) % 1920) - 1920, self.pos[1]))
