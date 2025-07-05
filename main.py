@@ -28,7 +28,6 @@ else:
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
-
 def main():
     speed = 4
     sidebar_tab = ""
@@ -174,6 +173,8 @@ def main():
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
 
+    camera_pos = pygame.Vector2()
+
     global global_run
     global_run = True
     while global_run:
@@ -213,18 +214,15 @@ def main():
                             len(major_country_select.majors),
                             6 + major_country_select.scroll,
                         )
-                    elif current_menu == Menu.GAME:
-                        map.scale = func.clamp(map.scale - (mouse_scroll / 12), 1, 3)
-                        map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
-                        map.pos[0] = -mouse_pos[0] * (map.scale - 1)
-                        map.pos[1] = -mouse_pos[1] * (map.scale - 1)
+                    # elif current_menu == Menu.GAME:
+                    #     map.scale = func.clamp(map.scale - (mouse_scroll / 12), 1, 3)
+                    #     map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
+                    #     map.pos[0] = -mouse_pos[0] * (map.scale - 1)
+                    #     map.pos[1] = -mouse_pos[1] * (map.scale - 1)
 
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         mouse_pressed = True
-                        r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
-                        selected_country_rgb = (r, g, b)
-                        division_target = pygame.Vector2(mouse_pos)
 
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -234,7 +232,10 @@ def main():
                     if event.button == 1:
                         current_menu = Menu.MAIN_MENU
 
-        screen.blit(menubg, (0, 0))
+        screen.fill((0, 0, 0))
+        if (current_menu != Menu.GAME):
+            screen.blit(menubg, (0, 0))
+
         match current_menu:
             case Menu.ESCAPEMENU:  # Why can't I use != :sob:
                 surface = pygame.Surface((screen.get_width(), screen.get_height()))
@@ -411,12 +412,74 @@ def main():
                     screen.blit(text, (100, 100 + i * 50))
 
             case Menu.GAME:
-                delta = division_target - division_pos
-                if delta.length() > 1:
-                    division_pos += delta.normalize()
 
-                map.draw(screen, mouse_rel)
-                # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
+                # Zoom
+                map.scale += mouse_scroll
+                map.scale = func.clamp(map.scale, 1, 10)
+
+                # Panning
+                mouse_sensitivity = 1/5
+                match pygame.mouse.get_pressed():
+                    case (_, 1, _):
+                        camera_pos.x -= mouse_rel[0] * mouse_sensitivity
+                        camera_pos.y -= mouse_rel[1] * mouse_sensitivity
+
+                scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
+                map_rect = scaled_map.get_rect()
+                map_rect.x -= int(camera_pos.x)
+                map_rect.y -= int(camera_pos.y)
+
+                # Render map
+                screen.blit(scaled_map, map_rect.topleft)
+                # screen.blit(
+                #     scaled_map,
+                #     (
+                #         map_rect.x % scaled_map.get_width(),
+                #         map_rect.y
+                #     )
+                # )
+                # screen.blit(
+                #     scaled_map,
+                #     (
+                #         (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                #         map_rect.y,
+                #     ),
+                # )
+
+                # Get selected country
+                hovered = map_rect.collidepoint(mouse_pos)
+                if (hovered and mouse_pressed):
+
+                    coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
+                    pixel = pygame.Vector2()
+                    pixel.x = coord.x * map.cmap.get_width() / map_rect.width
+                    pixel.y = coord.y * map.cmap.get_height() / map_rect.height
+                    r, g, b, _ = map.cmap.get_at((int(pixel.x), int(pixel.y)))
+                    selected_country_rgb = (r, g, b)
+
+                    pixel.x = coord.x * map.pmap.get_width() / map_rect.width
+                    pixel.y = coord.y * map.pmap.get_height() / map_rect.height
+                    r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
+                    selected_province_id = f"({r}, {g}, {b})"
+                    print("selected country :", selected_province_id)
+                    with open(os.path.join(base_path, "message.txt")) as f:
+                        for line in f:
+                            line = line.strip()
+                            line = line.rstrip(",") # Remove comma end of line
+                            province_id, center = line.split(":")
+                            if province_id == selected_province_id:
+                                target = pygame.Vector2(eval(center))
+                                target.x = target.x * map_rect.width / map.pmap.get_width()
+                                target.y = target.y * map_rect.height / map.pmap.get_height()
+                                division_target = pygame.Vector2(map_rect.topleft) + pygame.Vector2(target)
+                                break
+
+                delta = division_target - division_pos
+                division_speed = 10
+                if delta.length() > 10:
+                    division_pos += delta.normalize() * division_speed
+                else:
+                    division_pos = division_target
 
                 pygame.draw.circle(screen, secondary, division_pos, 5)
                 # print(selected_country_rgb)
@@ -457,6 +520,7 @@ def main():
                                 )
                         case _:
                             print("uhoh")
+
                 for button in mapbuttons:
                     hovered = button.draw(
                         screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
@@ -474,7 +538,7 @@ def main():
                         case "Military":
                             sidebar_tab = "Military"
 
-                    # NOTE(soi): i feel like we should indicate time based on the day night map thing
+                # NOTE(soi): i feel like we should indicate time based on the day night map thing
                 if (not tick % ((8 - speed) * 10)) and speed:
                     date += datetime.timedelta(days=1)
                     display_date = date.strftime("%A, %B %e, %Y")

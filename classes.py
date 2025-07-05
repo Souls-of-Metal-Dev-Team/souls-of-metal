@@ -23,16 +23,15 @@ class Button:
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
-        # NOTE(soi): uhh poleve yk u cant just multiply like this right?
-        # scaled_size = pygame.Vector2(size * globals.ui_scale)
-        # print(globals.ui_scale)
-        scaled_size = [i * globals.ui_scale for i in size]
+
         # NOTE(soi): might fuck up some buttons widths but idc i want my buttons to be like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
+
+        scaled_size = pygame.Vector2(size) * globals.ui_scale
         self.rect = pygame.Rect((0, 0), scaled_size)
         # NOTE(soi): yea pygame already has a thing for centering rects, should read the documentation more smsmsmh
-        self.rect.center = (pos[0], pos[1])
+        self.rect.center = pos
 
     def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
         _ = tick
@@ -298,9 +297,9 @@ class Map:
         ).convert()
         self.time = 0
         # NOTE(soi): dear god someone ix the scaling here
-        self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
-        self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
-        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        # self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
+        # self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
+        # self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
         self.day_cycle = pygame.transform.scale_by(
             self.day_cycle, 1080 / self.day_cycle.get_height()
         )
