@@ -166,7 +166,6 @@ def main():
     division_target = division_pos
 
     camera_pos = pygame.Vector2()
-    zoom = 10
 
     global global_run
     global_run = True
@@ -418,6 +417,11 @@ def main():
                 r, g, b, _ = map.cmap.get_at((int(pixel.x), int(pixel.y)))
                 print((r, g, b))
                 selected_country_rgb = (r, g, b)
+
+                pixel.x = coord.x * map.pmap.get_width() / map_rect.width
+                pixel.y = coord.y * map.pmap.get_height() / map_rect.height
+                r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
+                print((r, g, b))
 
             # map.draw(screen, mouse_rel)
             # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
