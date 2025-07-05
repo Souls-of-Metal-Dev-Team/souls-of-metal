@@ -14,7 +14,7 @@ class Countries:
         self.countriesToFlags = {}
 
         for k in self.countryData:
-            print(f'"{k}": "{k}",')
+            print(f'''"{k}": "{k.replace("_", " ")}",''')
             try:
                 flag_path = os.path.join(base_path, "flags", f"{k.lower()}_flag.png")
                 raw_flag = image.load(flag_path)
