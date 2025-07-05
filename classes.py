@@ -2,8 +2,7 @@ import os
 from json import load
 import pygame
 from pygame.rect import Rect
-from pygame.transform import scale
-from func import round_corners, clamp
+from func import round_corners, clamp, truncate
 import globals
 
 base_path = os.path.dirname(__file__)
@@ -28,7 +27,7 @@ class Button:
         # scaled_size = pygame.Vector2(size * globals.ui_scale)
         # print(globals.ui_scale)
         scaled_size = [i * globals.ui_scale for i in size]
-        # NOTE(soi): might fuck up some buttons widths but idc i want my buttonsto ble like my women
+        # NOTE(soi): might fuck up some buttons widths but idc i want my buttons to be like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
         self.rect = pygame.Rect((0, 0), scaled_size)
@@ -160,12 +159,12 @@ class MajorCountry:
         self.w, h = self.img.get_size()
         self.mouse_up = False
         self.selected_font_render = ui_font.render(
-            globals.language_translations[self.id],
+            truncate(globals.language_translations[self.id], 28),
             fontalias,
             secondary,
         )
         self.font_render = ui_font.render(
-            globals.language_translations[self.id],
+            truncate(globals.language_translations[self.id], 28),
             fontalias,
             primary,
         )
@@ -288,23 +287,31 @@ class Map:
     def __init__(self, scenario, pos, scale):
         self.scale = scale
         self.pos = pygame.Vector2(pos)
+        self.day_cycle = pygame.image.load(
+            os.path.join(base_path, "ui", "daynight.png")
+        ).convert()
         self.cmap = self.cvmap = pygame.image.load(
             os.path.join(base_path, "starts", scenario, "map.png")
         ).convert()
         self.pmap = pygame.image.load(
             os.path.join(base_path, "starts", scenario, "province.png")
         ).convert()
+        self.time = 0
+        # NOTE(soi): dear god someone ix the scaling here
         self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
         self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
         self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        self.day_cycle = pygame.transform.scale_by(
+            self.day_cycle, 1080 / self.day_cycle.get_height()
+        )
         self.mapwidth = self.cvmap.get_width()
 
     def draw(self, screen, rel):
         match pygame.mouse.get_pressed():
             case (_, 1, _):
-                self.pos[0] = self.pos[0] + rel[0] / (5 * self.scale)
+                self.pos[0] = self.pos[0] + rel[0] / (5)
                 self.pos[1] = clamp(
-                    (self.pos[1] + rel[1] / (5 * self.scale)),
+                    (self.pos[1] + rel[1] / (5)),
                     -1080 * (self.scale - 1),
                     0,
                 )
@@ -319,3 +326,6 @@ class Map:
                 self.pos[1],
             ),
         )
+
+        # screen.blit(self.day_cycle, (self.time, 0))
+        self.time = (self.time + 1) % 1920
