@@ -223,9 +223,6 @@ def main():
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         mouse_pressed = True
-                        r, g, b, _ = screen.get_at(pygame.mouse.get_pos())
-                        selected_country_rgb = (r, g, b)
-                        division_target = pygame.Vector2(mouse_pos)
 
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -415,9 +412,6 @@ def main():
                     screen.blit(text, (100, 100 + i * 50))
 
             case Menu.GAME:
-                delta = division_target - division_pos
-                if delta.length() > 1:
-                    division_pos += delta.normalize()
 
                 # Zoom
                 map.scale += mouse_scroll
@@ -436,35 +430,56 @@ def main():
                 map_rect.y -= int(camera_pos.y)
 
                 # Render map
-                screen.blit(
-                    scaled_map,
-                    (
-                        map_rect.x % scaled_map.get_width(),
-                        map_rect.y
-                    )
-                )
-                screen.blit(
-                    scaled_map,
-                    (
-                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
-                        map_rect.y,
-                    ),
-                )
+                screen.blit(scaled_map, map_rect.topleft)
+                # screen.blit(
+                #     scaled_map,
+                #     (
+                #         map_rect.x % scaled_map.get_width(),
+                #         map_rect.y
+                #     )
+                # )
+                # screen.blit(
+                #     scaled_map,
+                #     (
+                #         (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                #         map_rect.y,
+                #     ),
+                # )
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
                 if (hovered and mouse_pressed):
+
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
                     pixel.x = coord.x * map.cmap.get_width() / map_rect.width
                     pixel.y = coord.y * map.cmap.get_height() / map_rect.height
                     r, g, b, _ = map.cmap.get_at((int(pixel.x), int(pixel.y)))
-                    print((r, g, b))
                     selected_country_rgb = (r, g, b)
 
                     pixel.x = coord.x * map.pmap.get_width() / map_rect.width
                     pixel.y = coord.y * map.pmap.get_height() / map_rect.height
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
+                    selected_province_id = f"({r}, {g}, {b})"
+                    print("selected country :", selected_province_id)
+                    with open(os.path.join(base_path, "message.txt")) as f:
+                        for line in f:
+                            line = line.strip()
+                            line = line.rstrip(",") # Remove comma end of line
+                            province_id, center = line.split(":")
+                            if province_id == selected_province_id:
+                                target = pygame.Vector2(eval(center))
+                                target.x = target.x * map_rect.width / map.pmap.get_width()
+                                target.y = target.y * map_rect.height / map.pmap.get_height()
+                                division_target = pygame.Vector2(map_rect.topleft) + pygame.Vector2(target)
+                                break
+
+                delta = division_target - division_pos
+                division_speed = 10
+                if delta.length() > 10:
+                    division_pos += delta.normalize() * division_speed
+                else:
+                    division_pos = division_target
 
                 pygame.draw.circle(screen, secondary, division_pos, 5)
                 # print(selected_country_rgb)

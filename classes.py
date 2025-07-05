@@ -297,9 +297,9 @@ class Map:
         ).convert()
         self.time = 0
         # NOTE(soi): dear god someone ix the scaling here
-        self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
-        self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
-        self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
+        # self.pmap = pygame.transform.scale_by(self.pmap, 1080 / self.cmap.get_height())
+        # self.cmap = pygame.transform.scale_by(self.cmap, 1080 / self.cmap.get_height())
+        # self.cvmap = pygame.transform.scale_by(self.cmap, self.scale)
         self.day_cycle = pygame.transform.scale_by(
             self.day_cycle, 1080 / self.day_cycle.get_height()
         )
