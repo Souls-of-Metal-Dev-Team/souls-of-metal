@@ -421,20 +421,35 @@ def main():
 
                 # Zoom
                 map.scale += mouse_scroll
-                map.scale = func.clamp(map.scale, 1, 15)
+                map.scale = func.clamp(map.scale, 1, 10)
 
                 # Panning
                 mouse_sensitivity = 1/5
                 match pygame.mouse.get_pressed():
                     case (_, 1, _):
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
+                        camera_pos.y -= mouse_rel[1] * mouse_sensitivity
 
-                # Render map
                 scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
-                screen.blit(scaled_map, map_rect.topleft)
+
+                # Render map
+                screen.blit(
+                    scaled_map,
+                    (
+                        map_rect.x % scaled_map.get_width(),
+                        map_rect.y
+                    )
+                )
+                screen.blit(
+                    scaled_map,
+                    (
+                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                        map_rect.y,
+                    ),
+                )
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
@@ -450,10 +465,6 @@ def main():
                     pixel.x = coord.x * map.pmap.get_width() / map_rect.width
                     pixel.y = coord.y * map.pmap.get_height() / map_rect.height
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
-                    print((r, g, b))
-
-                    # map.draw(screen, mouse_rel)
-                    # NOTE(soi): definitely should hv this in like Map's draw and fix how its being placed
 
                 pygame.draw.circle(screen, secondary, division_pos, 5)
                 # print(selected_country_rgb)
