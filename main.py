@@ -253,9 +253,9 @@ def main():
                     match button.id:
                         case "Resume":
                             current_menu = Menu.GAME
-                        case "Back to main menu":
+                        case "Back to Main Menu":
                             current_menu = Menu.MAIN_MENU
-                        case "Setting":
+                        case "Settings":
                             current_menu = Menu.SETTINGS
             case Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
