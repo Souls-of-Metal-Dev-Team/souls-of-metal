@@ -28,6 +28,7 @@ else:
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
+
 def main():
     speed = 0
     sidebar_tab = ""
@@ -235,7 +236,7 @@ def main():
                         current_menu = Menu.MAIN_MENU
 
         screen.fill((0, 0, 0))
-        if (current_menu != Menu.GAME):
+        if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
 
         match current_menu:
@@ -414,13 +415,12 @@ def main():
                     screen.blit(text, (100, 100 + i * 50))
 
             case Menu.GAME:
-
                 # Zoom
                 map.scale += mouse_scroll
                 map.scale = func.clamp(map.scale, 1, 10)
 
                 # Panning
-                mouse_sensitivity = 1/5
+                mouse_sensitivity = 1 / 5
                 match pygame.mouse.get_pressed():
                     case (_, 1, _):
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
@@ -450,8 +450,7 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
-                if (hovered and mouse_pressed):
-
+                if hovered and mouse_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
                     pixel.x = coord.x * map.cmap.get_width() / map_rect.width
@@ -467,13 +466,19 @@ def main():
                     with open(os.path.join(base_path, "message.txt")) as f:
                         for line in f:
                             line = line.strip()
-                            line = line.rstrip(",") # Remove comma end of line
+                            line = line.rstrip(",")  # Remove comma end of line
                             province_id, center = line.split(":")
                             if province_id == selected_province_id:
                                 target = pygame.Vector2(eval(center))
-                                target.x = target.x * map_rect.width / map.pmap.get_width()
-                                target.y = target.y * map_rect.height / map.pmap.get_height()
-                                division_target = pygame.Vector2(map_rect.topleft) + pygame.Vector2(target)
+                                target.x = (
+                                    target.x * map_rect.width / map.pmap.get_width()
+                                )
+                                target.y = (
+                                    target.y * map_rect.height / map.pmap.get_height()
+                                )
+                                division_target = pygame.Vector2(
+                                    map_rect.topleft
+                                ) + pygame.Vector2(target)
                                 break
 
                 delta = division_target - division_pos
@@ -522,15 +527,12 @@ def main():
                                     (70, 400),
                                 )
                         case _:
-<<<<<<< HEAD
                             print("uhoh")
 
-=======
                             sidebar_pos = max(sidebar_pos / 5, -625)
 
                 else:
                     sidebar_pos = max(sidebar_pos / 5, -625)
->>>>>>> 8463a76 (tried to animate the sidebar and failed miserably)
                 for button in mapbuttons:
                     hovered = button.draw(
                         screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
