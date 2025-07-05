@@ -1,11 +1,486 @@
 {
-  "Japan": [[195, 92, 109], ["provinces go here"], "Japanese", "liberal", 69],
-  "United_States": [
-    [20, 133, 237],
+  "Japan": [[255, 201, 178], ["provinces go here"], "Japanese", "liberal", 69],
+  "China": [[167, 87, 90], ["provinces go here"], "Chinese", "liberal", 69],
+  "India": [[208, 163, 108], ["provinces go here"], "Indian", "liberal", 69],
+  "Vietnam": [
+    [198, 190, 117],
     ["provinces go here"],
-    "Japanese",
+    "Vietnamese",
     "liberal",
     69
   ],
-  "Russia": [[56, 96, 56], ["provinces go here"], "Japanese", "liberal", 69]
+  "United_States": [
+    [20, 133, 237],
+    ["provinces go here"],
+    "American",
+    "liberal",
+    69
+  ],
+  "Russia": [[56, 96, 56], ["provinces go here"], "Russian", "liberal", 69],
+  "Pakistan": [[0, 41, 23], ["provinces go here"], "Pakistani", "liberal", 69],
+  "Bangladesh": [[0, 42, 48], ["provinces go here"], "Bangla", "liberal", 69],
+  "Canada": [[195, 92, 109], ["provinces go here"], "Canadian", "liberal", 69],
+  "Denmark": [[153, 116, 93], ["provinces go here"], "Bangla", "liberal", 69],
+  "Norway": [[111, 71, 71], ["provinces go here"], "Bangla", "liberal", 69],
+  "Finland": [[194, 198, 215], ["provinces go here"], "Bangla", "liberal", 69],
+  "Sweden": [[36, 132, 247], ["provinces go here"], "Bangla", "liberal", 69],
+  "Iceland": [[68, 81, 113], ["provinces go here"], "Bangla", "liberal", 69],
+  "Estonia": [[50, 135, 175], ["provinces go here"], "Bangla", "liberal", 69],
+  "United_Kingdom": [
+    [200, 56, 93],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Latvia": [[75, 77, 186], ["provinces go here"], "Bangla", "liberal", 69],
+  "Belarus": [[199, 213, 224], ["provinces go here"], "Bangla", "liberal", 69],
+  "Lithuania": [
+    [219, 219, 119],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Ireland": [[80, 159, 90], ["provinces go here"], "Bangla", "liberal", 69],
+  "Kazakhstan": [
+    [88, 161, 193],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Germany": [[73, 72, 77], ["provinces go here"], "Bangla", "liberal", 69],
+  "Poland": [[197, 92, 106], ["provinces go here"], "Bangla", "liberal", 69],
+  "France": [[61, 117, 232], ["provinces go here"], "Bangla", "liberal", 69],
+  "Serbia": [[154, 104, 103], ["provinces go here"], "Bangla", "liberal", 69],
+  "Slovakia": [[121, 92, 159], ["provinces go here"], "Bangla", "liberal", 69],
+  "Mongolia": [[163, 142, 75], ["provinces go here"], "Bangla", "liberal", 69],
+  "Belgium": [[193, 171, 8], ["provinces go here"], "Bangla", "liberal", 69],
+  "Czechia": [[54, 167, 156], ["provinces go here"], "Bangla", "liberal", 69],
+  "Austria": [[168, 174, 198], ["provinces go here"], "Bangla", "liberal", 69],
+  "Hungary": [[78, 125, 115], ["provinces go here"], "Bangla", "liberal", 69],
+  "Moldova": [[134, 110, 82], ["provinces go here"], "Bangla", "liberal", 69],
+  "Romania": [[215, 196, 72], ["provinces go here"], "Bangla", "liberal", 69],
+  "Ukraine": [[52, 88, 138], ["provinces go here"], "Bangla", "liberal", 69],
+  "Netherlands": [
+    [199, 135, 73],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Switzerland": [[224, 5, 5], ["provinces go here"], "Bangla", "liberal", 69],
+  "Iraq": [[178, 114, 99], ["provinces go here"], "Bangla", "liberal", 69],
+  "Iran": [[90, 143, 123], ["provinces go here"], "Bangla", "liberal", 69],
+  "Syria": [[55, 78, 92], ["provinces go here"], "Bangla", "liberal", 69],
+  "Spain": [[242, 205, 94], ["provinces go here"], "Bangla", "liberal", 69],
+  "Italy": [[67, 127, 63], ["provinces go here"], "Bangla", "liberal", 69],
+  "Malta": [[217, 217, 217], ["provinces go here"], "Bangla", "liberal", 69],
+  "Libya": [[42, 112, 84], ["provinces go here"], "Bangla", "liberal", 69],
+  "Monaco": [[237, 162, 186], ["provinces go here"], "Bangla", "liberal", 69],
+  "Greece": [[93, 181, 227], ["provinces go here"], "Bangla", "liberal", 69],
+  "Kosovo": [[118, 142, 186], ["provinces go here"], "Bangla", "liberal", 69],
+  "Turkey": [[166, 52, 67], ["provinces go here"], "Bangla", "liberal", 69],
+  "Algeria": [[10, 43, 36], ["provinces go here"], "Bangla", "liberal", 69],
+  "Morocco": [[155, 74, 89], ["provinces go here"], "Bangla", "liberal", 69],
+  "Albania": [[149, 45, 102], ["provinces go here"], "Bangla", "liberal", 69],
+  "Croatia": [[42, 45, 96], ["provinces go here"], "Bangla", "liberal", 69],
+  "Georgia": [[239, 228, 232], ["provinces go here"], "Bangla", "liberal", 69],
+  "Andorra": [[201, 0, 1], ["provinces go here"], "Bangla", "liberal", 69],
+  "Armenia": [[246, 162, 134], ["provinces go here"], "Bangla", "liberal", 69],
+  "Tunisia": [[185, 86, 106], ["provinces go here"], "Bangla", "liberal", 69],
+  "Bulgaria": [[51, 155, 0], ["provinces go here"], "Bangla", "liberal", 69],
+  "Slovenia": [[79, 111, 150], ["provinces go here"], "Bangla", "liberal", 69],
+  "Abkhazia": [[63, 31, 45], ["provinces go here"], "Bangla", "liberal", 69],
+  "Portugal": [[39, 116, 70], ["provinces go here"], "Bangla", "liberal", 69],
+  "Tajikistan": [
+    [109, 148, 130],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Azerbaijan": [
+    [114, 140, 217],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Kyrgyzstan": [
+    [244, 61, 111],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Montenegro": [
+    [252, 114, 121],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Luxembourg": [
+    [85, 228, 233],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Uzbekistan": [
+    [202, 206, 253],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Afghanistan": [
+    [113, 107, 121],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Transnistria": [
+    [42, 22, 24],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Turkmenistan": [
+    [189, 140, 110],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Liechtenstein": [
+    [87, 90, 127],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Bosnia_and_Herzegovina": [
+    [223, 192, 135],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "San_Marino": [
+    [98, 176, 198],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "South_Ossetia": [
+    [194, 150, 87],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "North_Korea": [
+    [245, 12, 55],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "North_Macedonia": [
+    [202, 149, 118],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Vatican_City": [
+    [196, 181, 130],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "South_Korea": [
+    [94, 118, 190],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Turkish_Cyprus": [
+    [92, 77, 50],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Mali": [[158, 138, 87], ["provinces go here"], "Bangla", "liberal", 69],
+  "Oman": [[129, 84, 88], ["provinces go here"], "Bangla", "liberal", 69],
+  "Cuba": [[151, 68, 176], ["provinces go here"], "Bangla", "liberal", 69],
+  "Chad": [[187, 170, 126], ["provinces go here"], "Bangla", "liberal", 69],
+  "Laos": [[89, 77, 63], ["provinces go here"], "Bangla", "liberal", 69],
+  "Haiti": [[165, 116, 111], ["provinces go here"], "Bangla", "liberal", 69],
+  "Niger": [[38, 88, 77], ["provinces go here"], "Bangla", "liberal", 69],
+  "Sudan": [[12, 56, 39], ["provinces go here"], "Bangla", "liberal", 69],
+  "Yemen": [[78, 50, 53], ["provinces go here"], "Bangla", "liberal", 69],
+  "Nepal": [[0, 56, 147], ["provinces go here"], "Bangla", "liberal", 69],
+  "Egypt": [[175, 163, 88], ["provinces go here"], "Bangla", "liberal", 69],
+  "Qatar": [[111, 35, 115], ["provinces go here"], "Bangla", "liberal", 69],
+  "Taiwan": [[91, 77, 92], ["provinces go here"], "Bangla", "liberal", 69],
+  "Belize": [[130, 50, 20], ["provinces go here"], "Bangla", "liberal", 69],
+  "Cyprus": [[222, 181, 27], ["provinces go here"], "Bangla", "liberal", 69],
+  "Israel": [[69, 105, 217], ["provinces go here"], "Bangla", "liberal", 69],
+  "Jordan": [[227, 152, 156], ["provinces go here"], "Bangla", "liberal", 69],
+  "Mexico": [[104, 151, 82], ["provinces go here"], "Bangla", "liberal", 69],
+  "Kuwait": [[90, 64, 42], ["provinces go here"], "Bangla", "liberal", 69],
+  "Bhutan": [[121, 100, 95], ["provinces go here"], "Bangla", "liberal", 69],
+  "Vietnam": [[198, 190, 117], ["provinces go here"], "Bangla", "liberal", 69],
+  "Jamaica": [[139, 220, 10], ["provinces go here"], "Bangla", "liberal", 69],
+  "Eritrea": [[206, 140, 162], ["provinces go here"], "Bangla", "liberal", 69],
+  "Senegal": [[184, 117, 124], ["provinces go here"], "Bangla", "liberal", 69],
+  "Myanmar": [[59, 113, 79], ["provinces go here"], "Bangla", "liberal", 69],
+  "Lebanon": [[84, 156, 139], ["provinces go here"], "Bangla", "liberal", 69],
+  "Bahrain": [[58, 65, 75], ["provinces go here"], "Bangla", "liberal", 69],
+  "Ethiopia": [[48, 71, 123], ["provinces go here"], "Bangla", "liberal", 69],
+  "Cambodia": [[226, 180, 144], ["provinces go here"], "Bangla", "liberal", 69],
+  "Dominica": [[118, 112, 178], ["provinces go here"], "Bangla", "liberal", 69],
+  "Thailand": [[20, 45, 76], ["provinces go here"], "Bangla", "liberal", 69],
+  "Honduras": [[153, 176, 74], ["provinces go here"], "Bangla", "liberal", 69],
+  "Guatemala": [[72, 48, 109], ["provinces go here"], "Bangla", "liberal", 69],
+  "Nicaragua": [
+    [145, 178, 190],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Palestine": [[86, 72, 87], ["provinces go here"], "Bangla", "liberal", 69],
+  "Mauritania": [[42, 111, 83], ["provinces go here"], "Bangla", "liberal", 69],
+  "Philippines": [
+    [114, 85, 166],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Saudi_Arabia": [
+    [171, 190, 152],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Western_Sahara": [
+    [197, 174, 120],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "United_Arab_Emirates": [
+    [39, 150, 120],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Dominican_Republic": [
+    [114, 136, 119],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Cabo_Verde": [[206, 32, 39], ["provinces go here"], "Bangla", "liberal", 69],
+  "St_Kitts_and_Nevis": [
+    [59, 56, 0],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Burkina_Faso": [
+    [202, 110, 123],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "El_Salvador": [
+    [159, 136, 198],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "St_Lucia": [[93, 183, 230], ["provinces go here"], "Bangla", "liberal", 69],
+  "Guinea_Bissau": [
+    [218, 189, 129],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "South_Sudan": [
+    [212, 191, 110],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Costa_Rica": [
+    [167, 140, 42],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Central_African_Republic": [
+    [166, 77, 99],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Trinidad_and_Tobago": [
+    [240, 90, 39],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Ivory_Coast": [
+    [209, 153, 106],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Sierra_Leone": [
+    [114, 159, 190],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Sri_Lanka": [[86, 75, 57], ["provinces go here"], "Bangla", "liberal", 69],
+  "Equatorial_Guinea": [
+    [80, 144, 171],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Sao_Tome_and_Principe": [
+    [18, 173, 43],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Papua_New_Guinea": [
+    [43, 56, 90],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Solomon_Islands": [
+    [226, 12, 12],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "East_Timor": [[40, 170, 76], ["provinces go here"], "Bangla", "liberal", 69],
+  "South_Africa": [
+    [210, 165, 108],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "DR_Congo": [[65, 104, 147], ["provinces go here"], "Bangla", "liberal", 69],
+  "Peru": [[196, 189, 204], ["provinces go here"], "Bangla", "liberal", 69],
+  "Fiji": [[143, 73, 82], ["provinces go here"], "Bangla", "liberal", 69],
+  "Niue": [[185, 122, 87], ["provinces go here"], "Bangla", "liberal", 69],
+  "Togo": [[21, 51, 35], ["provinces go here"], "Bangla", "liberal", 69],
+  "Nauru": [[41, 47, 133], ["provinces go here"], "Bangla", "liberal", 69],
+  "Palau": [[255, 201, 14], ["provinces go here"], "Bangla", "liberal", 69],
+  "Benin": [[219, 196, 120], ["provinces go here"], "Bangla", "liberal", 69],
+  "Ghana": [[162, 74, 88], ["provinces go here"], "Bangla", "liberal", 69],
+  "Kenya": [[131, 54, 64], ["provinces go here"], "Bangla", "liberal", 69],
+  "Congo": [[209, 108, 120], ["provinces go here"], "Bangla", "liberal", 69],
+  "Gabon": [[220, 191, 123], ["provinces go here"], "Bangla", "liberal", 69],
+  "Chile": [[155, 101, 107], ["provinces go here"], "Bangla", "liberal", 69],
+  "Tonga": [[255, 117, 120], ["provinces go here"], "Bangla", "liberal", 69],
+  "Angola": [[44, 24, 35], ["provinces go here"], "Bangla", "liberal", 69],
+  "Rwanda": [[29, 56, 65], ["provinces go here"], "Bangla", "liberal", 69],
+  "Zambia": [[34, 86, 47], ["provinces go here"], "Bangla", "liberal", 69],
+  "Tuvalu": [[237, 28, 36], ["provinces go here"], "Bangla", "liberal", 69],
+  "Malawi": [[161, 84, 104], ["provinces go here"], "Bangla", "liberal", 69],
+  "Brazil": [[76, 145, 63], ["provinces go here"], "Bangla", "liberal", 69],
+  "Brunei": [[60, 110, 85], ["provinces go here"], "Bangla", "liberal", 69],
+  "Guinea": [[32, 90, 78], ["provinces go here"], "Bangla", "liberal", 69],
+  "Gambia": [[68, 53, 92], ["provinces go here"], "Bangla", "liberal", 69],
+  "Uganda": [[146, 130, 79], ["provinces go here"], "Bangla", "liberal", 69],
+  "Panama": [[60, 53, 88], ["provinces go here"], "Bangla", "liberal", 69],
+  "Guyana": [[180, 150, 120], ["provinces go here"], "Bangla", "liberal", 69],
+  "Nigeria": [[194, 122, 107], ["provinces go here"], "Bangla", "liberal", 69],
+  "Grenada": [[0, 123, 95], ["provinces go here"], "Bangla", "liberal", 69],
+  "Somalia": [[102, 131, 171], ["provinces go here"], "Bangla", "liberal", 69],
+  "Bolivia": [[204, 166, 108], ["provinces go here"], "Bangla", "liberal", 69],
+  "Lesotho": [[0, 190, 240], ["provinces go here"], "Bangla", "liberal", 69],
+  "Uruguay": [[174, 192, 156], ["provinces go here"], "Bangla", "liberal", 69],
+  "Namibia": [[193, 217, 167], ["provinces go here"], "Bangla", "liberal", 69],
+  "Vanuatu": [[237, 167, 32], ["provinces go here"], "Bangla", "liberal", 69],
+  "Burundi": [[154, 75, 160], ["provinces go here"], "Bangla", "liberal", 69],
+  "Ecuador": [[249, 146, 98], ["provinces go here"], "Bangla", "liberal", 69],
+  "Liberia": [[81, 61, 118], ["provinces go here"], "Bangla", "liberal", 69],
+  "Maldives": [[146, 155, 162], ["provinces go here"], "Bangla", "liberal", 69],
+  "Djibouti": [[215, 20, 26], ["provinces go here"], "Bangla", "liberal", 69],
+  "Cameroon": [[24, 94, 97], ["provinces go here"], "Bangla", "liberal", 69],
+  "Barbados": [[252, 209, 22], ["provinces go here"], "Bangla", "liberal", 69],
+  "Colombia": [[222, 187, 91], ["provinces go here"], "Bangla", "liberal", 69],
+  "Botswana": [[136, 157, 188], ["provinces go here"], "Bangla", "liberal", 69],
+  "Paraguay": [[57, 113, 228], ["provinces go here"], "Bangla", "liberal", 69],
+  "Eswatini": [[87, 95, 134], ["provinces go here"], "Bangla", "liberal", 69],
+  "Malaysia": [[197, 96, 100], ["provinces go here"], "Bangla", "liberal", 69],
+  "Suriname": [[128, 55, 84], ["provinces go here"], "Bangla", "liberal", 69],
+  "Zimbabwe": [[173, 88, 93], ["provinces go here"], "Bangla", "liberal", 69],
+  "Tanzania": [[103, 135, 146], ["provinces go here"], "Bangla", "liberal", 69],
+  "Australia": [[57, 143, 97], ["provinces go here"], "Bangla", "liberal", 69],
+  "Singapore": [[77, 73, 134], ["provinces go here"], "Bangla", "liberal", 69],
+  "Mauritius": [[179, 149, 0], ["provinces go here"], "Bangla", "liberal", 69],
+  "Argentina": [
+    [145, 157, 236],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Indonesia": [
+    [221, 190, 196],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Venezuela": [
+    [200, 100, 150],
+    ["provinces go here"],
+    "Bangla",
+    "liberal",
+    69
+  ],
+  "Madagascar": [[44, 140, 4], ["provinces go here"], "Bangla", "liberal", 69],
+  "Mozambique": [[14, 54, 62], ["provinces go here"], "Bangla", "liberal", 69],
+  "Seychelles": [[161, 30, 36], ["provinces go here"], "Bangla", "liberal", 69],
+  "Somaliland": [[85, 171, 112], ["provinces go here"], "Bangla", "liberal", 69]
 }

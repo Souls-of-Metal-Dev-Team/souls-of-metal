@@ -10,6 +10,10 @@ def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
 
+def truncate(text, trunc_length):
+    return text if len(text) < trunc_length else text[:trunc_length:] + "..."
+
+
 def round_corners(surface, radius):
     radius *= 3
     # Create a new surface with the same size as the input surface, but with an alpha channel
