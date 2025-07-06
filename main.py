@@ -32,7 +32,10 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 def main():
     speed = 0
     sidebar_tab = ""
-    sidebar_pos = 0
+    sidebar_pos = -625
+
+    chara_desc = pygame.Rect((0, 0), (200, 200))
+
     file_path = os.path.join(base_path, "date.txt")
 
     with open(file_path) as f:
@@ -87,6 +90,8 @@ def main():
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
+    with open(os.path.join(base_path, "province-centers.json")) as f:
+        province_centers = load(f)
 
     globals.ui_scale = settings_json["UI Size"] // 14
 
@@ -450,6 +455,7 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
+                # NOTE(soi): I should fix the part whre it lags frm zoom
                 if hovered and mouse_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
@@ -461,25 +467,20 @@ def main():
                     pixel.x = coord.x * map.pmap.get_width() / map_rect.width
                     pixel.y = coord.y * map.pmap.get_height() / map_rect.height
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
-                    selected_province_id = f"({r}, {g}, {b})"
+                    selected_province_id = f"{r}, {g}, {b}"
                     print("selected country :", selected_province_id)
-                    with open(os.path.join(base_path, "message.txt")) as f:
-                        for line in f:
-                            line = line.strip()
-                            line = line.rstrip(",")  # Remove comma end of line
-                            province_id, center = line.split(":")
-                            if province_id == selected_province_id:
-                                target = pygame.Vector2(eval(center))
-                                target.x = (
-                                    target.x * map_rect.width / map.pmap.get_width()
-                                )
-                                target.y = (
-                                    target.y * map_rect.height / map.pmap.get_height()
-                                )
-                                division_target = pygame.Vector2(
-                                    map_rect.topleft
-                                ) + pygame.Vector2(target)
-                                break
+                    print(sidebar_tab)
+                    if selected_country_rgb in countries.colorsToCountries:
+                        sidebar_tab = "Diplomacy"
+                        center = province_centers[selected_province_id]
+                        target = pygame.Vector2(center)
+                        target.x = target.x * map_rect.width / map.pmap.get_width()
+                        target.y = target.y * map_rect.height / map.pmap.get_height()
+                        division_target = pygame.Vector2(
+                            map_rect.topleft
+                        ) + pygame.Vector2(target)
+                    else:
+                        sidebar_tab = ""
 
                 delta = division_target - division_pos
                 division_speed = 10
@@ -506,7 +507,7 @@ def main():
                     width=10,
                 )
                 if sidebar_tab:
-                    sidebar_pos = min(sidebar_pos * 5, -10)
+                    sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient
                         case "Diplomacy":
@@ -516,23 +517,66 @@ def main():
                                 ]
                                 screen.blit(
                                     countries.countriesToFlags[country],
-                                    (70, 85),
+                                    (80 + sidebar_pos, 85),
                                 )
+                                if country in countries.Characters:
+                                    for i, character in enumerate(
+                                        countries.Display_Characters[country].keys()
+                                    ):
+                                        screen.blit(
+                                            character, (120 * i + sidebar_pos + 80, 255)
+                                        )
+                                        if character.get_rect(
+                                            left=120 * i + sidebar_pos + 80, top=255
+                                        ).collidepoint(mouse_pos):
+                                            chara_desc.left, chara_desc.top = mouse_pos
+
+                                            pygame.draw.rect(
+                                                screen,
+                                                tertiary,
+                                                chara_desc,
+                                                border_radius=16,
+                                            )
+                                            pygame.draw.rect(
+                                                screen,
+                                                secondary,
+                                                chara_desc,
+                                                border_radius=16,
+                                                width=4,
+                                            )
+                                            for i, trait in enumerate(
+                                                countries.Characters[country][
+                                                    character
+                                                ][0]
+                                            ):
+                                                screen.blit(
+                                                    ui_font.render(
+                                                        trait.split(".")[1]
+                                                        .replace("=", "")
+                                                        .capitalize(),
+                                                        fontalias,
+                                                        primary,
+                                                    ),
+                                                    (
+                                                        mouse_pos[0] + 15,
+                                                        mouse_pos[1] + 30 * i,
+                                                    ),
+                                                )
                                 screen.blit(
                                     ui_font.render(
                                         globals.language_translations[country],
                                         fontalias,
                                         primary,
                                     ),
-                                    (70, 400),
+                                    (80 + sidebar_pos, 400),
                                 )
                         case _:
                             print("uhoh")
 
-                            sidebar_pos = max(sidebar_pos / 5, -625)
+                            sidebar_pos = max(sidebar_pos - 45, -625)
 
                 else:
-                    sidebar_pos = max(sidebar_pos / 5, -625)
+                    sidebar_pos = max(sidebar_pos - 45, -625)
                 for button in mapbuttons:
                     hovered = button.draw(
                         screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font

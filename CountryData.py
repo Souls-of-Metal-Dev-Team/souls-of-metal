@@ -2,6 +2,8 @@ import os
 import random
 from pygame import image, transform
 from func import round_corners
+from json import load
+import itertools
 
 # Get the base path where this file resides
 base_path = os.path.dirname(__file__)
@@ -12,6 +14,7 @@ class Countries:
         self.countryData = data
         self.colorsToCountries = {tuple(v[0]): k for k, v in self.countryData.items()}
         self.countriesToFlags = {}
+        self.Characters = {}
 
         for k in self.countryData:
             # print(f'''"{k}": "{k.replace("_", " ")}",''')
@@ -24,6 +27,27 @@ class Countries:
             scaled = transform.scale_by(raw_flag, 475 / raw_flag.get_width())
             rounded = round_corners(scaled, 16)
             self.countriesToFlags[k] = rounded
+        with open(
+            os.path.join(base_path, "starts", "Modern World", "Characters.json")
+        ) as f:
+            for country, characters in load(f).items():
+                self.Characters[country] = {
+                    image.load(
+                        os.path.join(
+                            base_path,
+                            "starts",
+                            "Modern World",
+                            "Characters",
+                            f"{k}.png",
+                        )
+                    ).convert_alpha(): v
+                    for k, v in characters.items()
+                }
+        # NOTE(soi): doing this bcuz countries can hv like 50 ppl and ion wanna show all tht
+        self.Display_Characters = {
+            k: dict(itertools.islice(v.items(), 4)) for k, v in self.Characters.items()
+        }
+        print(self.Display_Characters)
 
     def getCountryType(self, culture, ideology=None):
         if ideology is not None:

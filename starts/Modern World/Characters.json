@@ -1,3 +1,8 @@
 {
-  "Minh": [["Vietnam"], ["self.money += 12"]]
+  "Vietnam": {
+    "minh": [["self.money += 10"], "cool guy"],
+    "vaibhav": [["self.money += 10"], "cool guy"],
+    "contractman": [["self.money += 10"], "cool guy"],
+    "allo": [["self.money += 10"], "cool guy"]
+  }
 }
