@@ -27,6 +27,9 @@ else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
+pygame.display.set_caption("Soul Of Steel")
+icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))  
+pygame.display.set_icon(icon)
 
 
 def main():
@@ -174,8 +177,8 @@ def main():
 
     escapemenubuttons = [
         Button("Resume", (200, 400), (160, 40), 5),
-        Button("Back to Main Menu", (200, 500), (160, 40), 5),
         Button("Settings", (200, 600), (160, 40), 5),
+        Button("Back to Main Menu", (200, 500), (160, 40), 5),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -262,10 +265,11 @@ def main():
                     match button.id:
                         case "Resume":
                             current_menu = Menu.GAME
-                        case "Back to Main Menu":
-                            current_menu = Menu.MAIN_MENU
                         case "Settings":
                             current_menu = Menu.SETTINGS
+                        case "Back to Main Menu":
+                            current_menu = Menu.MAIN_MENU
+                        
             case Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
 
@@ -423,6 +427,24 @@ def main():
                 # Zoom
                 map.scale += mouse_scroll
                 map.scale = func.clamp(map.scale, 2, 10)
+                
+                # WASD + Arrow key camera movement
+                keys = pygame.key.get_pressed()
+                direction = pygame.Vector2(0, 0)
+                move_speed = 10 / map.scale
+                
+                if keys[pygame.K_w] or keys[pygame.K_UP]:
+                    direction.y -= 1
+                if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+                    direction.y += 1
+                if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                    direction.x -= 1
+                if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                    direction.x += 1
+
+                if direction.length_squared() > 0:
+                    direction = direction.normalize()
+                    camera_pos += direction * move_speed
 
                 # Panning
                 mouse_sensitivity = 1 / 5
@@ -434,23 +456,22 @@ def main():
                 scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
-                map_rect.y -= int(camera_pos.y)
-                # map_rect.y = func.clamp(
-                #     map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
-                # )
+                map_rect.y = func.clamp(
+                    map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
+                )
 
                 # Render map
-                screen.blit(scaled_map, map_rect.topleft)
-                # screen.blit(
-                #     scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
-                # )
-                # screen.blit(
-                #     scaled_map,
-                #     (
-                #         (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
-                #         map_rect.y,
-                #     ),
-                # )
+                # screen.blit(scaled_map, map_rect.topleft)
+                screen.blit(
+                    scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
+                )
+                screen.blit(
+                    scaled_map,
+                    (
+                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                        map_rect.y,
+                    ),
+                )
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
@@ -477,7 +498,12 @@ def main():
                             else ""
                         )
                         center = province_centers[selected_province_id]
-                        division_target = pygame.Vector2(center)
+                        target = pygame.Vector2(center)
+                        target.x = target.x * map_rect.width / map.pmap.get_width()
+                        target.y = target.y * map_rect.height / map.pmap.get_height()
+                        division_target = pygame.Vector2(
+                            map_rect.topleft
+                        ) + pygame.Vector2(target)
                     else:
                         sidebar_tab = ""
 
@@ -488,15 +514,8 @@ def main():
                 else:
                     division_pos = division_target
 
-                # Transform coord relative to map to screen coord
-                division_screen_pos = pygame.Vector2()
-                division_screen_pos.x = division_pos.x * map_rect.width / map.cmap.get_width()
-                division_screen_pos.y = division_pos.y * map_rect.height / map.cmap.get_height()
-                division_screen_pos += map_rect.topleft
-
-                # Draw division
-                pygame.draw.circle(screen, secondary, division_screen_pos, 5)
-
+                pygame.draw.circle(screen, secondary, division_pos, 5)
+                # print(selected_country_rgb)
                 pygame.draw.rect(
                     screen,
                     tertiary,
