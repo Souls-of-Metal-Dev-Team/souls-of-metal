@@ -1,5 +1,4 @@
 import pygame
-from pygame.transform import scale
 from CountryData import Countries
 import func
 from os import getcwd
@@ -39,6 +38,7 @@ def main():
     sidebar_pos = -625
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
+
     file_path = os.path.join(base_path, "date.txt")
 
     with open(file_path) as f:
@@ -134,8 +134,9 @@ def main():
         countries_data = load(f)
     countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
-    scaled_maps = [pygame.transform.scale_by(map.cmap, x) for x in range(1, 16)]
-
+    scaled_maps = []
+    for i in range(1, 11):
+        scaled_maps.append(pygame.transform.scale_by(map.cmap, i))
     player_country = None
 
     selected_country_rgb = 0
@@ -459,7 +460,7 @@ def main():
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
                         camera_pos.y -= mouse_rel[1] * mouse_sensitivity
 
-                scaled_map = scaled_maps[map.scale]
+                scaled_map = scaled_maps[map.scale - 1]
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
