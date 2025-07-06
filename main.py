@@ -422,7 +422,7 @@ def main():
             case Menu.GAME:
                 # Zoom
                 map.scale += mouse_scroll
-                map.scale = func.clamp(map.scale, 1, 10)
+                map.scale = func.clamp(map.scale, 2, 10)
 
                 # Panning
                 mouse_sensitivity = 1 / 5
@@ -434,24 +434,22 @@ def main():
                 scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
-                map_rect.y -= int(camera_pos.y)
+                map_rect.y = func.clamp(
+                    map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
+                )
 
                 # Render map
-                screen.blit(scaled_map, map_rect.topleft)
-                # screen.blit(
-                #     scaled_map,
-                #     (
-                #         map_rect.x % scaled_map.get_width(),
-                #         map_rect.y
-                #     )
-                # )
-                # screen.blit(
-                #     scaled_map,
-                #     (
-                #         (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
-                #         map_rect.y,
-                #     ),
-                # )
+                # screen.blit(scaled_map, map_rect.topleft)
+                screen.blit(
+                    scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
+                )
+                screen.blit(
+                    scaled_map,
+                    (
+                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                        map_rect.y,
+                    ),
+                )
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
@@ -470,8 +468,13 @@ def main():
                     selected_province_id = f"{r}, {g}, {b}"
                     print("selected country :", selected_province_id)
                     print(sidebar_tab)
-                    if selected_country_rgb in countries.colorsToCountries:
-                        sidebar_tab = "Diplomacy"
+                    if selected_country_rgb != (0, 0, 0):
+                        sidebar_tab = (
+                            "Diplomacy"
+                            if selected_country_rgb
+                            in countries.colorsToCountries.keys()
+                            else ""
+                        )
                         center = province_centers[selected_province_id]
                         target = pygame.Vector2(center)
                         target.x = target.x * map_rect.width / map.pmap.get_width()
@@ -520,8 +523,15 @@ def main():
                                     (80 + sidebar_pos, 85),
                                 )
                                 if country in countries.Characters:
-                                    for i, character in enumerate(
-                                        countries.Display_Characters[country].keys()
+                                    # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
+                                    for i, character in reversed(
+                                        list(
+                                            enumerate(
+                                                countries.Display_Characters[
+                                                    country
+                                                ].keys()
+                                            )
+                                        )
                                     ):
                                         screen.blit(
                                             character, (120 * i + sidebar_pos + 80, 255)
@@ -545,23 +555,34 @@ def main():
                                                 width=4,
                                             )
                                             for i, trait in enumerate(
-                                                countries.Characters[country][
-                                                    character
-                                                ][0]
+                                                countries.Characters[country][character]
                                             ):
-                                                screen.blit(
-                                                    ui_font.render(
-                                                        trait.split(".")[1]
-                                                        .replace("=", "")
-                                                        .capitalize(),
-                                                        fontalias,
-                                                        primary,
-                                                    ),
-                                                    (
-                                                        mouse_pos[0] + 15,
-                                                        mouse_pos[1] + 30 * i,
-                                                    ),
-                                                )
+                                                if ":" not in trait:
+                                                    screen.blit(
+                                                        ui_font.render(
+                                                            trait.split(".")[1]
+                                                            .replace("=", "")
+                                                            .capitalize(),
+                                                            fontalias,
+                                                            secondary,
+                                                        ),
+                                                        (
+                                                            mouse_pos[0] + 15,
+                                                            mouse_pos[1] + 30 * i + 15,
+                                                        ),
+                                                    )
+                                                else:
+                                                    screen.blit(
+                                                        ui_font.render(
+                                                            trait[6::],
+                                                            fontalias,
+                                                            primary,
+                                                        ),
+                                                        (
+                                                            mouse_pos[0] + 15,
+                                                            mouse_pos[1] + 30 * i + 15,
+                                                        ),
+                                                    )
                                 screen.blit(
                                     ui_font.render(
                                         globals.language_translations[country],

@@ -1,8 +1,8 @@
 {
   "Vietnam": {
-    "minh": [["self.money += 10"], "cool guy"],
-    "vaibhav": [["self.money += 10"], "cool guy"],
-    "contractman": [["self.money += 10"], "cool guy"],
-    "allo": [["self.money += 10"], "cool guy"]
+    "minh": ["desc: cool guy", "self.money += 10"],
+    "vaibhav": ["desc: cool guy", "self.money += 10"],
+    "contractman": ["desc: cool guy", "self.money += 10"],
+    "allo": ["desc: cool guy", "self.money += 10"]
   }
 }
