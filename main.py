@@ -134,9 +134,7 @@ def main():
         countries_data = load(f)
     countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
-    scaled_maps = []
-    for i in range(1, 11):
-        scaled_maps.append(pygame.transform.scale_by(map.cmap, i))
+    scaled_maps = [pygame.transform.scale_by(map.cmap, i) for i in range(1, 11)]
     player_country = None
 
     selected_country_rgb = 0
