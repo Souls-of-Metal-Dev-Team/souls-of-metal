@@ -1,4 +1,5 @@
 import pygame
+import random
 from CountryData import Countries
 import func
 from os import getcwd
@@ -20,7 +21,7 @@ import sys
 import datetime
 
 global music_index
-music_tracks = ["0.mp3", "1.mp3", "2.mp3", "3.mp3"]
+music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
 music_index = 0
 
 base_path = os.path.dirname(__file__)
@@ -63,6 +64,8 @@ def main():
 
     # Load music
     music_path = os.path.join(base_path, "sound", "music", "background.mp3")
+    music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+    random.shuffle(music_tracks)
     if os.path.exists(music_path):
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(0.5)
@@ -312,7 +315,7 @@ def main():
                             continue
 
                         # Handle dynamic music ID (e.g., "Music: 1.mp3")
-                        if button.id.startswith("Music:") and mouse_pressed:
+                        if button.id.startswith("Music:") and mouse_pressed and hovered:
                             music_index = (music_index + 1) % len(music_tracks)
                             music_path = os.path.join(base_path, "sound", "music", music_tracks[music_index])
                             try:
@@ -321,10 +324,10 @@ def main():
                                 pygame.mixer.music.play(-1)
                                 print("Now playing:", music_tracks[music_index])
                                 settings_json["Music Track"] = music_index
-                                button.id = f"Music: {music_tracks[music_index]}"  # ✅ update label
+                                button.id = f"Music: {music_tracks[music_index]}"
                             except Exception as e:
                                 print("[ERROR] Failed to play music:", e)
-                            mouse_pressed = False  # ✅ prevent multiple triggers
+                            mouse_pressed = False
 
                         else:
                             match button.id:
