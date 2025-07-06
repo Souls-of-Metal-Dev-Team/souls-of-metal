@@ -19,6 +19,9 @@ import os
 import sys
 import datetime
 
+global music_index
+music_tracks = ["0.mp3", "1.mp3", "2.mp3", "3.mp3"]
+music_index = 0
 
 base_path = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
@@ -33,6 +36,7 @@ pygame.display.set_icon(icon)
 
 
 def main():
+    global music_index
     speed = 0
     sidebar_tab = ""
     sidebar_pos = -625
@@ -154,7 +158,8 @@ def main():
         Button("FPS", (200, 300), (160, 40), 5),
         Button("Sound Volume", (200, 400), (160, 40), 5),
         Button("Music Volume", (200, 500), (160, 40), 5),
-        Button("Scroll Invert", (200, 600), (160, 40), 5),
+        Button(f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5),
+        Button("Scroll Invert", (200, 700), (160, 40), 5),
         Button("Save Settings", (200, 800), (160, 40), 5),
         Button("Exit", (200, 900), (160, 40), 5),
     ]
@@ -298,57 +303,71 @@ def main():
                             global_run = False
 
             case Menu.SETTINGS:
-                for button in settingsbuttons:
-                    hovered = button.draw(
-                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                    )
+                    for button in settingsbuttons:
+                        hovered = button.draw(
+                            screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
+                        )
 
-                    if not hovered:
-                        continue
+                        if not hovered:
+                            continue
 
-                    match button.id:
-                        case "UI Size":
-                            settings_json["UI Size"] += mouse_scroll
-                            settings_json["UI Size"] = func.clamp(
-                                settings_json["UI Size"] + mouse_scroll, 14, 40
-                            )
+                        # Handle dynamic music ID (e.g., "Music: 1.mp3")
+                        if button.id.startswith("Music:") and mouse_pressed:
+                            music_index = (music_index + 1) % len(music_tracks)
+                            music_path = os.path.join(base_path, "sound", "music", music_tracks[music_index])
+                            try:
+                                pygame.mixer.music.load(music_path)
+                                pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+                                pygame.mixer.music.play(-1)
+                                print("Now playing:", music_tracks[music_index])
+                                settings_json["Music Track"] = music_index
+                                button.id = f"Music: {music_tracks[music_index]}"  # ✅ update label
+                            except Exception as e:
+                                print("[ERROR] Failed to play music:", e)
+                            mouse_pressed = False  # ✅ prevent multiple triggers
 
-                        case "Sound Volume":
-                            settings_json["Sound Volume"] += mouse_scroll
-                            settings_json["Sound Volume"] = func.clamp(
-                                settings_json["Sound Volume"], 0, 100
-                            )
+                        else:
+                            match button.id:
+                                case "UI Size":
+                                    settings_json["UI Size"] += mouse_scroll
+                                    settings_json["UI Size"] = func.clamp(
+                                        settings_json["UI Size"], 14, 40
+                                    )
 
-                        case "Music Volume":
-                            settings_json["Music Volume"] += mouse_scroll
-                            settings_json["Music Volume"] = func.clamp(
-                                settings_json["Music Volume"], 0, 100
-                            )
+                                case "Sound Volume":
+                                    settings_json["Sound Volume"] += mouse_scroll
+                                    settings_json["Sound Volume"] = func.clamp(
+                                        settings_json["Sound Volume"], 0, 100
+                                    )
 
-                        case "FPS":
-                            settings_json["FPS"] += mouse_scroll
-                            settings_json["FPS"] = max(settings_json["FPS"], 12)
+                                case "Music Volume":
+                                    settings_json["Music Volume"] += mouse_scroll
+                                    settings_json["Music Volume"] = func.clamp(
+                                        settings_json["Music Volume"], 0, 100
+                                    )
 
-                    if not mouse_pressed:
-                        continue
+                                case "FPS":
+                                    settings_json["FPS"] += mouse_scroll
+                                    settings_json["FPS"] = max(settings_json["FPS"], 12)
 
-                    match button.id:
-                        case "Scroll Invert":
-                            settings_json["Scroll Invert"] = func.clamp(
-                                settings_json["Scroll Invert"], 0, 1
-                            )
-                            settings_json["Scroll Invert"] = (
-                                settings_json["Scroll Invert"] * -2 + 1
-                            )
+                        if not mouse_pressed:
+                            continue
 
-                        case "Save Settings":
-                            with open(
-                                os.path.join(base_path, "settings.json"), "w"
-                            ) as f:
-                                dump(settings_json, f)
+                        match button.id:
+                            case "Scroll Invert":
+                                settings_json["Scroll Invert"] = func.clamp(
+                                    settings_json["Scroll Invert"], 0, 1
+                                )
+                                settings_json["Scroll Invert"] = (
+                                    settings_json["Scroll Invert"] * -2 + 1
+                                )
 
-                        case "Exit":
-                            current_menu = Menu.MAIN_MENU
+                            case "Save Settings":
+                                with open(os.path.join(base_path, "settings.json"), "w") as f:
+                                    dump(settings_json, f)
+
+                            case "Exit":
+                                current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
