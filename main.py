@@ -434,22 +434,23 @@ def main():
                 scaled_map = pygame.transform.scale_by(map.cmap, map.scale)
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
-                map_rect.y = func.clamp(
-                    map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
-                )
+                map_rect.y -= int(camera_pos.y)
+                # map_rect.y = func.clamp(
+                #     map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
+                # )
 
                 # Render map
-                # screen.blit(scaled_map, map_rect.topleft)
-                screen.blit(
-                    scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
-                )
-                screen.blit(
-                    scaled_map,
-                    (
-                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
-                        map_rect.y,
-                    ),
-                )
+                screen.blit(scaled_map, map_rect.topleft)
+                # screen.blit(
+                #     scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
+                # )
+                # screen.blit(
+                #     scaled_map,
+                #     (
+                #         (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
+                #         map_rect.y,
+                #     ),
+                # )
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
@@ -476,12 +477,7 @@ def main():
                             else ""
                         )
                         center = province_centers[selected_province_id]
-                        target = pygame.Vector2(center)
-                        target.x = target.x * map_rect.width / map.pmap.get_width()
-                        target.y = target.y * map_rect.height / map.pmap.get_height()
-                        division_target = pygame.Vector2(
-                            map_rect.topleft
-                        ) + pygame.Vector2(target)
+                        division_target = pygame.Vector2(center)
                     else:
                         sidebar_tab = ""
 
@@ -492,8 +488,15 @@ def main():
                 else:
                     division_pos = division_target
 
-                pygame.draw.circle(screen, secondary, division_pos, 5)
-                # print(selected_country_rgb)
+                # Transform coord relative to map to screen coord
+                division_screen_pos = pygame.Vector2()
+                division_screen_pos.x = division_pos.x * map_rect.width / map.cmap.get_width()
+                division_screen_pos.y = division_pos.y * map_rect.height / map.cmap.get_height()
+                division_screen_pos += map_rect.topleft
+
+                # Draw division
+                pygame.draw.circle(screen, secondary, division_screen_pos, 5)
+
                 pygame.draw.rect(
                     screen,
                     tertiary,
