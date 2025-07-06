@@ -420,9 +420,14 @@ def main():
                     screen.blit(text, (100, 100 + i * 50))
 
             case Menu.GAME:
+                # Credit: https://stackoverflow.com/a/20791835
+                mouse_world_pos = (pygame.Vector2(mouse_pos) + camera_pos) / map.scale
+
                 # Zoom
                 map.scale += mouse_scroll
                 map.scale = func.clamp(map.scale, 2, 10)
+
+                camera_pos = mouse_world_pos * map.scale - pygame.Vector2(mouse_pos)
 
                 # Panning
                 mouse_sensitivity = 1 / 5
