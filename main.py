@@ -51,9 +51,7 @@ def main():
 
     display_date = date.strftime("%A, %B %e, %Y")
     pygame.init()
-    screen = pygame.display.set_mode(
-        (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-    )
+    screen = pygame.display.set_mode((1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1)
 
     pygame.mixer.init()
 
@@ -100,18 +98,12 @@ def main():
 
     pygame.font.init()
     cwd = getcwd()
-    ui_font = pygame.font.Font(
-        os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale
-    )
-    title_font = pygame.font.Font(
-        os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale
-    )
+    ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
+    title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load(
-        os.path.join(base_path, "ui", "logo.png")
-    ).convert_alpha()
+    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
     current_menu = Menu.MAIN_MENU
     tick = 0
@@ -335,14 +327,10 @@ def main():
                             settings_json["Scroll Invert"] = func.clamp(
                                 settings_json["Scroll Invert"], 0, 1
                             )
-                            settings_json["Scroll Invert"] = (
-                                settings_json["Scroll Invert"] * -2 + 1
-                            )
+                            settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
 
                         case "Save Settings":
-                            with open(
-                                os.path.join(base_path, "settings.json"), "w"
-                            ) as f:
+                            with open(os.path.join(base_path, "settings.json"), "w") as f:
                                 dump(settings_json, f)
 
                         case "Exit":
@@ -470,9 +458,7 @@ def main():
 
                 # Render map
                 # screen.blit(scaled_map, map_rect.topleft)
-                screen.blit(
-                    scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
-                )
+                screen.blit(scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y))
                 screen.blit(
                     scaled_map,
                     (
@@ -501,8 +487,7 @@ def main():
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
-                            if selected_country_rgb
-                            in countries.colorsToCountries.keys()
+                            if selected_country_rgb in countries.colorsToCountries.keys()
                             else ""
                         )
                         center = province_centers[selected_province_id]
@@ -519,12 +504,8 @@ def main():
 
                 # Transform coord relative to map to screen coord
                 division_screen_pos = pygame.Vector2()
-                division_screen_pos.x = (
-                    division_pos.x * map_rect.width / map.cmap.get_width()
-                )
-                division_screen_pos.y = (
-                    division_pos.y * map_rect.height / map.cmap.get_height()
-                )
+                division_screen_pos.x = division_pos.x * map_rect.width / map.cmap.get_width()
+                division_screen_pos.y = division_pos.y * map_rect.height / map.cmap.get_height()
                 division_screen_pos += map_rect.topleft
 
                 # Draw division
@@ -552,9 +533,7 @@ def main():
                         # NOTE(soi): this feels inneficient
                         case "Diplomacy":
                             if selected_country_rgb in countries.colorsToCountries:
-                                country = countries.colorsToCountries[
-                                    selected_country_rgb
-                                ]
+                                country = countries.colorsToCountries[selected_country_rgb]
                                 screen.blit(
                                     countries.countriesToFlags[country],
                                     (80 + sidebar_pos, 85),
@@ -563,16 +542,10 @@ def main():
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
                                     for i, character in reversed(
                                         list(
-                                            enumerate(
-                                                countries.Display_Characters[
-                                                    country
-                                                ].keys()
-                                            )
+                                            enumerate(countries.Display_Characters[country].keys())
                                         )
                                     ):
-                                        screen.blit(
-                                            character, (120 * i + sidebar_pos + 80, 255)
-                                        )
+                                        screen.blit(character, (120 * i + sidebar_pos + 80, 255))
                                         if character.get_rect(
                                             left=120 * i + sidebar_pos + 80, top=255
                                         ).collidepoint(mouse_pos):
