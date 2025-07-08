@@ -1,5 +1,6 @@
 import os
 from json import load
+from re import escape
 import pygame
 from pygame.rect import Rect
 from func import round_corners, clamp, truncate
@@ -18,22 +19,40 @@ with open(os.path.join(base_path, "theme.json")) as f:
 
 class Button:
     # last_tick = 0
+    img = False
 
-    def __init__(self, id, pos, size, thicc):
+    def __init__(self, id, pos, size, thicc, settings_json):
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
+        scaled_size = pygame.Vector2(size) * globals.ui_scale
+        if id.startswith("/:"):
+            self.img = pygame.image.load(
+                os.path.join(base_path, "ui", f"{self.id[2::].split()[0]}.png")
+            ).convert_alpha()
+            self.img = pygame.transform.scale_by(
+                self.img, scaled_size[1] / self.img.get_height()
+            ).convert_alpha()
+            self.id = (
+                self.id[2::].split()[1]
+                if self.id[2::].split()[1] != self.id[2::].split()[0]
+                else False
+            )
+        self.text = (
+            f"{globals.language_translations[self.id]}: {settings_json[self.id]}"
+            if self.id in settings_json
+            else self.id
+        )
 
         # NOTE(soi): might fuck up some buttons widths but idc i want my buttons to be like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
 
-        scaled_size = pygame.Vector2(size) * globals.ui_scale
         self.rect = pygame.Rect((0, 0), scaled_size)
         # NOTE(soi): yea pygame already has a thing for centering rects, should read the documentation more smsmsmh
         self.rect.center = pos
 
-    def draw(self, screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font):
+    def draw(self, screen, mouse_pos, mouse_pressed, tick, ui_font):
         _ = tick
 
         hovered = pygame.Rect.collidepoint(self.rect, mouse_pos)
@@ -64,58 +83,28 @@ class Button:
                 ),
                 border_radius=self.rect.height * scaled_thicc // 2,
             )
-        # pygame.draw.circle(
-        #     screen,
-        #     secondary,
-        #     (self.rect.x, self.rect.centery),
-        #     self.rect.height / 2 + scaled_thicc,
-        # )
-        # pygame.draw.circle(
-        #     screen,
-        #     secondary,
-        #     (
-        #         self.rect.right,
-        #         self.rect.centery,
-        #     ),
-        #     self.rect.height / 2 + scaled_thicc,
-        # )
 
         pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
-        # pygame.draw.circle(
-        #     screen,
-        #     tertiary,
-        #     (
-        #         self.rect.x,
-        #         self.rect.centery,
-        #     ),
-        #     self.rect.height / 2,
-        # )
-        # pygame.draw.circle(
-        #     screen,
-        #     tertiary,
-        #     (
-        #         self.rect.right,
-        #         self.rect.centery,
-        #     ),
-        #     self.rect.height / 2,
-        # )
 
-        text = (
-            f"{globals.language_translations[self.id]}: {settings_json[self.id]}"
-            if self.id in settings_json
-            else self.id
-        )
-        text_surface = ui_font.render(
-            text, fontalias, secondary if hovered and mouse_pressed else primary
-        )
-        screen.blit(
-            text_surface,
-            (
-                self.rect.centerx - text_surface.get_width() / 2,
-                self.rect.y + (self.thiccmax * globals.ui_scale),
-            ),
-        )
-
+        if self.img:
+            screen.blit(
+                self.img,
+                (
+                    self.rect.centerx - self.img.get_width() / 2,
+                    self.rect.y,
+                ),
+            )
+        if self.text:
+            text_surface = ui_font.render(
+                self.text, fontalias, secondary if hovered and mouse_pressed else primary
+            )
+            screen.blit(
+                text_surface,
+                (
+                    self.rect.centerx - text_surface.get_width() / 2,
+                    self.rect.y + (self.thiccmax * globals.ui_scale),
+                ),
+            )
         return hovered
 
 
@@ -144,13 +133,9 @@ class MajorCountry:
         self.thiccmax = self.thicc = thicc * globals.ui_scale
 
         try:
-            self.img = pygame.image.load(
-                f"flags/{self.id.lower()}_flag.png"
-            ).convert_alpha()
+            self.img = pygame.image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = pygame.image.load(
-                os.path.join(base_path, "unknown.jpg")
-            ).convert_alpha()
+            self.img = pygame.image.load(os.path.join(base_path, "unknown.jpg")).convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h
@@ -191,9 +176,7 @@ class MajorCountry:
             or self.thicc > 1
         ):
             pygame.draw.rect(screen, tertiary, brect, 2 * self.thicc, 20)
-            screen.blit(
-                self.selected_font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25)
-            )
+            screen.blit(self.selected_font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
         else:
             screen.blit(self.font_render, (self.pos[0] + 25 + self.w, self.pos[1] + 25))
         pygame.draw.rect(screen, secondary, brect, 5, 20)
@@ -236,13 +219,9 @@ class MinorCountry:
         self.thicc = self.thiccmax = thicc
 
         try:
-            self.img = pygame.image.load(
-                f"flags/{self.id.lower()}_flag.png"
-            ).convert_alpha()
+            self.img = pygame.image.load(f"flags/{self.id.lower()}_flag.png").convert_alpha()
         except FileNotFoundError:
-            self.img = pygame.image.load(
-                os.path.join(base_path, "unknown.jpg")
-            ).convert_alpha()
+            self.img = pygame.image.load(os.path.join(base_path, "unknown.jpg")).convert_alpha()
 
         h = self.img.get_height()
         scale = (180 - (thicc << 1)) / h / 4
@@ -268,12 +247,8 @@ class MinorCountry:
         if pygame.Rect.collidepoint(b, mpos) or select == self.id:
             if self.thicc < self.thiccmax:
                 self.thicc += 1
-            pygame.draw.rect(
-                screen, tertiary, self.brect, border_radius=9, width=self.thicc
-            )
-            pygame.draw.rect(
-                screen, secondary, self.brect, border_radius=9, width=self.thicc // 2
-            )
+            pygame.draw.rect(screen, tertiary, self.brect, border_radius=9, width=self.thicc)
+            pygame.draw.rect(screen, secondary, self.brect, border_radius=9, width=self.thicc // 2)
         else:
             self.thicc = max(self.thicc - 2, 1)
 
@@ -286,9 +261,7 @@ class Map:
     def __init__(self, scenario, pos, scale):
         self.scale = scale
         self.pos = pygame.Vector2(pos)
-        self.day_cycle = pygame.image.load(
-            os.path.join(base_path, "ui", "daynight.png")
-        ).convert()
+        self.day_cycle = pygame.image.load(os.path.join(base_path, "ui", "daynight.png")).convert()
         self.cmap = self.cvmap = pygame.image.load(
             os.path.join(base_path, "starts", scenario, "map.png")
         ).convert()
@@ -314,14 +287,11 @@ class Map:
                     -1080 * (self.scale - 1),
                     0,
                 )
-        screen.blit(
-            self.cvmap, ((self.pos[0] % (self.mapwidth * self.scale)), self.pos[1])
-        )
+        screen.blit(self.cvmap, ((self.pos[0] % (self.mapwidth * self.scale)), self.pos[1]))
         screen.blit(
             self.cvmap,
             (
-                ((self.pos[0]) % (self.mapwidth * self.scale))
-                - (self.mapwidth * self.scale),
+                ((self.pos[0]) % (self.mapwidth * self.scale)) - (self.mapwidth * self.scale),
                 self.pos[1],
             ),
         )
