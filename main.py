@@ -1,4 +1,5 @@
 import pygame
+import random
 from CountryData import Countries
 import func
 from os import getcwd
@@ -19,6 +20,9 @@ import os
 import sys
 import datetime
 
+global music_index
+music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+music_index = 0
 
 base_path = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
@@ -33,6 +37,7 @@ pygame.display.set_icon(icon)
 
 
 def main():
+    global music_index
     speed = 0
     sidebar_tab = ""
     sidebar_pos = -625
@@ -57,6 +62,8 @@ def main():
 
     # Load music
     music_path = os.path.join(base_path, "sound", "music", "background.mp3")
+    music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+    random.shuffle(music_tracks)
     if os.path.exists(music_path):
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(0.5)
@@ -144,7 +151,8 @@ def main():
         Button("FPS", (200, 300), (160, 40), 5, settings_json),
         Button("Sound Volume", (200, 400), (160, 40), 5, settings_json),
         Button("Music Volume", (200, 500), (160, 40), 5, settings_json),
-        Button("Scroll Invert", (200, 600), (160, 40), 5, settings_json),
+        Button(f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5, settings_json),
+        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json),
         Button("Save Settings", (200, 800), (160, 40), 5, settings_json),
         Button("Exit", (200, 900), (160, 40), 5, settings_json),
     ]
@@ -286,35 +294,51 @@ def main():
             case Menu.SETTINGS:
                 for button in settingsbuttons:
                     hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
-
+                    
                     if not hovered:
                         continue
 
-                    match button.id:
-                        case "UI Size":
-                            settings_json["UI Size"] += mouse_scroll
-                            settings_json["UI Size"] = func.clamp(
-                                settings_json["UI Size"] + mouse_scroll, 14, 40
-                            )
+                        # Handle dynamic music ID (e.g., "Music: 1.mp3")
+                        if button.id.startswith("Music:") and mouse_pressed and hovered:
+                            music_index = (music_index + 1) % len(music_tracks)
+                            music_path = os.path.join(base_path, "sound", "music", music_tracks[music_index])
+                            try:
+                                pygame.mixer.music.load(music_path)
+                                pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+                                pygame.mixer.music.play(-1)
+                                print("Now playing:", music_tracks[music_index])
+                                settings_json["Music Track"] = music_index
+                                button.id = f"Music: {music_tracks[music_index]}"
+                            except Exception as e:
+                                print("[ERROR] Failed to play music:", e)
+                            mouse_pressed = False
 
-                        case "Sound Volume":
-                            settings_json["Sound Volume"] += mouse_scroll
-                            settings_json["Sound Volume"] = func.clamp(
-                                settings_json["Sound Volume"], 0, 100
-                            )
+                        else:
+                            match button.id:
+                                case "UI Size":
+                                    settings_json["UI Size"] += mouse_scroll
+                                    settings_json["UI Size"] = func.clamp(
+                                        settings_json["UI Size"], 14, 40
+                                    )
 
-                        case "Music Volume":
-                            settings_json["Music Volume"] += mouse_scroll
-                            settings_json["Music Volume"] = func.clamp(
-                                settings_json["Music Volume"], 0, 100
-                            )
+                                case "Sound Volume":
+                                    settings_json["Sound Volume"] += mouse_scroll
+                                    settings_json["Sound Volume"] = func.clamp(
+                                        settings_json["Sound Volume"], 0, 100
+                                    )
 
-                        case "FPS":
-                            settings_json["FPS"] += mouse_scroll
-                            settings_json["FPS"] = max(settings_json["FPS"], 12)
+                                case "Music Volume":
+                                    settings_json["Music Volume"] += mouse_scroll
+                                    settings_json["Music Volume"] = func.clamp(
+                                        settings_json["Music Volume"], 0, 100
+                                    )
 
-                    if not mouse_pressed:
-                        continue
+                                case "FPS":
+                                    settings_json["FPS"] += mouse_scroll
+                                    settings_json["FPS"] = max(settings_json["FPS"], 12)
+
+                        if not mouse_pressed:
+                            continue
 
                     match button.id:
                         case "Scroll Invert":
@@ -327,8 +351,8 @@ def main():
                             with open(os.path.join(base_path, "settings.json"), "w") as f:
                                 dump(settings_json, f)
 
-                        case "Exit":
-                            current_menu = Menu.MAIN_MENU
+                            case "Exit":
+                                current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
