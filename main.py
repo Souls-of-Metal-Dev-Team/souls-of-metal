@@ -61,11 +61,13 @@ def main():
     pygame.mixer.init()
 
     # Load music
-    music_path = os.path.join(base_path, "sound", "music", "background.mp3")
-    music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+
+    # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
+    music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
+    music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
-    if os.path.exists(music_path):
-        pygame.mixer.music.load(music_path)
+    if os.path.exists(os.path.join(base_path, "sound", music_path)):
+        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
         pygame.mixer.music.set_volume(0.5)
         pygame.mixer.music.play(-1)
     else:
@@ -294,14 +296,16 @@ def main():
             case Menu.SETTINGS:
                 for button in settingsbuttons:
                     hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
-                    
+
                     if not hovered:
                         continue
 
                         # Handle dynamic music ID (e.g., "Music: 1.mp3")
                         if button.id.startswith("Music:") and mouse_pressed and hovered:
                             music_index = (music_index + 1) % len(music_tracks)
-                            music_path = os.path.join(base_path, "sound", "music", music_tracks[music_index])
+                            music_path = os.path.join(
+                                base_path, "sound", "music", music_tracks[music_index]
+                            )
                             try:
                                 pygame.mixer.music.load(music_path)
                                 pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
@@ -351,8 +355,8 @@ def main():
                             with open(os.path.join(base_path, "settings.json"), "w") as f:
                                 dump(settings_json, f)
 
-                            case "Exit":
-                                current_menu = Menu.MAIN_MENU
+                        case "Exit":
+                            current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
                 # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
