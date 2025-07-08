@@ -56,9 +56,7 @@ def main():
 
     display_date = date.strftime("%A, %B %e, %Y")
     pygame.init()
-    screen = pygame.display.set_mode(
-        (1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1
-    )
+    screen = pygame.display.set_mode((1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1)
 
     pygame.mixer.init()
 
@@ -107,18 +105,12 @@ def main():
 
     pygame.font.init()
     cwd = getcwd()
-    ui_font = pygame.font.Font(
-        os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale
-    )
-    title_font = pygame.font.Font(
-        os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale
-    )
+    ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
+    title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load(
-        os.path.join(base_path, "ui", "logo.png")
-    ).convert_alpha()
+    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
     current_menu = Menu.MAIN_MENU
     tick = 0
@@ -141,54 +133,52 @@ def main():
         countries_data = load(f)
     countries = Countries(countries_data)
     map = Map("Modern World", (0, 0), 1)
-    scaled_maps = []
-    for i in range(1, 11):
-        scaled_maps.append(pygame.transform.scale_by(map.cmap, i))
+    scaled_maps = [pygame.transform.scale_by(map.cmap, i) for i in range(1, 11)]
     player_country = None
 
     selected_country_rgb = 0
 
     menubuttons = [
-        Button("Start Game", (200, 400), (160, 40), 5),
-        Button("Continue Game", (200, 500), (160, 40), 5),
-        Button("Settings", (200, 600), (160, 40), 5),
-        Button("Credits", (200, 700), (160, 40), 5),
-        Button("Exit", (200, 800), (160, 40), 5),
+        Button("Start Game", (200, 400), (160, 40), 5, settings_json),
+        Button("Continue Game", (200, 500), (160, 40), 5, settings_json),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json),
+        Button("Credits", (200, 700), (160, 40), 5, settings_json),
+        Button("Exit", (200, 800), (160, 40), 5, settings_json),
     ]
 
     settingsbuttons = [
-        Button("UI Size", (200, 200), (160, 40), 5),
-        Button("FPS", (200, 300), (160, 40), 5),
-        Button("Sound Volume", (200, 400), (160, 40), 5),
-        Button("Music Volume", (200, 500), (160, 40), 5),
-        Button(f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5),
-        Button("Scroll Invert", (200, 700), (160, 40), 5),
-        Button("Save Settings", (200, 800), (160, 40), 5),
-        Button("Exit", (200, 900), (160, 40), 5),
+        Button("UI Size", (200, 200), (160, 40), 5, settings_json),
+        Button("FPS", (200, 300), (160, 40), 5, settings_json),
+        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json),
+        Button("Music Volume", (200, 500), (160, 40), 5, settings_json),
+        Button(f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5, settings_json),
+        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json),
+        Button("Save Settings", (200, 800), (160, 40), 5, settings_json),
+        Button("Exit", (200, 900), (160, 40), 5, settings_json),
     ]
 
     countryselectbuttons = [
-        Button("Back", (1125, 570), (160, 40), 5),
-        Button("Map Select", (1375, 570), (160, 40), 5),
-        Button("Country List", (1125, 670), (160, 40), 5),
-        Button("Start", (1375, 670), (160, 40), 5),
+        Button("Back", (1125, 570), (160, 40), 5, settings_json),
+        Button("Map Select", (1375, 570), (160, 40), 5, settings_json),
+        Button("Country List", (1125, 670), (160, 40), 5, settings_json),
+        Button("Start", (1375, 670), (160, 40), 5, settings_json),
     ]
 
     mapbuttons = [
-        Button("Diplomacy", (65, 25), (120, 40), 5),
-        Button("Building", (195, 25), (120, 40), 5),
-        Button("Military", (325, 25), (120, 40), 5),
-        Button("Estates ", (455, 25), (120, 40), 5),
-        Button("-", (770, 25), (40, 40), 5),
-        Button("+", (1150, 25), (40, 40), 5),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json),
+        Button("Building", (195, 25), (120, 40), 5, settings_json),
+        Button("Military", (325, 25), (120, 40), 5, settings_json),
+        Button("Estates ", (455, 25), (120, 40), 5, settings_json),
+        Button("-", (770, 25), (40, 40), 5, settings_json),
+        Button("+", (1150, 25), (40, 40), 5, settings_json),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json),
     ]
 
     escapemenubuttons = [
-        Button("Resume", (200, 400), (160, 40), 5),
-        Button("Settings", (200, 600), (160, 40), 5),
-        Button("Back to Main Menu", (200, 500), (160, 40), 5),
+        Button("Resume", (200, 400), (160, 40), 5, settings_json),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json),
+        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -264,9 +254,7 @@ def main():
                 surface.fill((0, 0, 0))
                 screen.blit(surface, (0, 0))
                 for button in escapemenubuttons:
-                    hovered = button.draw(
-                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                    )
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -286,9 +274,7 @@ def main():
                 screen.blit(game_logo, (30, 30))
 
                 for button in menubuttons:
-                    hovered = button.draw(
-                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                    )
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -306,13 +292,11 @@ def main():
                             global_run = False
 
             case Menu.SETTINGS:
-                    for button in settingsbuttons:
-                        hovered = button.draw(
-                            screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                        )
-
-                        if not hovered:
-                            continue
+                for button in settingsbuttons:
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    
+                    if not hovered:
+                        continue
 
                         # Handle dynamic music ID (e.g., "Music: 1.mp3")
                         if button.id.startswith("Music:") and mouse_pressed and hovered:
@@ -356,18 +340,16 @@ def main():
                         if not mouse_pressed:
                             continue
 
-                        match button.id:
-                            case "Scroll Invert":
-                                settings_json["Scroll Invert"] = func.clamp(
-                                    settings_json["Scroll Invert"], 0, 1
-                                )
-                                settings_json["Scroll Invert"] = (
-                                    settings_json["Scroll Invert"] * -2 + 1
-                                )
+                    match button.id:
+                        case "Scroll Invert":
+                            settings_json["Scroll Invert"] = func.clamp(
+                                settings_json["Scroll Invert"], 0, 1
+                            )
+                            settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
 
-                            case "Save Settings":
-                                with open(os.path.join(base_path, "settings.json"), "w") as f:
-                                    dump(settings_json, f)
+                        case "Save Settings":
+                            with open(os.path.join(base_path, "settings.json"), "w") as f:
+                                dump(settings_json, f)
 
                             case "Exit":
                                 current_menu = Menu.MAIN_MENU
@@ -419,9 +401,7 @@ def main():
                     player_country = minor.id
 
                 for button in countryselectbuttons:
-                    hovered = button.draw(
-                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                    )
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -494,9 +474,7 @@ def main():
 
                 # Render map
                 # screen.blit(scaled_map, map_rect.topleft)
-                screen.blit(
-                    scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y)
-                )
+                screen.blit(scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y))
                 screen.blit(
                     scaled_map,
                     (
@@ -525,8 +503,7 @@ def main():
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
-                            if selected_country_rgb
-                            in countries.colorsToCountries.keys()
+                            if selected_country_rgb in countries.colorsToCountries.keys()
                             else ""
                         )
                         center = province_centers[selected_province_id]
@@ -543,12 +520,8 @@ def main():
 
                 # Transform coord relative to map to screen coord
                 division_screen_pos = pygame.Vector2()
-                division_screen_pos.x = (
-                    division_pos.x * map_rect.width / map.cmap.get_width()
-                )
-                division_screen_pos.y = (
-                    division_pos.y * map_rect.height / map.cmap.get_height()
-                )
+                division_screen_pos.x = division_pos.x * map_rect.width / map.cmap.get_width()
+                division_screen_pos.y = division_pos.y * map_rect.height / map.cmap.get_height()
                 division_screen_pos += map_rect.topleft
 
                 # Draw division
@@ -576,9 +549,7 @@ def main():
                         # NOTE(soi): this feels inneficient
                         case "Diplomacy":
                             if selected_country_rgb in countries.colorsToCountries:
-                                country = countries.colorsToCountries[
-                                    selected_country_rgb
-                                ]
+                                country = countries.colorsToCountries[selected_country_rgb]
                                 screen.blit(
                                     countries.countriesToFlags[country],
                                     (80 + sidebar_pos, 85),
@@ -587,16 +558,10 @@ def main():
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
                                     for i, character in reversed(
                                         list(
-                                            enumerate(
-                                                countries.Display_Characters[
-                                                    country
-                                                ].keys()
-                                            )
+                                            enumerate(countries.Display_Characters[country].keys())
                                         )
                                     ):
-                                        screen.blit(
-                                            character, (120 * i + sidebar_pos + 80, 255)
-                                        )
+                                        screen.blit(character, (120 * i + sidebar_pos + 80, 255))
                                         if character.get_rect(
                                             left=120 * i + sidebar_pos + 80, top=255
                                         ).collidepoint(mouse_pos):
@@ -660,9 +625,7 @@ def main():
                 else:
                     sidebar_pos = max(sidebar_pos - 45, -625)
                 for button in mapbuttons:
-                    hovered = button.draw(
-                        screen, mouse_pos, mouse_pressed, settings_json, tick, ui_font
-                    )
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
                     if not mouse_pressed or not hovered:
                         continue
                     match button.id:
