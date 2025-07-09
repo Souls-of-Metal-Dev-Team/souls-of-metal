@@ -7,6 +7,8 @@
 [![Development Status](https://img.shields.io/badge/Status-In%20Development-orange.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
+> **⚠️ Development Notice**: This project is currently in **early development stage**. Features are actively being developed and the game is not yet complete. Expect frequent changes and some features may not be fully functional. 🚧
+
 ## 📋 Table of Contents
 - [🎯 What is Souls of Metal?](#-what-is-souls-of-metal)
 - [✨ Features](#-features)
