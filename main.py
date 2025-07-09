@@ -294,7 +294,7 @@ def main():
                 screen.blit(game_logo, (30, 30))
 
                 for button in menubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -313,7 +313,7 @@ def main():
 
             case Menu.SETTINGS:
                 for button in settingsbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
 
                     if not hovered:
                         continue
@@ -423,7 +423,7 @@ def main():
                     player_country = minor.id
 
                 for button in countryselectbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -572,9 +572,42 @@ def main():
                         case "Diplomacy":
                             if selected_country_rgb in countries.colorsToCountries:
                                 country = countries.colorsToCountries[selected_country_rgb]
+                                countrystats = countries.countryData[country][-1]
                                 screen.blit(
                                     countries.countriesToFlags[country],
                                     (80 + sidebar_pos, 85),
+                                )
+                                screen.blit(
+                                    ui_font.render(
+                                        f"Political power:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (150 + sidebar_pos, 480),
+                                )
+                                screen.blit(
+                                    ui_font.render(
+                                        f"Stability:{countrystats[1]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (150 + sidebar_pos, 510),
+                                )
+                                screen.blit(
+                                    ui_font.render(
+                                        f"Money:{countrystats[2]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (150 + sidebar_pos, 540),
+                                )
+                                screen.blit(
+                                    ui_font.render(
+                                        f"Manpower:{countrystats[3]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (150 + sidebar_pos, 570),
                                 )
                                 if country in countries.Characters:
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
@@ -651,7 +684,7 @@ def main():
                 else:
                     sidebar_pos = max(sidebar_pos - 45, -625)
                 for button in mapbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
                     if not mouse_pressed or not hovered:
                         continue
                     match button.id:

@@ -54,7 +54,13 @@ class Button:
         # NOTE(soi): yea pygame already has a thing for centering rects, should read the documentation more smsmsmh
         self.rect.center = pos
 
-    def draw(self, screen, mouse_pos, mouse_pressed, tick, ui_font):
+    def draw(
+        self,
+        screen,
+        mouse_pos,
+        mouse_pressed,
+        tick,
+    ):
         _ = tick
 
         hovered = pygame.Rect.collidepoint(self.rect, mouse_pos)
