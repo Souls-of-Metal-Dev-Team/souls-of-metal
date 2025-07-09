@@ -3,7 +3,7 @@ from json import load
 from re import escape
 import pygame
 from pygame.rect import Rect
-from func import round_corners, clamp, truncate
+from func import outline, round_corners, clamp, truncate
 import globals
 
 base_path = os.path.dirname(__file__)
@@ -21,7 +21,7 @@ class Button:
     # last_tick = 0
     img = False
 
-    def __init__(self, id, pos, size, thicc, settings_json):
+    def __init__(self, id, pos, size, thicc, settings_json, ui_font):
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
@@ -44,6 +44,8 @@ class Button:
             else self.id
         )
 
+        self.hovered_text = ui_font.render(self.text, fontalias, secondary)
+        self.normal_text = ui_font.render(self.text, fontalias, primary)
         # NOTE(soi): might fuck up some buttons widths but idc i want my buttons to be like my women
         # R O T U N D
         # scaled_size[0] += 2 * scaled_size[1]
@@ -86,6 +88,7 @@ class Button:
 
         pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
 
+        print(self.img)
         if self.img:
             screen.blit(
                 self.img,
@@ -95,9 +98,7 @@ class Button:
                 ),
             )
         if self.text:
-            text_surface = ui_font.render(
-                self.text, fontalias, secondary if hovered and mouse_pressed else primary
-            )
+            text_surface = self.hovered_text if hovered else self.normal_text
             screen.blit(
                 text_surface,
                 (

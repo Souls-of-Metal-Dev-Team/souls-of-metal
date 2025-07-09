@@ -1,7 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-import func
+from func import outline, clamp
 from os import getcwd
 from classes import (
     Button,
@@ -141,46 +141,48 @@ def main():
     selected_country_rgb = 0
 
     menubuttons = [
-        Button("Start Game", (200, 400), (160, 40), 5, settings_json),
-        Button("Continue Game", (200, 500), (160, 40), 5, settings_json),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json),
-        Button("Credits", (200, 700), (160, 40), 5, settings_json),
-        Button("Exit", (200, 800), (160, 40), 5, settings_json),
+        Button("Start Game", (200, 400), (160, 40), 5, settings_json, ui_font),
+        Button("Continue Game", (200, 500), (160, 40), 5, settings_json, ui_font),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font),
+        Button("Credits", (200, 700), (160, 40), 5, settings_json, ui_font),
+        Button("Exit", (200, 800), (160, 40), 5, settings_json, ui_font),
     ]
 
     settingsbuttons = [
-        Button("UI Size", (200, 200), (160, 40), 5, settings_json),
-        Button("FPS", (200, 300), (160, 40), 5, settings_json),
-        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json),
-        Button("Music Volume", (200, 500), (160, 40), 5, settings_json),
-        Button(f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5, settings_json),
-        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json),
-        Button("Save Settings", (200, 800), (160, 40), 5, settings_json),
-        Button("Exit", (200, 900), (160, 40), 5, settings_json),
+        Button("UI Size", (200, 200), (160, 40), 5, settings_json, ui_font),
+        Button("FPS", (200, 300), (160, 40), 5, settings_json, ui_font),
+        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json, ui_font),
+        Button("Music Volume", (200, 500), (160, 40), 5, settings_json, ui_font),
+        Button(
+            f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5, settings_json, ui_font
+        ),
+        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json, ui_font),
+        Button("Save Settings", (200, 800), (160, 40), 5, settings_json, ui_font),
+        Button("Exit", (200, 900), (160, 40), 5, settings_json, ui_font),
     ]
 
     countryselectbuttons = [
-        Button("Back", (1125, 570), (160, 40), 5, settings_json),
-        Button("Map Select", (1375, 570), (160, 40), 5, settings_json),
-        Button("Country List", (1125, 670), (160, 40), 5, settings_json),
-        Button("Start", (1375, 670), (160, 40), 5, settings_json),
+        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font),
+        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font),
+        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font),
+        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font),
     ]
 
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json),
-        Button("Building", (195, 25), (120, 40), 5, settings_json),
-        Button("Military", (325, 25), (120, 40), 5, settings_json),
-        Button("Estates ", (455, 25), (120, 40), 5, settings_json),
-        Button("-", (770, 25), (40, 40), 5, settings_json),
-        Button("+", (1150, 25), (40, 40), 5, settings_json),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Estates ", (455, 25), (120, 40), 5, settings_json, ui_font),
+        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
+        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5, settings_json),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
     ]
 
     escapemenubuttons = [
-        Button("Resume", (200, 400), (160, 40), 5, settings_json),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json),
-        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json),
+        Button("Resume", (200, 400), (160, 40), 5, settings_json, ui_font),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font),
+        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json, ui_font),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -217,7 +219,7 @@ def main():
                     if current_menu == Menu.COUNTRY_SELECT:
                         major_country_select.update(mouse_scroll)
                         major_country_select.scroll -= mouse_scroll
-                        major_country_select.scroll = func.clamp(
+                        major_country_select.scroll = clamp(
                             major_country_select.scroll,
                             0,
                             len(major_country_select.majors) - 5,
@@ -256,7 +258,7 @@ def main():
                 surface.fill((0, 0, 0))
                 screen.blit(surface, (0, 0))
                 for button in escapemenubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick, ui_font)
+                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
                     if not mouse_pressed or not hovered:
                         continue
 
@@ -346,7 +348,7 @@ def main():
 
                     match button.id:
                         case "Scroll Invert":
-                            settings_json["Scroll Invert"] = func.clamp(
+                            settings_json["Scroll Invert"] = clamp(
                                 settings_json["Scroll Invert"], 0, 1
                             )
                             settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
@@ -455,7 +457,7 @@ def main():
 
                 # Zoom
                 map.scale += mouse_scroll
-                map.scale = func.clamp(map.scale, 2, 10)
+                map.scale = clamp(map.scale, 2, 10)
 
                 camera_pos = mouse_world_pos * map.scale - pygame.Vector2(mouse_pos)
 
@@ -614,12 +616,16 @@ def main():
                                                         ),
                                                     )
                                 screen.blit(
-                                    ui_font.render(
-                                        globals.language_translations[country],
-                                        fontalias,
-                                        primary,
+                                    outline(
+                                        title_font.render(
+                                            globals.language_translations[country],
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        7,
+                                        tertiary,
                                     ),
-                                    (80 + sidebar_pos, 400),
+                                    (150 + sidebar_pos, 350),
                                 )
                         case _:
                             print("uhoh")
