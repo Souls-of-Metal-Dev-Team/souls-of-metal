@@ -69,7 +69,6 @@ def main():
     if os.path.exists(os.path.join(base_path, "sound", music_path)):
         pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
         pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
     else:
         print("[WARNING] Music file not found at:", music_path)
 
@@ -193,6 +192,15 @@ def main():
     global global_run
     global_run = True
     while global_run:
+        if not pygame.mixer.music.get_busy():
+            music_path = random.choice(music_tracks)
+            random.shuffle(music_tracks)
+            if os.path.exists(os.path.join(base_path, "sound", music_path)):
+                pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                pygame.mixer.music.set_volume(0.5)
+            else:
+                print("[WARNING] Music file not found at:", music_path)
+
         mouse_rel = pygame.mouse.get_rel()
         mouse_pos = pygame.mouse.get_pos()
         mouse_scroll = 0
