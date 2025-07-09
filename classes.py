@@ -88,7 +88,6 @@ class Button:
 
         pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
 
-        print(self.img)
         if self.img:
             screen.blit(
                 self.img,
@@ -210,7 +209,6 @@ class MinorCountrySelect(pygame.sprite.Sprite):
         # self.max = 8
         self.min = scroll
         self.max = min(len(self.minors), 6 + scroll)
-        print(self.min, self.max)
 
 
 class MinorCountry:

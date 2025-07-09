@@ -63,15 +63,20 @@ def main():
     # Load music
 
     # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
+    SONG_FINISHED = pygame.USEREVENT + 1
+    # NOTE(soi): ehhhhhhhhh
+    pygame.mixer.music.set_endevent(SONG_FINISHED)
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
-    if os.path.exists(os.path.join(base_path, "sound", music_path)):
+    if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+        print(music_path)
         pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
         pygame.mixer.music.set_volume(0.5)
+
+        pygame.mixer.music.play(0)
     else:
         print("[WARNING] Music file not found at:", music_path)
-
     with open(os.path.join(base_path, "translation.json")) as f:
         globals.language_translations = load(f)
 
@@ -192,15 +197,6 @@ def main():
     global global_run
     global_run = True
     while global_run:
-        if not pygame.mixer.music.get_busy():
-            music_path = random.choice(music_tracks)
-            random.shuffle(music_tracks)
-            if os.path.exists(os.path.join(base_path, "sound", music_path)):
-                pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
-                pygame.mixer.music.set_volume(0.5)
-            else:
-                print("[WARNING] Music file not found at:", music_path)
-
         mouse_rel = pygame.mouse.get_rel()
         mouse_pos = pygame.mouse.get_pos()
         mouse_scroll = 0
@@ -254,6 +250,18 @@ def main():
                 case pygame.K_ESCAPE:
                     if event.button == 1:
                         current_menu = Menu.MAIN_MENU
+            # NOTE(soi): this doesnt woek in the match statement and idk why
+            if event.type == SONG_FINISHED:
+                music_path = random.choice(music_tracks)
+                random.shuffle(music_tracks)
+                if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+                    print(music_path)
+                    pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                    pygame.mixer.music.set_volume(0.5)
+
+                    pygame.mixer.music.play(0)
+                else:
+                    print("[WARNING] Music file not found at:", music_path)
 
         screen.fill((0, 0, 0))
         if current_menu != Menu.GAME:
