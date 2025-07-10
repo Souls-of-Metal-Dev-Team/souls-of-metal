@@ -60,26 +60,6 @@ def main():
 
     pygame.mixer.init()
 
-    # Load music
-
-    # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
-    SONG_FINISHED = pygame.USEREVENT + 1
-    # NOTE(soi): ehhhhhhhhh
-    pygame.mixer.music.set_endevent(SONG_FINISHED)
-    music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
-    music_path = random.choice(music_tracks)
-    random.shuffle(music_tracks)
-    if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-        print(music_path)
-        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
-        pygame.mixer.music.set_volume(0.5)
-
-        pygame.mixer.music.play(0)
-    else:
-        print("[WARNING] Music file not found at:", music_path)
-    with open(os.path.join(base_path, "translation.json")) as f:
-        globals.language_translations = load(f)
-
     # NOTE(soi): kepping this at game for debugging reasons
     current_menu = Menu.GAME
     tick = 0
@@ -107,6 +87,25 @@ def main():
     with open(os.path.join(base_path, "province-centers.json")) as f:
         province_centers = load(f)
 
+    # Load music
+
+    # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
+    SONG_FINISHED = pygame.USEREVENT + 1
+    # NOTE(soi): ehhhhhhhhh
+    pygame.mixer.music.set_endevent(SONG_FINISHED)
+    music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
+    music_path = random.choice(music_tracks)
+    random.shuffle(music_tracks)
+    if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+        print(music_path)
+        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+        pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+
+        pygame.mixer.music.play(0)
+    else:
+        print("[WARNING] Music file not found at:", music_path)
+    with open(os.path.join(base_path, "translation.json")) as f:
+        globals.language_translations = load(f)
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
@@ -233,9 +232,6 @@ def main():
                             len(major_country_select.majors),
                             6 + major_country_select.scroll,
                         )
-                    elif current_menu == Menu.SETTINGS:
-                        for button in settingsbuttons:
-
 
                     # elif current_menu == Menu.GAME:
                     #     map.scale = func.clamp(map.scale - (mouse_scroll / 12), 1, 3)
@@ -261,7 +257,7 @@ def main():
                 if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
                     print(music_path)
                     pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
-                    pygame.mixer.music.set_volume(0.5)
+                    pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                     pygame.mixer.music.play(0)
                 else:
