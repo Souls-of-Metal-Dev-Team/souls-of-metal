@@ -78,9 +78,10 @@ def main():
         settings_json = {
             "Scroll Invert": 1,
             "UI Size": 14,
-            "FPS": 144,
+            "FPS": 60,
             "Sound Volume": 100,
             "Music Volume": 100,
+            "Music Track": "FDJ"
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
