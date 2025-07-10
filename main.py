@@ -235,15 +235,7 @@ def main():
                         )
                     elif current_menu == Menu.SETTINGS:
                         for button in settingsbuttons:
-                            print(button.text)
-                            button.text = (
-                                f"{globals.language_translations[button.id]}: {settings_json[button.id]}"
-                                if button.id in settings_json
-                                else button.id
-                            )
 
-                            button.hovered_text = ui_font.render(button.text, fontalias, secondary)
-                            button.normal_text = ui_font.render(button.text, fontalias, primary)
 
                     # elif current_menu == Menu.GAME:
                     #     map.scale = func.clamp(map.scale - (mouse_scroll / 12), 1, 3)
@@ -326,7 +318,14 @@ def main():
             case Menu.SETTINGS:
                 for button in settingsbuttons:
                     hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
+                    button.text = (
+                        f"{globals.language_translations[button.id]}: {settings_json[button.id]}"
+                        if button.id in settings_json
+                        else button.id
+                    )
 
+                    button.hovered_text = ui_font.render(button.text, fontalias, secondary)
+                    button.normal_text = ui_font.render(button.text, fontalias, primary)
                     if not hovered:
                         continue
 
