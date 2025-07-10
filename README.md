@@ -1,3 +1,22 @@
+# HOW 2 PLAY
+
+### Requirements
+- python3
+
+Download the code.
+```
+git clone https://github.com/Soilad/souls-of-metal.git
+```
+Install pygame.
+```
+pip install pygame
+```
+Go in the game directory and run the game.
+```
+python main.py
+```
+
+
 # todo list
 >diplo ui[eh]<br />
 >military ui<br />
