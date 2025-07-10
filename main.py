@@ -19,6 +19,8 @@ import os
 import sys
 import datetime
 import networkx as nx
+from dataclasses import dataclass
+from typing import Optional
 
 global music_index
 music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
@@ -39,6 +41,73 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
 class CustomEvents:
     SONG_FINISHED = pygame.USEREVENT + 1
+
+
+@dataclass
+class ButtonConfig:
+    string: str = ""
+    thicc: int = 0
+    image: Optional[pygame.Surface] = None
+
+
+thiccmax = 5
+
+
+def draw_button(
+    screen: pygame.Surface,
+    mouse_pos: tuple[int, int],
+    pos: tuple[int, int],
+    size: tuple[int, int],
+    button: ButtonConfig,
+    text_font: pygame.font.Font,
+):
+    rect = pygame.Rect(pos, size)
+
+    hovered = pygame.Rect.collidepoint(rect, mouse_pos)
+
+    if hovered:
+        if button.thicc < thiccmax:
+            button.thicc += 1
+    else:
+        button.thicc = max(button.thicc - 1, 0)
+
+    scaled_thicc = button.thicc * globals.ui_scale
+
+    if scaled_thicc:
+        pygame.draw.rect(
+            screen,
+            secondary,
+            pygame.Rect(
+                rect.x - scaled_thicc,
+                rect.y - scaled_thicc,
+                rect.width + scaled_thicc * 2,
+                rect.height + scaled_thicc * 2,
+            ),
+            border_radius=rect.height * scaled_thicc // 2,
+        )
+
+    pygame.draw.rect(screen, tertiary, rect, border_radius=rect.height)
+
+    if button.image:
+        screen.blit(
+            button.image,
+            (
+                rect.centerx - button.image.get_width() / 2,
+                rect.y,
+            ),
+        )
+
+    if button.string:
+        text_color = secondary if hovered else primary
+        text_surface: pygame.Surface = text_font.render(button.string, fontalias, text_color)
+        screen.blit(
+            text_surface,
+            (
+                rect.centerx - text_surface.get_width() / 2,
+                rect.y + (thiccmax * globals.ui_scale),
+            ),
+        )
+    return hovered
 
 
 def main():
@@ -79,7 +148,7 @@ def main():
     # NOTE(soi): kepping this at game for debugging reasons
     current_menu = Menu.GAME
     tick = 0
-    mouse_pressed = False
+    mouse_just_pressed = False
     mouse_scroll = 0
 
     with open(os.path.join(base_path, "CountryData.json")) as f:
@@ -146,10 +215,6 @@ def main():
     game_logo = glow(
         pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha(), 5, primary
     )
-
-    current_menu = Menu.MAIN_MENU
-    tick = 0
-    mouse_pressed = False
 
     sprites = pygame.sprite.Group()
 
@@ -410,12 +475,19 @@ def main():
 
     camera_pos = pygame.Vector2()
 
+    escape_buttons = [
+        ButtonConfig("Resume"),
+        ButtonConfig("Back to Main Menu"),
+        ButtonConfig("Settings"),
+    ]
+
     global global_run
     global_run = True
     while global_run:
         mouse_rel = pygame.mouse.get_rel()
         mouse_pos = pygame.mouse.get_pos()
         mouse_scroll = 0
+        mouse_just_pressed = False
 
         for event in pygame.event.get():
             match event.type:
@@ -446,7 +518,7 @@ def main():
                                 current_menu = Menu.ESCAPEMENU
 
                 case pygame.MOUSEWHEEL:
-                    mouse_scroll = settings_json["Scroll Invert"] * event.y
+                    mouse_scroll = -settings_json["Scroll Invert"] * event.y
 
                     if current_menu == Menu.COUNTRY_SELECT:
                         major_country_select.scroll -= mouse_scroll
@@ -463,30 +535,54 @@ def main():
 
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        mouse_pressed = True
+                        mouse_just_pressed = True
 
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
-                        mouse_pressed = False
+                        mouse_just_pressed = False
 
+                case pygame.K_ESCAPE:
+                    if event.button == 1:
+                        current_menu = Menu.MAIN_MENU
+            # NOTE(soi): this doesnt woek in the match statement and idk why
+            if event.type == SONG_FINISHED:
+                music_path = random.choice(music_tracks)
+                random.shuffle(music_tracks)
+                if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+                    print(music_path)
+                    pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                    pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+
+                    pygame.mixer.music.play(0)
+                else:
+                    print("[WARNING] Music file not found at:", music_path)
+
+        # Clear screen
         screen.fill((0, 0, 0))
+
         if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
 
         match current_menu:
-            case Menu.ESCAPEMENU:  # Why can't I use != :sob:
-                surface = pygame.Surface((screen.get_width(), screen.get_height()))
-                surface.set_alpha(180)
-                surface.fill((0, 0, 0))
-                screen.blit(surface, (0, 0))
-                for button in escapemenubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+            case Menu.ESCAPEMENU:
+                # NOTE(pol): This should be a separate asset
+                dark_overlay = pygame.Surface((screen.get_width(), screen.get_height()))
+                dark_overlay.set_alpha(180)
+                dark_overlay.fill((0, 0, 0))
+                screen.blit(dark_overlay, (0, 0))
+
+                size: tuple[int, int] = (160, 40)
+                padding: int = 20
+                y: int = screen.get_height() // 2 - padding - size[1]
+
+                for button in escape_buttons:
+                    hovered = draw_button(screen, mouse_pos, (100, y), size, button, ui_font)
+                    y += size[1] + padding
+
+                    if not mouse_just_pressed or not hovered:
                         continue
 
-                    mouse_pressed = False  # Eat input
-
-                    match button.id:
+                    match button.string:
                         case "Resume":
                             current_menu = Menu.GAME
                         case "Settings":
@@ -500,12 +596,12 @@ def main():
                 screen.blit(game_logo, (30, 30))
 
                 for button in menubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                    if not mouse_just_pressed or not hovered:
                         continue
 
                     # NOTE(pol): Eat input
-                    mouse_pressed = False
+                    mouse_just_pressed = False
 
                     match button.id:
                         case "Settings":
@@ -519,7 +615,7 @@ def main():
 
             case Menu.SETTINGS:
                 for button in settingsbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
                     button.text = (
                         f"{globals.language_translations[button.id]}: {settings_json[button.id]}"
                         if button.id in settings_json
@@ -564,12 +660,10 @@ def main():
                                 dump(settings_json, f)
 
                         case "Exit":
-                            if mouse_pressed:
+                            if mouse_just_pressed:
                                 current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
-                # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
-                # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
                 sprites.draw(screen)
                 pygame.draw.rect(
                     major_country_select.image,
@@ -593,9 +687,9 @@ def main():
                             mouse_pos[1] - major_country_select.rect[0][1],
                         ),
                         player_country,
-                        mouse_pressed,
+                        mouse_just_pressed,
                     )
-                    if not mouse_pressed or not hovered:
+                    if not mouse_just_pressed or not hovered:
                         continue
 
                     player_country = major.id
@@ -607,15 +701,15 @@ def main():
                         minor_country_select.image,
                         mouse_pos,
                         player_country,
-                        mouse_pressed,
+                        mouse_just_pressed,
                     )
-                    if not mouse_pressed or not hovered:
+                    if not mouse_just_pressed or not hovered:
                         continue
                     player_country = minor.id
 
                 for button in countryselectbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                    if not mouse_just_pressed or not hovered:
                         continue
 
                     match button.id:
@@ -698,7 +792,7 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
-                if hovered and mouse_pressed:
+                if hovered and mouse_just_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
                     pixel.x = coord.x * map.cmap.get_width() / map_rect.width
@@ -891,8 +985,8 @@ def main():
                 else:
                     sidebar_pos = max(sidebar_pos - 45, -625)
                 for button in mapbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                    if not mouse_just_pressed or not hovered:
                         continue
                     match button.id:
                         case "-":
