@@ -1,7 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-from func import outline, clamp
+from func import outline, clamp, compass
 from os import getcwd
 from classes import (
     Button,
@@ -552,6 +552,7 @@ def main():
                     width=10,
                 )
                 if sidebar_tab:
+                    compass(screen, (0.5, -0.2, 0.314), tick / 100)
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient

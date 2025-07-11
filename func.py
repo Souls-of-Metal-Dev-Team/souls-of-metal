@@ -1,9 +1,32 @@
 import pygame
 from pygame.transform import scale
+from math import cos, sin
 
 
 def clamp(value, a, b):
     return max(min(value, b), a)
+
+
+def compass(screen, pos, tick):
+    position = pygame.math.Vector2(100, 500)
+    x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + position
+    x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + position
+    y_right = pygame.math.Vector2(-sin(tick), -cos(tick) / (2**0.5)) * 100 + position
+    y_left = pygame.math.Vector2(sin(tick), cos(tick) / (2**0.5)) * 100 + position
+    z_right = pygame.math.Vector2(0, 1 / (2**0.5)) * 100 + position
+    z_left = pygame.math.Vector2(0, -1 / (2**0.5)) * 100 + position
+    projected_pos = (
+        pygame.math.Vector2(
+            pos[0] * cos(tick) - pos[1] * sin(tick),
+            -1 / (2**0.5) * ((pos[1] * cos(tick)) + (pos[0] * sin(tick)) - pos[2]),
+        )
+        * 100
+        + position
+    )
+    pygame.draw.line(screen, (255, 255, 255), x_right, x_left)
+    pygame.draw.line(screen, (255, 255, 255), y_right, y_left)
+    pygame.draw.line(screen, (255, 255, 255), z_right, z_left)
+    pygame.draw.circle(screen, (255, 0, 127), projected_pos, 5)
 
 
 # If you change this function the ui breaks for some reason
