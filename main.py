@@ -1,7 +1,11 @@
 import pygame
 import random
 from CountryData import Countries
+<<<<<<< HEAD
 from func import outline, glow, shadow, clamp, compass, pichart
+=======
+from func import outline, clamp
+>>>>>>> d9db4ab (Removed globals and redundant variables.)
 from classes import (
     Button,
     MajorCountrySelect,
@@ -22,19 +26,18 @@ import networkx as nx
 from dataclasses import dataclass
 from typing import Optional
 
-global music_index
-music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
-music_index = 0
-
-base_path = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
+<<<<<<< HEAD
 pygame.display.set_caption("Soul Of Steel")
 icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
 pygame.display.set_icon(icon)
+=======
+Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
+>>>>>>> d9db4ab (Removed globals and redundant variables.)
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
@@ -111,10 +114,16 @@ def draw_button(
 
 
 def main():
-    global music_index
+    pygame.display.set_caption("Soul Of Steel")
+    icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
+    pygame.display.set_icon(icon)
+
     speed = 0
     sidebar_tab = ""
     sidebar_pos = -625
+
+    music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+    music_index = 0
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
@@ -150,10 +159,6 @@ def main():
     tick = 0
     mouse_just_pressed = False
     mouse_scroll = 0
-
-    with open(os.path.join(base_path, "CountryData.json")) as f:
-        countries_data = load(f)
-    countries = Countries(countries_data)
 
     settings_json = None
     try:
@@ -198,7 +203,10 @@ def main():
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
+<<<<<<< HEAD
     smol_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 12 * globals.ui_scale)
+=======
+>>>>>>> d9db4ab (Removed globals and redundant variables.)
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
     compass_axis = (
@@ -227,13 +235,15 @@ def main():
     minor_country_select = MinorCountrySelect(
         os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites
     )
-    with open(
-        os.path.join(base_path, "CountryData.json")
-    ) as f:  # REMEMBER NOT TO USE HARDCODED PATH -minh-
+
+    with open( os.path.join(base_path, "CountryData.json")) as f:
         countries_data = load(f)
     countries = Countries(countries_data)
+
     map = Map("Modern World", (0, 0), 1)
+
     scaled_maps = [pygame.transform.scale_by(map.cmap, i) for i in range(1, 11)]
+
     player_country = None
 
     selected_country_rgb = 0
