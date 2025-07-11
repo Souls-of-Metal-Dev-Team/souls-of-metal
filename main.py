@@ -31,13 +31,10 @@ if getattr(sys, "frozen", False):
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-<<<<<<< HEAD
 pygame.display.set_caption("Soul Of Steel")
 icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
 pygame.display.set_icon(icon)
-=======
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
->>>>>>> d9db4ab (Removed globals and redundant variables.)
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
@@ -45,13 +42,13 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 class CustomEvents:
     SONG_FINISHED = pygame.USEREVENT + 1
 
+THICCMAX = 5
 
 @dataclass
 class ButtonConfig:
     string: str = ""
     thicc: int = 0
     image: Optional[pygame.Surface] = None
-
 
 thiccmax = 5
 
@@ -64,12 +61,14 @@ def draw_button(
     button: ButtonConfig,
     text_font: pygame.font.Font,
 ):
+def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[int, int],
+                size: tuple[int, int], text: str, button: ButtonConfig, text_font: pygame.font.Font):
     rect = pygame.Rect(pos, size)
 
     hovered = pygame.Rect.collidepoint(rect, mouse_pos)
 
     if hovered:
-        if button.thicc < thiccmax:
+        if button.thicc < THICCMAX:
             button.thicc += 1
     else:
         button.thicc = max(button.thicc - 1, 0)
@@ -99,17 +98,17 @@ def draw_button(
                 rect.y,
             ),
         )
-
     if button.string:
         text_color = secondary if hovered else primary
-        text_surface: pygame.Surface = text_font.render(button.string, fontalias, text_color)
+        text_surface: pygame.Surface = text_font.render(text, fontalias, text_color)
         screen.blit(
             text_surface,
             (
                 rect.centerx - text_surface.get_width() / 2,
-                rect.y + (thiccmax * globals.ui_scale),
+                rect.y + (THICCMAX * globals.ui_scale),
             ),
         )
+
     return hovered
 
 
@@ -169,9 +168,9 @@ def main():
             "Scroll Invert": 1,
             "UI Size": 14,
             "FPS": 60,
-            "Sound Volume": 100,
-            "Music Volume": 100,
-            "Music Track": "FDJ",
+            "Sound Volume": 50,
+            "Music Volume": 50,
+            "Music Track": "FDJ"
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
@@ -203,10 +202,6 @@ def main():
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
-<<<<<<< HEAD
-    smol_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 12 * globals.ui_scale)
-=======
->>>>>>> d9db4ab (Removed globals and redundant variables.)
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
     compass_axis = (
@@ -491,7 +486,25 @@ def main():
         ButtonConfig("Settings"),
     ]
 
-    global global_run
+    main_menu_buttons = [
+        ButtonConfig("Start Game"),
+        ButtonConfig("Continue Game"),
+        ButtonConfig("Settings"),
+        ButtonConfig("Credits"),
+        ButtonConfig("Exit")
+    ]
+
+    settings_buttons = [
+        ButtonConfig("UI Size"),
+        ButtonConfig("FPS"),
+        ButtonConfig("Sound Volume"),
+        ButtonConfig("Music Volume"),
+        ButtonConfig("Music"),
+        ButtonConfig("Scroll Invert"),
+        ButtonConfig("Save Settings"),
+        ButtonConfig("Exit")
+    ]
+
     global_run = True
     while global_run:
         mouse_rel = pygame.mouse.get_rel()
@@ -528,7 +541,7 @@ def main():
                                 current_menu = Menu.ESCAPEMENU
 
                 case pygame.MOUSEWHEEL:
-                    mouse_scroll = -settings_json["Scroll Invert"] * event.y
+                    mouse_scroll = settings_json["Scroll Invert"] * event.y
 
                     if current_menu == Menu.COUNTRY_SELECT:
                         major_country_select.scroll -= mouse_scroll
@@ -582,11 +595,12 @@ def main():
                 screen.blit(dark_overlay, (0, 0))
 
                 size: tuple[int, int] = (160, 40)
-                padding: int = 20
-                y: int = screen.get_height() // 2 - padding - size[1]
+
+                padding: int = 60
+                y: int = screen.get_height()//2 - padding - size[1]
 
                 for button in escape_buttons:
-                    hovered = draw_button(screen, mouse_pos, (100, y), size, button, ui_font)
+                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
                     y += size[1] + padding
 
                     if not mouse_just_pressed or not hovered:
@@ -602,18 +616,20 @@ def main():
 
             case Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
-
                 screen.blit(game_logo, (30, 30))
 
-                for button in menubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                size: tuple[int, int] = (160, 40)
+                padding: int = 60
+                y: int = 30 + game_logo.get_height()
+
+                for button in main_menu_buttons:
+                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
+                    y += padding + size[1]
+
                     if not mouse_just_pressed or not hovered:
                         continue
 
-                    # NOTE(pol): Eat input
-                    mouse_just_pressed = False
-
-                    match button.id:
+                    match button.string:
                         case "Settings":
                             current_menu = Menu.SETTINGS
                         case "Start Game":
@@ -624,46 +640,47 @@ def main():
                             global_run = False
 
             case Menu.SETTINGS:
-                for button in settingsbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
-                    button.text = (
-                        f"{globals.language_translations[button.id]}: {settings_json[button.id]}"
-                        if button.id in settings_json
-                        else button.id
+                size: tuple[int, int] = (160, 40)
+                padding: int = 60
+                y: int = 200
+
+                for button in settings_buttons:
+                    text: str = (
+                        f"{button.string}: {settings_json[button.string]}"
+                        if button.string in settings_json
+                        else button.string
                     )
 
-                    button.hovered_text = ui_font.render(button.text, fontalias, secondary)
-                    button.normal_text = ui_font.render(button.text, fontalias, primary)
+                    hovered = draw_button(screen, mouse_pos, (120, y), size, text, button, ui_font)
+                    y += padding + size[1]
+
                     if not hovered:
                         continue
 
-                        # Handle dynamic music ID (e.g., "Music: 1.mp3")
-                    match button.id:
+                    match button.string:
                         case "UI Size":
                             settings_json["UI Size"] += mouse_scroll
                             settings_json["UI Size"] = clamp(settings_json["UI Size"], 14, 40)
 
                         case "Sound Volume":
                             settings_json["Sound Volume"] += mouse_scroll
-                            settings_json["Sound Volume"] = clamp(
-                                settings_json["Sound Volume"], 0, 100
-                            )
+                            settings_json["Sound Volume"] = clamp(settings_json["Sound Volume"], 0, 100)
 
                         case "Music Volume":
-                            settings_json["Music Volume"] = clamp(
-                                settings_json["Music Volume"] + mouse_scroll, 0, 100
-                            )
+                            settings_json["Music Volume"] += mouse_scroll
+                            settings_json["Music Volume"] = clamp(settings_json["Music Volume"], 0, 100)
                             pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         case "FPS":
                             settings_json["FPS"] += mouse_scroll
-                            settings_json["FPS"] = max(settings_json["FPS"], 12)
+                            settings_json["FPS"] = clamp(settings_json["FPS"], 12, 999)
 
+                    if not mouse_just_pressed:
+                        continue
+
+                    match button.string:
                         case "Scroll Invert":
-                            settings_json["Scroll Invert"] = clamp(
-                                settings_json["Scroll Invert"], 0, 1
-                            )
-                            settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
+                            settings_json["Scroll Invert"] *= -1
 
                         case "Save Settings":
                             with open(os.path.join(base_path, "settings.json"), "w") as f:
@@ -671,6 +688,8 @@ def main():
 
                         case "Exit":
                             if mouse_just_pressed:
+                                with open(os.path.join(base_path, "settings.json")) as f:
+                                    settings_json = load(f)
                                 current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
