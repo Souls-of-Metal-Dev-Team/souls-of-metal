@@ -98,7 +98,6 @@ def main():
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
     if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-        print(music_path)
         pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
         pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
@@ -114,12 +113,12 @@ def main():
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
     compass_axis = (
-        smol_font.render("socialism", fontalias, primary),
-        smol_font.render("capitalism", fontalias, primary),
-        smol_font.render("globalism", fontalias, primary),
-        smol_font.render("isolationism", fontalias, primary),
-        smol_font.render("anarchism", fontalias, primary),
-        smol_font.render("authoritarianism", fontalias, primary),
+        smol_font.render("socialism", fontalias, secondary),
+        smol_font.render("capitalism", fontalias, secondary),
+        smol_font.render("globalism", fontalias, secondary),
+        smol_font.render("isolationism", fontalias, secondary),
+        smol_font.render("anarchism", fontalias, secondary),
+        smol_font.render("authoritarianism", fontalias, secondary),
     )
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
@@ -264,7 +263,6 @@ def main():
                 music_path = random.choice(music_tracks)
                 random.shuffle(music_tracks)
                 if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                    print(music_path)
                     pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
                     pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
@@ -515,7 +513,6 @@ def main():
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
                     selected_province_id = f"{r}, {g}, {b}"
                     print("selected country :", selected_province_id)
-                    print(sidebar_tab)
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
@@ -606,6 +603,8 @@ def main():
                                 compass(
                                     screen,
                                     pygame.math.Vector2(150 + sidebar_pos, 550),
+                                    primary,
+                                    secondary,
                                     compass_axis,
                                     tick / 100,
                                     pygame.math.Vector3(50, 20, 31.4),

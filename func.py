@@ -7,7 +7,7 @@ def clamp(value, a, b):
     return max(min(value, b), a)
 
 
-def compass(screen, pos, compass_axis, tick, country_ideology):
+def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):
     country_ideology /= 100
     x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + pos
     x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + pos
@@ -29,10 +29,10 @@ def compass(screen, pos, compass_axis, tick, country_ideology):
         * 100
         + pos
     )
-    pygame.draw.line(screen, (255, 255, 255), x_right, x_left)
-    pygame.draw.line(screen, (255, 255, 255), y_right, y_left)
-    pygame.draw.line(screen, (255, 255, 255), z_right, z_left)
-    pygame.draw.circle(screen, (255, 0, 127), projected_pos, 5)
+    pygame.draw.line(screen, line_colour, x_right, x_left)
+    pygame.draw.line(screen, line_colour, y_right, y_left)
+    pygame.draw.line(screen, line_colour, z_right, z_left)
+    pygame.draw.circle(screen, point_colour, projected_pos, 5)
     screen.blit(compass_axis[0], x_right + (2, 0))
     screen.blit(compass_axis[1], x_left + (2, 0))
     screen.blit(compass_axis[2], y_right + (2, 0))
