@@ -81,7 +81,7 @@ def main():
             "FPS": 60,
             "Sound Volume": 100,
             "Music Volume": 100,
-            "Music Track": "FDJ"
+            "Music Track": "FDJ",
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
@@ -110,9 +110,17 @@ def main():
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
-    cwd = getcwd()
+    smol_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 12 * globals.ui_scale)
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
+    compass_axis = (
+        smol_font.render("socialism", fontalias, primary),
+        smol_font.render("capitalism", fontalias, primary),
+        smol_font.render("globalism", fontalias, primary),
+        smol_font.render("isolationism", fontalias, primary),
+        smol_font.render("anarchism", fontalias, primary),
+        smol_font.render("authoritarianism", fontalias, primary),
+    )
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
@@ -552,7 +560,6 @@ def main():
                     width=10,
                 )
                 if sidebar_tab:
-                    compass(screen, (0.5, -0.2, 0.314), tick / 100)
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient
@@ -570,7 +577,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 480),
+                                    (320 + sidebar_pos, 480),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -578,7 +585,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 510),
+                                    (320 + sidebar_pos, 510),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -586,7 +593,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 540),
+                                    (320 + sidebar_pos, 540),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -594,7 +601,14 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 570),
+                                    (320 + sidebar_pos, 570),
+                                )
+                                compass(
+                                    screen,
+                                    pygame.math.Vector2(150 + sidebar_pos, 550),
+                                    compass_axis,
+                                    tick / 100,
+                                    pygame.math.Vector3(50, 20, 31.4),
                                 )
                                 if country in countries.Characters:
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)

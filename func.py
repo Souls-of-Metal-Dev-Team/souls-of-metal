@@ -7,26 +7,38 @@ def clamp(value, a, b):
     return max(min(value, b), a)
 
 
-def compass(screen, pos, tick):
-    position = pygame.math.Vector2(100, 500)
-    x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + position
-    x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + position
-    y_right = pygame.math.Vector2(-sin(tick), -cos(tick) / (2**0.5)) * 100 + position
-    y_left = pygame.math.Vector2(sin(tick), cos(tick) / (2**0.5)) * 100 + position
-    z_right = pygame.math.Vector2(0, 1 / (2**0.5)) * 100 + position
-    z_left = pygame.math.Vector2(0, -1 / (2**0.5)) * 100 + position
+def compass(screen, pos, compass_axis, tick, country_ideology):
+    country_ideology /= 100
+    x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + pos
+    x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + pos
+    y_right = pygame.math.Vector2(-sin(tick), -cos(tick) / (2**0.5)) * 100 + pos
+    y_left = pygame.math.Vector2(sin(tick), cos(tick) / (2**0.5)) * 100 + pos
+    z_right = pygame.math.Vector2(0, 1 / (2**0.5)) * 100 + pos
+    z_left = pygame.math.Vector2(0, -1 / (2**0.5)) * 100 + pos
     projected_pos = (
         pygame.math.Vector2(
-            pos[0] * cos(tick) - pos[1] * sin(tick),
-            -1 / (2**0.5) * ((pos[1] * cos(tick)) + (pos[0] * sin(tick)) - pos[2]),
+            country_ideology[0] * cos(tick) - country_ideology[1] * sin(tick),
+            -1
+            / (2**0.5)
+            * (
+                (country_ideology[1] * cos(tick))
+                + (country_ideology[0] * sin(tick))
+                - country_ideology[2]
+            ),
         )
         * 100
-        + position
+        + pos
     )
     pygame.draw.line(screen, (255, 255, 255), x_right, x_left)
     pygame.draw.line(screen, (255, 255, 255), y_right, y_left)
     pygame.draw.line(screen, (255, 255, 255), z_right, z_left)
     pygame.draw.circle(screen, (255, 0, 127), projected_pos, 5)
+    screen.blit(compass_axis[0], x_right + (2, 0))
+    screen.blit(compass_axis[1], x_left + (2, 0))
+    screen.blit(compass_axis[2], y_right + (2, 0))
+    screen.blit(compass_axis[3], y_left + (2, 0))
+    screen.blit(compass_axis[4], z_right + (2, 0))
+    screen.blit(compass_axis[5], z_left + (2, 0))
 
 
 # If you change this function the ui breaks for some reason
