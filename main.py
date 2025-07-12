@@ -1,7 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-from func import outline, clamp, compass
+from func import outline, clamp, compass, pichart
 from classes import (
     Button,
     MajorCountrySelect,
@@ -211,7 +211,7 @@ def main():
         Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
         Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
         Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Estates ", (455, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font),
         Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
         Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
         # NOTE(soi): oh so thats why buttons should have ids
@@ -610,6 +610,16 @@ def main():
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient
+                        case "Estates":
+                            pichart(
+                                screen,
+                                (150 + sidebar_pos, 200),
+                                100,
+                                {
+                                    "oligarchs": [(255, 90, 189), 0.1],
+                                    "proletariat": [(255, 45, 78), 0.2],
+                                },
+                            )
                         case "Diplomacy":
                             if selected_country_rgb in countries.colorsToCountries:
                                 country = countries.colorsToCountries[selected_country_rgb]
@@ -659,6 +669,7 @@ def main():
                                     tick / 100,
                                     pygame.math.Vector3(50, 20, 31.4),
                                 )
+
                                 if country in countries.Characters:
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
                                     for i, character in reversed(
@@ -747,13 +758,18 @@ def main():
                             sidebar_tab = "Diplomacy"
                         case "Military":
                             sidebar_tab = "Military"
+                        case "Estates":
+                            sidebar_tab = "Estates"
 
                 # NOTE(soi): i feel like we should indicate time based on the day night map thing
                 if (not tick % ((8 - speed) * 10)) and speed:
                     date += datetime.timedelta(days=1)
                     display_date = date.strftime("%A, %B %e, %Y")
                     # NOTE(soi): theres probably a better way to do this
-                    mapbuttons[-1].id = display_date
+                    # mapbuttons[-1].id = display_date
+                    # NOTE(soi): so this is the better way
+                    mapbuttons[-1].hovered_text = ui_font.render(display_date, fontalias, secondary)
+                    mapbuttons[-1].normal_text = ui_font.render(display_date, fontalias, primary)
 
         tick += 1
 

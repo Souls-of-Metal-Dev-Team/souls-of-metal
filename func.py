@@ -1,8 +1,27 @@
 import pygame
+import pygame.gfxdraw
 from math import cos, sin
 
 def clamp(value, a, b):
     return max(min(value, b), a)
+
+def pichart(screen, pos, radius, percentages):
+    start_angle = 0
+    for percent in percentages.values():
+        for i in range(1, 2 * radius):
+            for j in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)):
+                pygame.gfxdraw.pie(
+                    screen,
+                    pos[0] + j[0],
+                    pos[1] + j[1],
+                    i,
+                    int(start_angle * 360),
+                    int(percent[1] * 360),
+                    percent[0],
+                )
+
+        start_angle = percent[1] + 1
+
 
 def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):
     country_ideology /= 100
@@ -26,16 +45,16 @@ def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_
         * 100
         + pos
     )
-    pygame.draw.line(screen, line_colour, x_right, x_left)
-    pygame.draw.line(screen, line_colour, y_right, y_left)
-    pygame.draw.line(screen, line_colour, z_right, z_left)
+    pygame.draw.aaline(screen, line_colour, x_right, x_left)
+    pygame.draw.aaline(screen, line_colour, y_right, y_left)
+    pygame.draw.aaline(screen, line_colour, z_right, z_left)
     pygame.draw.circle(screen, point_colour, projected_pos, 5)
     screen.blit(compass_axis[0], x_right + (2, 0))
     screen.blit(compass_axis[1], x_left + (2, 0))
     screen.blit(compass_axis[2], y_right + (2, 0))
     screen.blit(compass_axis[3], y_left + (2, 0))
-    screen.blit(compass_axis[4], z_right + (2, 0))
-    screen.blit(compass_axis[5], z_left + (2, 0))
+    screen.blit(compass_axis[4], z_right + (2, 6))
+    screen.blit(compass_axis[5], z_left + (2, -24))
 
 
 def lerp(v0, v1, t):
