@@ -1,9 +1,8 @@
 import os
 from json import load
-from re import escape
 import pygame
 from pygame.rect import Rect
-from func import outline, round_corners, clamp, truncate
+from func import round_corners, clamp, truncate
 import globals
 
 base_path = os.path.dirname(__file__)
@@ -125,7 +124,6 @@ class MajorCountrySelect(pygame.sprite.Sprite):
             for k in f.read().split(", "):
                 self.majors.append(MajorCountry(k, [0, count], thicc, ui_font))
                 count += 200
-        # print(len(self.majors))
         self.image = pygame.Surface((700, 1000), pygame.SRCALPHA)
         self.image.fill((255, 255, 255, 0))
         self.rect = ((300, 40), (700, 1000))
@@ -211,10 +209,8 @@ class MinorCountrySelect(pygame.sprite.Sprite):
         self.rect = ((1000, 40), (200, 1000))
 
     def update(self, scroll):
-        # self.min = 3
-        # self.max = 8
         self.min = scroll
-        self.max = min(len(self.minors), 6 + scroll)
+        self.max = min(len(self.minors), 6 - scroll)
 
 
 class MinorCountry:

@@ -29,11 +29,14 @@ if getattr(sys, "frozen", False):
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 pygame.display.set_caption("Soul Of Steel")
 icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
 pygame.display.set_icon(icon)
 
+Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
+
+class CustomEvents:
+    SONG_FINISHED = pygame.USEREVENT+1
 
 def main():
     global music_index
@@ -87,12 +90,9 @@ def main():
     with open(os.path.join(base_path, "province-centers.json")) as f:
         province_centers = load(f)
 
-    # Load music
-
-    # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
-    SONG_FINISHED = pygame.USEREVENT + 1
-    # NOTE(soi): ehhhhhhhhh
-    pygame.mixer.music.set_endevent(SONG_FINISHED)
+    CustomEvents.SONG_FINISHED = pygame.USEREVENT + 1
+    pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
+    print("look at this", CustomEvents.SONG_FINISHED, pygame.USEREVENT, pygame.USEREVENT+1, "and this", pygame.MOUSEMOTION)
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
@@ -209,6 +209,17 @@ def main():
 
         for event in pygame.event.get():
             match event.type:
+                case CustomEvents.SONG_FINISHED:
+                    music_path = random.choice(music_tracks)
+                    random.shuffle(music_tracks)
+                    if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+                        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                        pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+
+                        pygame.mixer.music.play(0)
+                    else:
+                        print("[WARNING] Music file not found at:", music_path)
+
                 case pygame.QUIT:
                     global_run = False
 
@@ -223,11 +234,9 @@ def main():
                                 current_menu = Menu.ESCAPEMENU
 
                 case pygame.MOUSEWHEEL:
-                    # mouse_pressed = True
-                    mouse_scroll = -settings_json["Scroll Invert"] * event.y
+                    mouse_scroll = settings_json["Scroll Invert"] * event.y
 
                     if current_menu == Menu.COUNTRY_SELECT:
-                        major_country_select.update(mouse_scroll)
                         major_country_select.scroll -= mouse_scroll
                         major_country_select.scroll = clamp(
                             major_country_select.scroll,
@@ -240,12 +249,6 @@ def main():
                             6 + major_country_select.scroll,
                         )
 
-                    # elif current_menu == Menu.GAME:
-                    #     map.scale = func.clamp(map.scale - (mouse_scroll / 12), 1, 3)
-                    #     map.cvmap = pygame.transform.scale_by(map.cmap, map.scale)
-                    #     map.pos[0] = -mouse_pos[0] * (map.scale - 1)
-                    #     map.pos[1] = -mouse_pos[1] * (map.scale - 1)
-
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         mouse_pressed = True
@@ -253,21 +256,6 @@ def main():
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_pressed = False
-
-                case pygame.K_ESCAPE:
-                    if event.button == 1:
-                        current_menu = Menu.MAIN_MENU
-            # NOTE(soi): this doesnt woek in the match statement and idk why
-            if event.type == SONG_FINISHED:
-                music_path = random.choice(music_tracks)
-                random.shuffle(music_tracks)
-                if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                    pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
-                    pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
-
-                    pygame.mixer.music.play(0)
-                else:
-                    print("[WARNING] Music file not found at:", music_path)
 
         screen.fill((0, 0, 0))
         if current_menu != Menu.GAME:
@@ -511,7 +499,6 @@ def main():
                     pixel.y = coord.y * map.pmap.get_height() / map_rect.height
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
                     selected_province_id = f"{r}, {g}, {b}"
-                    print("selected country :", selected_province_id)
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
@@ -539,7 +526,6 @@ def main():
                 # Draw division
                 pygame.draw.circle(screen, secondary, division_screen_pos, 5)
 
-                # print(selected_country_rgb)
                 pygame.draw.rect(
                     screen,
                     tertiary,
