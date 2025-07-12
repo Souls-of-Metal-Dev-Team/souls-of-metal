@@ -1,19 +1,13 @@
 import pygame
-from pygame.transform import scale
-
 
 def clamp(value, a, b):
     return max(min(value, b), a)
 
-
-# If you change this function the ui breaks for some reason
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
-
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
-
 
 def outline(surface, thicc, color):
     convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
