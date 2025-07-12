@@ -1,7 +1,42 @@
 import pygame
+from math import cos, sin
 
 def clamp(value, a, b):
     return max(min(value, b), a)
+
+def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):
+    country_ideology /= 100
+    x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + pos
+    x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + pos
+    y_right = pygame.math.Vector2(-sin(tick), -cos(tick) / (2**0.5)) * 100 + pos
+    y_left = pygame.math.Vector2(sin(tick), cos(tick) / (2**0.5)) * 100 + pos
+    z_right = pygame.math.Vector2(0, 1 / (2**0.5)) * 100 + pos
+    z_left = pygame.math.Vector2(0, -1 / (2**0.5)) * 100 + pos
+    projected_pos = (
+        pygame.math.Vector2(
+            country_ideology[0] * cos(tick) - country_ideology[1] * sin(tick),
+            -1
+            / (2**0.5)
+            * (
+                (country_ideology[1] * cos(tick))
+                + (country_ideology[0] * sin(tick))
+                - country_ideology[2]
+            ),
+        )
+        * 100
+        + pos
+    )
+    pygame.draw.line(screen, line_colour, x_right, x_left)
+    pygame.draw.line(screen, line_colour, y_right, y_left)
+    pygame.draw.line(screen, line_colour, z_right, z_left)
+    pygame.draw.circle(screen, point_colour, projected_pos, 5)
+    screen.blit(compass_axis[0], x_right + (2, 0))
+    screen.blit(compass_axis[1], x_left + (2, 0))
+    screen.blit(compass_axis[2], y_right + (2, 0))
+    screen.blit(compass_axis[3], y_left + (2, 0))
+    screen.blit(compass_axis[4], z_right + (2, 0))
+    screen.blit(compass_axis[5], z_left + (2, 0))
+
 
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t

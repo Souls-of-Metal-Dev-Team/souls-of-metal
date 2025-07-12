@@ -1,7 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-from func import outline, clamp
+from func import outline, clamp, compass
 from classes import (
     Button,
     MajorCountrySelect,
@@ -97,7 +97,6 @@ def main():
     sidebar_pos = -625
 
     music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
-    music_index = 0
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
@@ -110,8 +109,8 @@ def main():
         month = int(ymd[1])
         day = int(ymd[2])
         date = datetime.date(year, month, day)
-
     display_date = date.strftime("%A, %B %e, %Y")
+
     pygame.init()
     screen = pygame.display.set_mode((1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1)
 
@@ -138,10 +137,9 @@ def main():
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
+
     with open(os.path.join(base_path, "province-centers.json")) as f:
         province_centers = load(f)
-
-    # Load music
 
     # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
     SONG_FINISHED = pygame.USEREVENT + 1
@@ -151,7 +149,6 @@ def main():
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
     if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-        print(music_path)
         pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
         pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
@@ -163,8 +160,17 @@ def main():
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
+    smol_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 12 * globals.ui_scale)
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
+    compass_axis = (
+        smol_font.render("socialism", fontalias, secondary),
+        smol_font.render("capitalism", fontalias, secondary),
+        smol_font.render("globalism", fontalias, secondary),
+        smol_font.render("isolationism", fontalias, secondary),
+        smol_font.render("anarchism", fontalias, secondary),
+        smol_font.render("authoritarianism", fontalias, secondary),
+    )
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
@@ -296,7 +302,6 @@ def main():
                 music_path = random.choice(music_tracks)
                 random.shuffle(music_tracks)
                 if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                    print(music_path)
                     pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
                     pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
@@ -558,7 +563,6 @@ def main():
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
                     selected_province_id = f"{r}, {g}, {b}"
                     print("selected country :", selected_province_id)
-                    print(sidebar_tab)
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
@@ -620,7 +624,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 480),
+                                    (320 + sidebar_pos, 480),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -628,7 +632,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 510),
+                                    (320 + sidebar_pos, 510),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -636,7 +640,7 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 540),
+                                    (320 + sidebar_pos, 540),
                                 )
                                 screen.blit(
                                     ui_font.render(
@@ -644,7 +648,16 @@ def main():
                                         fontalias,
                                         primary,
                                     ),
-                                    (150 + sidebar_pos, 570),
+                                    (320 + sidebar_pos, 570),
+                                )
+                                compass(
+                                    screen,
+                                    pygame.math.Vector2(150 + sidebar_pos, 550),
+                                    primary,
+                                    secondary,
+                                    compass_axis,
+                                    tick / 100,
+                                    pygame.math.Vector3(50, 20, 31.4),
                                 )
                                 if country in countries.Characters:
                                     # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
