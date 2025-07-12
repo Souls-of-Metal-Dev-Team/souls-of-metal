@@ -1,11 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-<<<<<<< HEAD
 from func import outline, glow, shadow, clamp, compass, pichart
-=======
-from func import outline, clamp
->>>>>>> d9db4ab (Removed globals and redundant variables.)
 from classes import (
     Button,
     MajorCountrySelect,
@@ -42,13 +38,16 @@ Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 class CustomEvents:
     SONG_FINISHED = pygame.USEREVENT + 1
 
+
 THICCMAX = 5
+
 
 @dataclass
 class ButtonConfig:
     string: str = ""
     thicc: int = 0
     image: Optional[pygame.Surface] = None
+
 
 thiccmax = 5
 
@@ -58,11 +57,10 @@ def draw_button(
     mouse_pos: tuple[int, int],
     pos: tuple[int, int],
     size: tuple[int, int],
+    text: str,
     button: ButtonConfig,
     text_font: pygame.font.Font,
 ):
-def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[int, int],
-                size: tuple[int, int], text: str, button: ButtonConfig, text_font: pygame.font.Font):
     rect = pygame.Rect(pos, size)
 
     hovered = pygame.Rect.collidepoint(rect, mouse_pos)
@@ -170,7 +168,7 @@ def main():
             "FPS": 60,
             "Sound Volume": 50,
             "Music Volume": 50,
-            "Music Track": "FDJ"
+            "Music Track": "FDJ",
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
@@ -202,6 +200,7 @@ def main():
     globals.ui_scale = settings_json["UI Size"] // 14
 
     pygame.font.init()
+    smol_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 12 * globals.ui_scale)
     ui_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 24 * globals.ui_scale)
     title_font = pygame.font.Font(os.path.join(base_path, "ui", "font.ttf"), 64 * globals.ui_scale)
     compass_axis = (
@@ -231,7 +230,7 @@ def main():
         os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites
     )
 
-    with open( os.path.join(base_path, "CountryData.json")) as f:
+    with open(os.path.join(base_path, "CountryData.json")) as f:
         countries_data = load(f)
     countries = Countries(countries_data)
 
@@ -491,7 +490,7 @@ def main():
         ButtonConfig("Continue Game"),
         ButtonConfig("Settings"),
         ButtonConfig("Credits"),
-        ButtonConfig("Exit")
+        ButtonConfig("Exit"),
     ]
 
     settings_buttons = [
@@ -502,7 +501,7 @@ def main():
         ButtonConfig("Music"),
         ButtonConfig("Scroll Invert"),
         ButtonConfig("Save Settings"),
-        ButtonConfig("Exit")
+        ButtonConfig("Exit"),
     ]
 
     global_run = True
@@ -597,10 +596,12 @@ def main():
                 size: tuple[int, int] = (160, 40)
 
                 padding: int = 60
-                y: int = screen.get_height()//2 - padding - size[1]
+                y: int = screen.get_height() // 2 - padding - size[1]
 
                 for button in escape_buttons:
-                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
+                    hovered = draw_button(
+                        screen, mouse_pos, (120, y), size, button.string, button, ui_font
+                    )
                     y += size[1] + padding
 
                     if not mouse_just_pressed or not hovered:
@@ -623,7 +624,9 @@ def main():
                 y: int = 30 + game_logo.get_height()
 
                 for button in main_menu_buttons:
-                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
+                    hovered = draw_button(
+                        screen, mouse_pos, (120, y), size, button.string, button, ui_font
+                    )
                     y += padding + size[1]
 
                     if not mouse_just_pressed or not hovered:
@@ -664,11 +667,15 @@ def main():
 
                         case "Sound Volume":
                             settings_json["Sound Volume"] += mouse_scroll
-                            settings_json["Sound Volume"] = clamp(settings_json["Sound Volume"], 0, 100)
+                            settings_json["Sound Volume"] = clamp(
+                                settings_json["Sound Volume"], 0, 100
+                            )
 
                         case "Music Volume":
                             settings_json["Music Volume"] += mouse_scroll
-                            settings_json["Music Volume"] = clamp(settings_json["Music Volume"], 0, 100)
+                            settings_json["Music Volume"] = clamp(
+                                settings_json["Music Volume"], 0, 100
+                            )
                             pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         case "FPS":
