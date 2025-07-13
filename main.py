@@ -207,33 +207,6 @@ def main():
 
     selected_country_rgb = 0
 
-    menubuttons = [
-        Button("Start Game", (200, 400), (160, 40), 5, settings_json, ui_font, True),
-        Button("Continue Game", (200, 500), (160, 40), 5, settings_json, ui_font, True),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
-        Button("Credits", (200, 700), (160, 40), 5, settings_json, ui_font, True),
-        Button("Exit", (200, 800), (160, 40), 5, settings_json, ui_font, True),
-    ]
-
-    settingsbuttons = [
-        Button("UI Size", (200, 200), (160, 40), 5, settings_json, ui_font, True),
-        Button("FPS", (200, 300), (160, 40), 5, settings_json, ui_font, True),
-        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
-        Button("Music Volume", (200, 500), (160, 40), 5, settings_json, ui_font, True),
-        Button(
-            f"Music: {music_tracks[music_index]}",
-            (200, 600),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-            True,
-        ),
-        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json, ui_font, True),
-        Button("Save Settings", (200, 800), (160, 40), 5, settings_json, ui_font, True),
-        Button("Exit", (200, 900), (160, 40), 5, settings_json, ui_font, True),
-    ]
-
     countryselectbuttons = [
         Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font, True),
         Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font, True),
@@ -250,12 +223,6 @@ def main():
         Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font, True),
         # NOTE(soi): oh so thats why buttons should have ids
         Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font, True),
-    ]
-
-    escapemenubuttons = [
-        Button("Resume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
-        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -409,11 +376,13 @@ def main():
                 y: int = 200
 
                 for button in settings_buttons:
-                    text: str = (
+                    text: str = ""
+                    if button.string in settings_json:
                         f"{button.string}: {settings_json[button.string]}"
-                        if button.string in settings_json
-                        else button.string
-                    )
+                    elif button.string == "Music":
+                        text = f"Music: {music_tracks[music_index]}"
+                    else:
+                        text = button.string
 
                     hovered = draw_button(screen, mouse_pos, (120, y), size, text, button, ui_font)
                     y += padding + size[1]
@@ -524,8 +493,8 @@ def main():
                     "                                                                       Thanks for Playing! :3",
                 ]
                 for i, line in enumerate(lines):
-                    text: pygame.Surface = font.render(line, True, (255, 255, 255))
-                    screen.blit(text, (100, 100 + i * 50))
+                    textt: pygame.Surface = font.render(line, True, (255, 255, 255))
+                    screen.blit(textt, (100, 100 + i * 50))
 
             case Menu.GAME:
                 # WASD + Arrow key camera movement
