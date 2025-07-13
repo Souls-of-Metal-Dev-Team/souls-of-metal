@@ -18,6 +18,7 @@ import globals
 import os
 import sys
 import datetime
+import networkx as nx
 
 global music_index
 music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
@@ -35,8 +36,10 @@ pygame.display.set_icon(icon)
 
 Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 
+
 class CustomEvents:
-    SONG_FINISHED = pygame.USEREVENT+1
+    SONG_FINISHED = pygame.USEREVENT + 1
+
 
 def main():
     global music_index
@@ -47,6 +50,17 @@ def main():
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
     file_path = os.path.join(base_path, "date.txt")
+
+    G = nx.Graph()
+
+    with open(os.path.join(base_path, "starts", "Modern World", "neighbors.json")) as json:
+        neighbours = {eval(k): [tuple(i) for i in v] for k, v in load(json).items()}
+
+    for k, v in neighbours.items():
+        for province in v:
+            G.add_edge(k, province)
+
+    print(G)
 
     with open(file_path) as f:
         lines = f.readlines()
@@ -92,7 +106,14 @@ def main():
 
     CustomEvents.SONG_FINISHED = pygame.USEREVENT + 1
     pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
-    print("look at this", CustomEvents.SONG_FINISHED, pygame.USEREVENT, pygame.USEREVENT+1, "and this", pygame.MOUSEMOTION)
+    print(
+        "look at this",
+        CustomEvents.SONG_FINISHED,
+        pygame.USEREVENT,
+        pygame.USEREVENT + 1,
+        "and this",
+        pygame.MOUSEMOTION,
+    )
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
@@ -219,7 +240,9 @@ def main():
                     music_path = random.choice(music_tracks)
                     random.shuffle(music_tracks)
                     if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                        pygame.mixer.music.load(
+                            os.path.join(base_path, "sound", "music", music_path)
+                        )
                         pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         pygame.mixer.music.play(0)
@@ -492,7 +515,6 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
-                # NOTE(soi): I should fix the part whre it lags frm zoom
                 if hovered and mouse_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
