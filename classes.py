@@ -20,8 +20,9 @@ class Button:
     # last_tick = 0
     img = False
 
-    def __init__(self, id, pos, size, thicc, settings_json, ui_font):
+    def __init__(self, id, pos, size, thicc, settings_json, ui_font, condition):
         self.id = id
+        self.condition = condition
         self.thicc = 0
         self.thiccmax = thicc
         scaled_size = pygame.Vector2(size) * globals.ui_scale
@@ -110,7 +111,8 @@ class Button:
                     self.rect.y + (self.thiccmax * globals.ui_scale),
                 ),
             )
-        return hovered
+        if self.condition:
+            return hovered
 
 
 class MajorCountrySelect(pygame.sprite.Sprite):

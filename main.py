@@ -151,48 +151,54 @@ def main():
     selected_country_rgb = 0
 
     menubuttons = [
-        Button("Start Game", (200, 400), (160, 40), 5, settings_json, ui_font),
-        Button("Continue Game", (200, 500), (160, 40), 5, settings_json, ui_font),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font),
-        Button("Credits", (200, 700), (160, 40), 5, settings_json, ui_font),
-        Button("Exit", (200, 800), (160, 40), 5, settings_json, ui_font),
+        Button("Start Game", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Continue Game", (200, 500), (160, 40), 5, settings_json, ui_font, True),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
+        Button("Credits", (200, 700), (160, 40), 5, settings_json, ui_font, True),
+        Button("Exit", (200, 800), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     settingsbuttons = [
-        Button("UI Size", (200, 200), (160, 40), 5, settings_json, ui_font),
-        Button("FPS", (200, 300), (160, 40), 5, settings_json, ui_font),
-        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json, ui_font),
-        Button("Music Volume", (200, 500), (160, 40), 5, settings_json, ui_font),
+        Button("UI Size", (200, 200), (160, 40), 5, settings_json, ui_font, True),
+        Button("FPS", (200, 300), (160, 40), 5, settings_json, ui_font, True),
+        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Music Volume", (200, 500), (160, 40), 5, settings_json, ui_font, True),
         Button(
-            f"Music: {music_tracks[music_index]}", (200, 600), (160, 40), 5, settings_json, ui_font
+            f"Music: {music_tracks[music_index]}",
+            (200, 600),
+            (160, 40),
+            5,
+            settings_json,
+            ui_font,
+            True,
         ),
-        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json, ui_font),
-        Button("Save Settings", (200, 800), (160, 40), 5, settings_json, ui_font),
-        Button("Exit", (200, 900), (160, 40), 5, settings_json, ui_font),
+        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json, ui_font, True),
+        Button("Save Settings", (200, 800), (160, 40), 5, settings_json, ui_font, True),
+        Button("Exit", (200, 900), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     countryselectbuttons = [
-        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font),
-        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font),
-        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font),
-        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font),
+        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font, True),
+        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font, True),
+        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font, True),
+        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font),
-        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
-        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font, True),
+        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font, True),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font, True),
     ]
 
     escapemenubuttons = [
-        Button("Resume", (200, 400), (160, 40), 5, settings_json, ui_font),
-        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font),
-        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json, ui_font),
+        Button("Resume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
+        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)

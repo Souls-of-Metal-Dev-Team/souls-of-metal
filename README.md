@@ -18,13 +18,14 @@ python main.py
 
 
 # todo list
->diplo ui[like 90% done]<br />
 >RE: add stuff to countryData.json[this is never gonna end is it]<br />
 >military ui<br />
->a thing where if u hover over it u get a cool ahh window to where ur cursor is and it like increases width then height then it shows u text[yea lets not do this]<br />
+>add hqx scaling<br />
+>add glow and drop shadows :pointing_left::pointing_right:<br />
+>make characters do smthng to the estates<br />
+>add country relations buttons<br />
 >troop types<br />
->figure out pi charts[x]<br />
->figure out 3d political compasses[x]<br />
+>figure out text near pi chart<br />
 >get provinces to work[i mean kinda]<br />
 
 
