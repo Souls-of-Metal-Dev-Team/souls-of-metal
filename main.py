@@ -13,7 +13,7 @@ from classes import (
     tertiary,
 )
 from json import load, dump
-from enum import Enum
+from enum import Enum, auto, IntEnum
 import globals
 import os
 import sys
@@ -26,7 +26,6 @@ if getattr(sys, "frozen", False):
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
 THICCMAX = 5
 
 @dataclass
@@ -34,6 +33,17 @@ class ButtonConfig:
     string: str = ""
     thicc: int = 0
     image: Optional[pygame.Surface] = None
+
+class Menu(Enum):
+    MAIN_MENU = auto(),
+    COUNTRY_SELECT = auto()
+    SETTINGS = auto(),
+    CREDITS = auto(),
+    GAME = auto(),
+    ESCAPEMENU = auto()
+
+class CustomEvents(IntEnum):
+    SONG_FINISHED = pygame.USEREVENT+1
 
 def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[int, int],
                 size: tuple[int, int], text: str, button: ButtonConfig, text_font: pygame.font.Font):
@@ -86,7 +96,6 @@ def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[i
 
     return hovered
 
-
 def main():
     pygame.display.set_caption("Soul Of Steel")
     icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
@@ -97,6 +106,7 @@ def main():
     sidebar_pos = -625
 
     music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+    music_index = 0
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
@@ -141,10 +151,7 @@ def main():
     with open(os.path.join(base_path, "province-centers.json")) as f:
         province_centers = load(f)
 
-    # NOTE(soi):i meant shuffle as in play a random song next after a song is over smsmsmsh
-    SONG_FINISHED = pygame.USEREVENT + 1
-    # NOTE(soi): ehhhhhhhhh
-    pygame.mixer.music.set_endevent(SONG_FINISHED)
+    pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
@@ -200,22 +207,55 @@ def main():
 
     selected_country_rgb = 0
 
+    menubuttons = [
+        Button("Start Game", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Continue Game", (200, 500), (160, 40), 5, settings_json, ui_font, True),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
+        Button("Credits", (200, 700), (160, 40), 5, settings_json, ui_font, True),
+        Button("Exit", (200, 800), (160, 40), 5, settings_json, ui_font, True),
+    ]
+
+    settingsbuttons = [
+        Button("UI Size", (200, 200), (160, 40), 5, settings_json, ui_font, True),
+        Button("FPS", (200, 300), (160, 40), 5, settings_json, ui_font, True),
+        Button("Sound Volume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Music Volume", (200, 500), (160, 40), 5, settings_json, ui_font, True),
+        Button(
+            f"Music: {music_tracks[music_index]}",
+            (200, 600),
+            (160, 40),
+            5,
+            settings_json,
+            ui_font,
+            True,
+        ),
+        Button("Scroll Invert", (200, 700), (160, 40), 5, settings_json, ui_font, True),
+        Button("Save Settings", (200, 800), (160, 40), 5, settings_json, ui_font, True),
+        Button("Exit", (200, 900), (160, 40), 5, settings_json, ui_font, True),
+    ]
+
     countryselectbuttons = [
-        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font),
-        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font),
-        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font),
-        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font),
+        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font, True),
+        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font, True),
+        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font, True),
+        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
-        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font),
-        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
-        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font, True),
+        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font, True),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font, True),
+    ]
+
+    escapemenubuttons = [
+        Button("Resume", (200, 400), (160, 40), 5, settings_json, ui_font, True),
+        Button("Settings", (200, 600), (160, 40), 5, settings_json, ui_font, True),
+        Button("Back to Main Menu", (200, 500), (160, 40), 5, settings_json, ui_font, True),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -257,6 +297,17 @@ def main():
 
         for event in pygame.event.get():
             match event.type:
+                case CustomEvents.SONG_FINISHED:
+                    music_path = random.choice(music_tracks)
+                    random.shuffle(music_tracks)
+                    if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
+                        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                        pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
+
+                        pygame.mixer.music.play(0)
+                    else:
+                        print("[WARNING] Music file not found at:", music_path)
+
                 case pygame.QUIT:
                     global_run = False
 
@@ -293,21 +344,6 @@ def main():
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_just_pressed = False
-
-                case pygame.K_ESCAPE:
-                    if event.button == 1:
-                        current_menu = Menu.MAIN_MENU
-            # NOTE(soi): this doesnt woek in the match statement and idk why
-            if event.type == SONG_FINISHED:
-                music_path = random.choice(music_tracks)
-                random.shuffle(music_tracks)
-                if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                    pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
-                    pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
-
-                    pygame.mixer.music.play(0)
-                else:
-                    print("[WARNING] Music file not found at:", music_path)
 
         # Clear screen
         screen.fill((0, 0, 0))
@@ -488,7 +524,7 @@ def main():
                     "                                                                       Thanks for Playing! :3",
                 ]
                 for i, line in enumerate(lines):
-                    text = font.render(line, True, (255, 255, 255))
+                    text: pygame.Surface = font.render(line, True, (255, 255, 255))
                     screen.blit(text, (100, 100 + i * 50))
 
             case Menu.GAME:
@@ -530,11 +566,6 @@ def main():
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
-                # NOTE(pol): Do not reenable this I will crash out. It breaks zoom.
-                # Clamp the camera_pos directly!
-                # map_rect.y = func.clamp(
-                #     map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
-                # )
 
                 # Render map
                 # screen.blit(scaled_map, map_rect.topleft)
@@ -562,7 +593,6 @@ def main():
                     pixel.y = coord.y * map.pmap.get_height() / map_rect.height
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
                     selected_province_id = f"{r}, {g}, {b}"
-                    print("selected country :", selected_province_id)
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = (
                             "Diplomacy"
@@ -590,7 +620,6 @@ def main():
                 # Draw division
                 pygame.draw.circle(screen, secondary, division_screen_pos, 5)
 
-                # print(selected_country_rgb)
                 pygame.draw.rect(
                     screen,
                     tertiary,
@@ -671,7 +700,9 @@ def main():
                                 )
 
                                 if country in countries.Characters:
-                                    # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
+                                    # NOTE(soi): im doing this bcuz the characters get rendered on
+                                    # top of the character decription (theres probably a better way
+                                    # of doing this)
                                     for i, character in reversed(
                                         list(
                                             enumerate(countries.Display_Characters[country].keys())

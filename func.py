@@ -1,6 +1,38 @@
 import pygame
 import pygame.gfxdraw
 from math import cos, sin
+import numpy as np
+
+# def gkern(kernlen=21, std=3):
+#     gkern1d = signal.gaussian(kernlen, std=std).reshape(kernlen, 1)
+#     gkern2d = np.outer(gkern1d, gkern1d)
+#     return gkern2d
+
+def gkern(l=5, sig=1.0):
+    """
+    creates gaussian kernel with side length `l` and a sigma of `sig`
+    """
+    ax = np.linspace(-(l - 1) / 2.0, (l - 1) / 2.0, l)
+    gauss = np.exp(-0.5 * np.square(ax) / np.square(sig))
+    kernel = np.outer(gauss, gauss)
+    return pygame.mask.from_surface(
+        pygame.surfarray.make_surface(kernel / np.sum(kernel)), threshold=254
+    )
+
+
+def outline(surface, thicc, color):
+    # convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
+    # convolution_mask.set_at((0, 0), value=0)
+    # convolution_mask.set_at((thicc - 1, 0), value=0)
+    # convolution_mask.set_at((0, thicc - 1), value=0)
+    # convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
+    convolution_mask = gkern(thicc)
+    mask = pygame.mask.from_surface(surface)
+    outline_surface = mask.convolve(convolution_mask).to_surface(
+        setcolor=color, unsetcolor=surface.get_colorkey()
+    )
+    outline_surface.blit(surface, (thicc // 2, thicc // 2))
+    return outline_surface
 
 def clamp(value, a, b):
     return max(min(value, b), a)
@@ -62,20 +94,6 @@ def lerp(v0, v1, t):
 
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
-
-def outline(surface, thicc, color):
-    convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
-    convolution_mask.set_at((0, 0), value=0)
-    convolution_mask.set_at((thicc - 1, 0), value=0)
-    convolution_mask.set_at((0, thicc - 1), value=0)
-    convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
-    mask = pygame.mask.from_surface(surface)
-    outline_surface = mask.convolve(convolution_mask).to_surface(
-        setcolor=color, unsetcolor=surface.get_colorkey()
-    )
-    outline_surface.blit(surface, (thicc // 2, thicc // 2))
-    return outline_surface
-
 
 def round_corners(surface, radius):
     radius *= 3
