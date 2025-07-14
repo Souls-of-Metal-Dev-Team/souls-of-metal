@@ -70,13 +70,19 @@ def shadow(surface, thicc, color):
     a.blit(surface, (2 * thicc, 2 * thicc))
     return a
 
+<<<<<<< HEAD
 =======
 >>>>>>> 53967ea (Remove some useless things.)
+=======
+>>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def clamp(value, a, b):
     return max(min(value, b), a)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
@@ -135,9 +141,11 @@ def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
+
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 def outline(surface, thicc, color):
@@ -154,6 +162,8 @@ def outline(surface, thicc, color):
     return outline_surface
 
 >>>>>>> 53967ea (Remove some useless things.)
+=======
+>>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def round_corners(surface, radius):
     radius *= 3
