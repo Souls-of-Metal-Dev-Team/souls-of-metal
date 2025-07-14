@@ -18,7 +18,7 @@ import globals
 import os
 import sys
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 if getattr(sys, "frozen", False):
@@ -27,12 +27,6 @@ else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
 THICCMAX = 5
-
-@dataclass
-class ButtonConfig:
-    string: str = ""
-    thicc: int = 0
-    image: Optional[pygame.Surface] = None
 
 class Menu(Enum):
     MAIN_MENU = auto(),
@@ -45,8 +39,36 @@ class Menu(Enum):
 class CustomEvents(IntEnum):
     SONG_FINISHED = pygame.USEREVENT+1
 
-def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[int, int],
-                size: tuple[int, int], text: str, button: ButtonConfig, text_font: pygame.font.Font):
+
+@dataclass
+class ButtonConfig:
+    string: str = ""
+    thicc: int = 0
+    image: Optional[pygame.Surface] = None
+
+@dataclass
+class Vec2i:
+    x: int = 0
+    y: int = 0
+    
+    def to_tuple(self):
+        return (self.x, self.y)
+
+@dataclass
+class ButtonDraw:
+    pos: Vec2i = field(default_factory=Vec2i)
+    size: Vec2i = field(default_factory=Vec2i)
+    button: ButtonConfig = field(default_factory=ButtonConfig)
+    text: str = ""
+    text_font: Optional[pygame.font.Font] = None
+
+def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw):
+    pos = button_draw.pos.to_tuple()
+    size = button_draw.size.to_tuple()
+    button = button_draw.button
+    text = button_draw.text or button.string
+    text_font = button_draw.text_font
+
     rect = pygame.Rect(pos, size)
 
     hovered = pygame.Rect.collidepoint(rect, mouse_pos)
@@ -83,7 +105,7 @@ def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], pos: tuple[i
             ),
         )
     
-    if text:
+    if text and text_font:
         text_color = secondary if hovered else primary
         text_surface: pygame.Surface = text_font.render(text, fontalias, text_color)
         screen.blit(
@@ -249,7 +271,11 @@ def main():
         ButtonConfig("FPS"),
         ButtonConfig("Sound Volume"),
         ButtonConfig("Music Volume"),
+
+        # NOTE(pol): This draws the track playing but there is no logic for
+        # pressing it?
         ButtonConfig("Music"),
+
         ButtonConfig("Scroll Invert"),
         ButtonConfig("Save Settings"),
         ButtonConfig("Exit")
@@ -326,13 +352,20 @@ def main():
                 dark_overlay.fill((0, 0, 0))
                 screen.blit(dark_overlay, (0, 0))
 
-                size: tuple[int, int] = (160, 40)
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    text_font = ui_font
+                )
+
                 padding: int = 60
-                y: int = screen.get_height()//2 - padding - size[1]
+                button_draw.pos = Vec2i(120, screen.get_height()//2 - padding - button_draw.size.y)
 
                 for button in escape_buttons:
-                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
-                    y += size[1] + padding
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+
+                    button_draw.pos.y += button_draw.size.y + padding
 
                     if not mouse_just_pressed or not hovered:
                         continue
@@ -349,13 +382,19 @@ def main():
                 screen.blit(game_title, (400, 160))
                 screen.blit(game_logo, (30, 30))
 
-                size: tuple[int, int] = (160, 40)
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    text_font = ui_font,
+                    pos = Vec2i(120, game_logo.get_height() + 30)
+                )
+
                 padding: int = 60
-                y: int = 30 + game_logo.get_height()
 
                 for button in main_menu_buttons:
-                    hovered = draw_button(screen, mouse_pos, (120, y), size, button.string, button, ui_font)
-                    y += padding + size[1]
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+                    button_draw.pos.y += padding + button_draw.size.y
 
                     if not mouse_just_pressed or not hovered:
                         continue
@@ -371,21 +410,26 @@ def main():
                             global_run = False
 
             case Menu.SETTINGS:
-                size: tuple[int, int] = (160, 40)
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    pos = Vec2i(120, 200),
+                    text_font = ui_font
+                )
+
                 padding: int = 60
-                y: int = 200
 
                 for button in settings_buttons:
                     text: str = ""
                     if button.string in settings_json:
-                        f"{button.string}: {settings_json[button.string]}"
+                        text = f"{button.string}: {settings_json[button.string]}"
                     elif button.string == "Music":
                         text = f"Music: {music_tracks[music_index]}"
-                    else:
-                        text = button.string
+                    button_draw.text = text
 
-                    hovered = draw_button(screen, mouse_pos, (120, y), size, text, button, ui_font)
-                    y += padding + size[1]
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+                    button_draw.pos.y += padding + button_draw.size.y
 
                     if not hovered:
                         continue
