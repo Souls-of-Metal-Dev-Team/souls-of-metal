@@ -8,6 +8,14 @@ import numpy as np
 #     gkern2d = np.outer(gkern1d, gkern1d)
 #     return gkern2d
 
+
+def changeestates(estates: dict, change: dict) -> dict:
+    for k, v in change.items():
+        estates[k] += v
+    total_influence = sum(estates.values())
+    return {k: v / total_influence for k, v in estates.items()}
+
+
 def gkern(l=5, sig=1.0):
     """
     creates gaussian kernel with side length `l` and a sigma of `sig`
@@ -21,11 +29,11 @@ def gkern(l=5, sig=1.0):
 
 
 def outline(surface, thicc, color):
-    # convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
-    # convolution_mask.set_at((0, 0), value=0)
-    # convolution_mask.set_at((thicc - 1, 0), value=0)
-    # convolution_mask.set_at((0, thicc - 1), value=0)
-    # convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
+    convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
+    convolution_mask.set_at((0, 0), value=0)
+    convolution_mask.set_at((thicc - 1, 0), value=0)
+    convolution_mask.set_at((0, thicc - 1), value=0)
+    convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
     convolution_mask = gkern(thicc)
     mask = pygame.mask.from_surface(surface)
     outline_surface = mask.convolve(convolution_mask).to_surface(
@@ -34,8 +42,35 @@ def outline(surface, thicc, color):
     outline_surface.blit(surface, (thicc // 2, thicc // 2))
     return outline_surface
 
+
+def glow(surface, thicc, color):
+    b = pygame.Surface(
+        (surface.get_width() + (4 * thicc), surface.get_height() + (4 * thicc)),
+        flags=pygame.SRCALPHA,
+    )
+    a = b.copy()
+    b.blit(surface, (2 * thicc, 2 * thicc))
+    pygame.transform.gaussian_blur(b, thicc, dest_surface=a)
+    a.fill(color, special_flags=pygame.BLEND_RGBA_MIN)
+    a.blit(surface, (2 * thicc, 2 * thicc), special_flags=pygame.BLEND_RGBA_ADD)
+    return a
+
+
+def shadow(surface, thicc, color):
+    b = pygame.Surface(
+        (surface.get_width() + 4 * thicc, surface.get_height() + 4 * thicc), flags=pygame.SRCALPHA
+    )
+    a = b.copy()
+    b.blit(surface, (2 * thicc, 2 * thicc))
+    pygame.transform.gaussian_blur(b, thicc, dest_surface=a)
+    a.fill(color, special_flags=pygame.BLEND_RGBA_MIN)
+    a.blit(surface, (2 * thicc, 2 * thicc))
+    return a
+
+
 def clamp(value, a, b):
     return max(min(value, b), a)
+
 
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
@@ -92,8 +127,10 @@ def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
+
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
+
 
 def round_corners(surface, radius):
     radius *= 3
