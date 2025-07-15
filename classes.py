@@ -20,9 +20,8 @@ class Button:
     # last_tick = 0
     img = False
 
-    def __init__(self, id, pos, size, thicc, settings_json, ui_font, condition):
+    def __init__(self, id, pos, size, thicc, settings_json, ui_font):
         self.id = id
-        self.condition = condition
         self.thicc = 0
         self.thiccmax = thicc
         scaled_size = pygame.Vector2(size) * globals.ui_scale
@@ -54,13 +53,7 @@ class Button:
         # NOTE(soi): yea pygame already has a thing for centering rects, should read the documentation more smsmsmh
         self.rect.center = pos
 
-    def draw(
-        self,
-        screen,
-        mouse_pos,
-        mouse_pressed,
-        tick,
-    ):
+    def draw(self, screen, mouse_pos, mouse_pressed, tick, condition=True):
         _ = tick
 
         hovered = pygame.Rect.collidepoint(self.rect, mouse_pos)
@@ -111,7 +104,7 @@ class Button:
                     self.rect.y + (self.thiccmax * globals.ui_scale),
                 ),
             )
-        if self.condition:
+        if condition:
             return hovered
 
 

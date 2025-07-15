@@ -7,9 +7,9 @@ Download the code.
 ```
 git clone https://github.com/Soilad/souls-of-metal.git
 ```
-Install pygame.
+Install pygame community edition.
 ```
-pip install pygame
+pip install pygame-ce
 ```
 Go in the game directory and run the game.
 ```
