@@ -59,7 +59,7 @@ class ButtonDraw:
     pos: Vec2i = field(default_factory=Vec2i)
     size: Vec2i = field(default_factory=Vec2i)
     button: ButtonConfig = field(default_factory=ButtonConfig)
-    text: str = ""
+    text: Optional[str] = None
     text_font: Optional[pygame.font.Font] = None
 
 def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw):
@@ -419,12 +419,12 @@ def main():
                 padding: int = 60
 
                 for button in settings_buttons:
-                    text: str = ""
                     if button.string in settings_json:
-                        text = f"{button.string}: {settings_json[button.string]}"
+                        button_draw.text = f"{button.string}: {settings_json[button.string]}"
                     elif button.string == "Music":
-                        text = f"Music: {music_tracks[music_index]}"
-                    button_draw.text = text
+                        button_draw.text = f"Music: {music_tracks[music_index]}"
+                    else:
+                        button_draw.text = None
 
                     button_draw.button = button
 
