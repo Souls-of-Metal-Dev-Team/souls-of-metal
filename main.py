@@ -13,39 +13,122 @@ from classes import (
     tertiary,
 )
 from json import load, dump
-from enum import Enum
+from enum import Enum, auto, IntEnum
 import globals
 import os
 import sys
 import datetime
+from dataclasses import dataclass, field
+from typing import Optional
 import networkx as nx
 
-global music_index
-music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
-music_index = 0
-
-base_path = os.path.dirname(__file__)
 if getattr(sys, "frozen", False):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-pygame.display.set_caption("Soul Of Steel")
-icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
-pygame.display.set_icon(icon)
+THICCMAX = 5
 
-Menu = Enum("Menu", "MAIN_MENU COUNTRY_SELECT SETTINGS CREDITS GAME ESCAPEMENU")
+class Menu(Enum):
+    MAIN_MENU = auto(),
+    COUNTRY_SELECT = auto()
+    SETTINGS = auto(),
+    CREDITS = auto(),
+    GAME = auto(),
+    ESCAPEMENU = auto()
 
+class CustomEvents(IntEnum):
+    SONG_FINISHED = pygame.USEREVENT+1
 
-class CustomEvents:
-    SONG_FINISHED = pygame.USEREVENT + 1
+@dataclass
+class ButtonConfig:
+    string: str = ""
+    thicc: int = 0
+    image: Optional[pygame.Surface] = None
 
+@dataclass
+class Vec2i:
+    x: int = 0
+    y: int = 0
+    
+    def to_tuple(self):
+        return (self.x, self.y)
+
+@dataclass
+class ButtonDraw:
+    pos: Vec2i = field(default_factory=Vec2i)
+    size: Vec2i = field(default_factory=Vec2i)
+    button: ButtonConfig = field(default_factory=ButtonConfig)
+    text: Optional[str] = None
+    text_font: Optional[pygame.font.Font] = None
+
+def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw):
+    pos = button_draw.pos.to_tuple()
+    size = button_draw.size.to_tuple()
+    button = button_draw.button
+    text = button_draw.text or button.string
+    text_font = button_draw.text_font
+
+    rect = pygame.Rect(pos, size)
+
+    hovered = pygame.Rect.collidepoint(rect, mouse_pos)
+
+    if hovered:
+        if button.thicc < THICCMAX:
+            button.thicc += 1
+    else:
+        button.thicc = max(button.thicc - 1, 0)
+
+    scaled_thicc = button.thicc * globals.ui_scale
+
+    if scaled_thicc:
+        pygame.draw.rect(
+            screen,
+            secondary,
+            pygame.Rect(
+                rect.x - scaled_thicc,
+                rect.y - scaled_thicc,
+                rect.width + scaled_thicc * 2,
+                rect.height + scaled_thicc * 2,
+            ),
+            border_radius=rect.height * scaled_thicc // 2,
+        )
+
+    pygame.draw.rect(screen, tertiary, rect, border_radius=rect.height)
+
+    if button.image:
+        screen.blit(
+            button.image,
+            (
+                rect.centerx - button.image.get_width() / 2,
+                rect.y,
+            ),
+        )
+    
+    if text and text_font:
+        text_color = secondary if hovered else primary
+        text_surface: pygame.Surface = text_font.render(text, fontalias, text_color)
+        screen.blit(
+            text_surface,
+            (
+                rect.centerx - text_surface.get_width() / 2,
+                rect.y + (THICCMAX * globals.ui_scale),
+            ),
+        )
+
+    return hovered
 
 def main():
-    global music_index
+    pygame.display.set_caption("Soul Of Steel")
+    icon = pygame.image.load(os.path.join(base_path, "ui", "logo.png"))
+    pygame.display.set_icon(icon)
+
     speed = 0
     sidebar_tab = ""
     sidebar_pos = -625
+
+    music_tracks = ["FDJ.mp3", "Lenin is young again.mp3", "Katyusha.mp3", "Soilad 62.mp3"]
+    music_index = 0
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
@@ -60,8 +143,6 @@ def main():
         for province in v:
             G.add_edge(k, province)
 
-    print(G)
-
     with open(file_path) as f:
         lines = f.readlines()
         ymd = lines[0].strip().split(",")
@@ -69,8 +150,8 @@ def main():
         month = int(ymd[1])
         day = int(ymd[2])
         date = datetime.date(year, month, day)
-
     display_date = date.strftime("%A, %B %e, %Y")
+
     pygame.init()
     screen = pygame.display.set_mode((1920, 1080), pygame.DOUBLEBUF | pygame.SCALED, vsync=1)
 
@@ -79,12 +160,8 @@ def main():
     # NOTE(soi): kepping this at game for debugging reasons
     current_menu = Menu.GAME
     tick = 0
-    mouse_pressed = False
+    mouse_just_pressed = False
     mouse_scroll = 0
-
-    with open(os.path.join(base_path, "CountryData.json")) as f:
-        countries_data = load(f)
-    countries = Countries(countries_data)
 
     settings_json = None
     try:
@@ -95,25 +172,17 @@ def main():
             "Scroll Invert": 1,
             "UI Size": 14,
             "FPS": 60,
-            "Sound Volume": 100,
-            "Music Volume": 100,
-            "Music Track": "FDJ",
+            "Sound Volume": 50,
+            "Music Volume": 50,
+            "Music Track": "FDJ"
         }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
+
     with open(os.path.join(base_path, "province-centers.json")) as f:
         province_centers = load(f)
 
-    CustomEvents.SONG_FINISHED = pygame.USEREVENT + 1
     pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
-    print(
-        "look at this",
-        CustomEvents.SONG_FINISHED,
-        pygame.USEREVENT,
-        pygame.USEREVENT + 1,
-        "and this",
-        pygame.MOUSEMOTION,
-    )
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
     music_path = random.choice(music_tracks)
     random.shuffle(music_tracks)
@@ -145,10 +214,6 @@ def main():
     game_title = title_font.render("Souls Of Metal", fontalias, primary)
     game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
 
-    current_menu = Menu.MAIN_MENU
-    tick = 0
-    mouse_pressed = False
-
     sprites = pygame.sprite.Group()
 
     major_country_select = MajorCountrySelect(
@@ -160,126 +225,18 @@ def main():
     minor_country_select = MinorCountrySelect(
         os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites
     )
-    with open(
-        os.path.join(base_path, "CountryData.json")
-    ) as f:  # REMEMBER NOT TO USE HARDCODED PATH -minh-
+
+    with open( os.path.join(base_path, "CountryData.json")) as f:
         countries_data = load(f)
     countries = Countries(countries_data)
+
     map = Map("Modern World", (0, 0), 1)
+
     scaled_maps = [pygame.transform.scale_by(map.cmap, i) for i in range(1, 11)]
+
     player_country = None
 
     selected_country_rgb = 0
-
-    menubuttons = [
-        Button(
-            "Start Game",
-            (200, 400),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Continue Game",
-            (200, 500),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Settings",
-            (200, 600),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Credits",
-            (200, 700),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Exit",
-            (200, 800),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-    ]
-
-    settingsbuttons = [
-        Button(
-            "UI Size",
-            (200, 200),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "FPS",
-            (200, 300),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Sound Volume",
-            (200, 400),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Music Volume",
-            (200, 500),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            f"Music: {music_tracks[music_index]}",
-            (200, 600),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Scroll Invert",
-            (200, 700),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Save Settings",
-            (200, 800),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Exit",
-            (200, 900),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-    ]
 
     countryselectbuttons = [
         Button(
@@ -306,101 +263,19 @@ def main():
             settings_json,
             ui_font,
         ),
-        Button(
-            "Start",
-            (1375, 670),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
+        Button( "Start", (1375, 670), (160, 40), 5, settings_json, ui_font,
         ),
     ]
 
     mapbuttons = [
-        Button(
-            "/:diplo Diplomacy",
-            (65, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Building",
-            (195, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Military",
-            (325, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Estates",
-            (455, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "-",
-            (770, 25),
-            (40, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "+",
-            (1150, 25),
-            (40, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font),
+        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
+        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(
-            display_date,
-            (960, 25),
-            (320, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-    ]
-
-    escapemenubuttons = [
-        Button(
-            "Resume",
-            (200, 400),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Settings",
-            (200, 600),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Back to Main Menu",
-            (200, 500),
-            (160, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -408,12 +283,41 @@ def main():
 
     camera_pos = pygame.Vector2()
 
-    global global_run
+    escape_buttons = [
+        ButtonConfig("Resume"),
+        ButtonConfig("Back to Main Menu"),
+        ButtonConfig("Settings")
+    ]
+
+    main_menu_buttons = [
+        ButtonConfig("Start Game"),
+        ButtonConfig("Continue Game"),
+        ButtonConfig("Settings"),
+        ButtonConfig("Credits"),
+        ButtonConfig("Exit")
+    ]
+
+    settings_buttons = [
+        ButtonConfig("UI Size"),
+        ButtonConfig("FPS"),
+        ButtonConfig("Sound Volume"),
+        ButtonConfig("Music Volume"),
+
+        # NOTE(pol): This draws the track playing but there is no logic for
+        # pressing it?
+        ButtonConfig("Music"),
+
+        ButtonConfig("Scroll Invert"),
+        ButtonConfig("Save Settings"),
+        ButtonConfig("Exit")
+    ]
+
     global_run = True
     while global_run:
         mouse_rel = pygame.mouse.get_rel()
         mouse_pos = pygame.mouse.get_pos()
         mouse_scroll = 0
+        mouse_just_pressed = False
 
         for event in pygame.event.get():
             match event.type:
@@ -461,30 +365,45 @@ def main():
 
                 case pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        mouse_pressed = True
+                        mouse_just_pressed = True
 
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
-                        mouse_pressed = False
+                        mouse_just_pressed = False
 
+        # Clear screen
         screen.fill((0, 0, 0))
+
         if current_menu != Menu.GAME:
             screen.blit(menubg, (0, 0))
 
         match current_menu:
-            case Menu.ESCAPEMENU:  # Why can't I use != :sob:
-                surface = pygame.Surface((screen.get_width(), screen.get_height()))
-                surface.set_alpha(180)
-                surface.fill((0, 0, 0))
-                screen.blit(surface, (0, 0))
-                for button in escapemenubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+            case Menu.ESCAPEMENU:
+                # NOTE(pol): This should be a separate asset
+                dark_overlay = pygame.Surface((screen.get_width(), screen.get_height()))
+                dark_overlay.set_alpha(180)
+                dark_overlay.fill((0, 0, 0))
+                screen.blit(dark_overlay, (0, 0))
+
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    text_font = ui_font
+                )
+
+                padding: int = 60
+                button_draw.pos = Vec2i(120, screen.get_height()//2 - padding - button_draw.size.y)
+
+                for button in escape_buttons:
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+
+                    button_draw.pos.y += button_draw.size.y + padding
+
+                    if not mouse_just_pressed or not hovered:
                         continue
 
-                    mouse_pressed = False  # Eat input
-
-                    match button.id:
+                    match button.string:
                         case "Resume":
                             current_menu = Menu.GAME
                         case "Settings":
@@ -494,18 +413,26 @@ def main():
 
             case Menu.MAIN_MENU:
                 screen.blit(game_title, (400, 160))
-
                 screen.blit(game_logo, (30, 30))
 
-                for button in menubuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    text_font = ui_font,
+                    pos = Vec2i(120, game_logo.get_height() + 30)
+                )
+
+                padding: int = 60
+
+                for button in main_menu_buttons:
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+                    button_draw.pos.y += padding + button_draw.size.y
+
+                    if not mouse_just_pressed or not hovered:
                         continue
 
-                    # NOTE(pol): Eat input
-                    mouse_pressed = False
-
-                    match button.id:
+                    match button.string:
                         case "Settings":
                             current_menu = Menu.SETTINGS
                         case "Start Game":
@@ -516,58 +443,66 @@ def main():
                             global_run = False
 
             case Menu.SETTINGS:
-                for button in settingsbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    button.text = (
-                        f"{globals.language_translations[button.id]}: {settings_json[button.id]}"
-                        if button.id in settings_json
-                        else button.id
-                    )
+                button_draw = ButtonDraw(
+                    size = Vec2i(160, 40),
+                    pos = Vec2i(120, 200),
+                    text_font = ui_font
+                )
 
-                    button.hovered_text = ui_font.render(button.text, fontalias, secondary)
-                    button.normal_text = ui_font.render(button.text, fontalias, primary)
+                padding: int = 60
+
+                for button in settings_buttons:
+                    if button.string in settings_json:
+                        button_draw.text = f"{button.string}: {settings_json[button.string]}"
+                    elif button.string == "Music":
+                        button_draw.text = f"Music: {music_tracks[music_index]}"
+                    else:
+                        button_draw.text = None
+
+                    button_draw.button = button
+
+                    hovered = draw_button(screen, mouse_pos, button_draw)
+                    button_draw.pos.y += padding + button_draw.size.y
+
                     if not hovered:
                         continue
 
-                        # Handle dynamic music ID (e.g., "Music: 1.mp3")
-                    match button.id:
+                    match button.string:
                         case "UI Size":
                             settings_json["UI Size"] += mouse_scroll
                             settings_json["UI Size"] = clamp(settings_json["UI Size"], 14, 40)
 
                         case "Sound Volume":
                             settings_json["Sound Volume"] += mouse_scroll
-                            settings_json["Sound Volume"] = clamp(
-                                settings_json["Sound Volume"], 0, 100
-                            )
+                            settings_json["Sound Volume"] = clamp(settings_json["Sound Volume"], 0, 100)
 
                         case "Music Volume":
-                            settings_json["Music Volume"] = clamp(
-                                settings_json["Music Volume"] + mouse_scroll, 0, 100
-                            )
+                            settings_json["Music Volume"] += mouse_scroll
+                            settings_json["Music Volume"] = clamp(settings_json["Music Volume"], 0, 100)
                             pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         case "FPS":
                             settings_json["FPS"] += mouse_scroll
-                            settings_json["FPS"] = max(settings_json["FPS"], 12)
+                            settings_json["FPS"] = clamp(settings_json["FPS"], 12, 999)
 
+                    if not mouse_just_pressed:
+                        continue
+
+                    match button.string:
                         case "Scroll Invert":
-                            settings_json["Scroll Invert"] = clamp(
-                                settings_json["Scroll Invert"], 0, 1
-                            )
-                            settings_json["Scroll Invert"] = settings_json["Scroll Invert"] * -2 + 1
+                            settings_json["Scroll Invert"] *= -1
 
                         case "Save Settings":
                             with open(os.path.join(base_path, "settings.json"), "w") as f:
                                 dump(settings_json, f)
 
                         case "Exit":
-                            if mouse_pressed:
+                            if mouse_just_pressed:
+                                with open(os.path.join(base_path, "settings.json")) as f:
+                                    settings_json = load(f)
                                 current_menu = Menu.MAIN_MENU
 
             case Menu.COUNTRY_SELECT:
-                # pygame.draw.rect(screen, (50, 50, 50), ((300, 40), (1200, 1000)), 0, 20)
-                # pygame.draw.rect(screen, (40, 40, 40), ((1000, 540), (500, 200)), 0, 20)
                 sprites.draw(screen)
                 pygame.draw.rect(
                     major_country_select.image,
@@ -591,9 +526,9 @@ def main():
                             mouse_pos[1] - major_country_select.rect[0][1],
                         ),
                         player_country,
-                        mouse_pressed,
+                        mouse_just_pressed,
                     )
-                    if not mouse_pressed or not hovered:
+                    if not mouse_just_pressed or not hovered:
                         continue
 
                     player_country = major.id
@@ -605,15 +540,15 @@ def main():
                         minor_country_select.image,
                         mouse_pos,
                         player_country,
-                        mouse_pressed,
+                        mouse_just_pressed,
                     )
-                    if not mouse_pressed or not hovered:
+                    if not mouse_just_pressed or not hovered:
                         continue
                     player_country = minor.id
 
                 for button in countryselectbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                    if not mouse_just_pressed or not hovered:
                         continue
 
                     match button.id:
@@ -635,8 +570,8 @@ def main():
                     "                                                                       Thanks for Playing! :3",
                 ]
                 for i, line in enumerate(lines):
-                    text = font.render(line, True, (255, 255, 255))
-                    screen.blit(text, (100, 100 + i * 50))
+                    textt: pygame.Surface = font.render(line, True, (255, 255, 255))
+                    screen.blit(textt, (100, 100 + i * 50))
 
             case Menu.GAME:
                 # WASD + Arrow key camera movement
@@ -677,11 +612,6 @@ def main():
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
-                # NOTE(pol): Do not reenable this I will crash out. It breaks zoom.
-                # Clamp the camera_pos directly!
-                # map_rect.y = func.clamp(
-                #     map_rect.y - int(camera_pos.y), 1080 - map_rect.height, 0
-                # )
 
                 # Render map
                 # screen.blit(scaled_map, map_rect.topleft)
@@ -696,7 +626,8 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
-                if hovered and mouse_pressed:
+                # NOTE(soi): I should fix the part whre it lags frm zoom
+                if hovered and mouse_just_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
                     pixel.x = coord.x * map.cmap.get_width() / map_rect.width
@@ -815,7 +746,9 @@ def main():
                                 )
 
                                 if country in countries.Characters:
-                                    # NOTE(soi): im doing this bcuz the characters get rendered on top of the character decription (theres probably a better way of doing this)
+                                    # NOTE(soi): im doing this bcuz the characters get rendered on
+                                    # top of the character decription (theres probably a better way
+                                    # of doing this)
                                     for i, character in reversed(
                                         list(
                                             enumerate(countries.Display_Characters[country].keys())
@@ -889,8 +822,8 @@ def main():
                 else:
                     sidebar_pos = max(sidebar_pos - 45, -625)
                 for button in mapbuttons:
-                    hovered = button.draw(screen, mouse_pos, mouse_pressed, tick)
-                    if not mouse_pressed or not hovered:
+                    hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                    if not mouse_just_pressed or not hovered:
                         continue
                     match button.id:
                         case "-":

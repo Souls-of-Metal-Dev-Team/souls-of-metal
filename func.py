@@ -1,18 +1,15 @@
 import pygame
 import pygame.gfxdraw
-from pygame.transform import scale
 from math import cos, sin
 import numpy as np
-
 
 # def gkern(kernlen=21, std=3):
 #     gkern1d = signal.gaussian(kernlen, std=std).reshape(kernlen, 1)
 #     gkern2d = np.outer(gkern1d, gkern1d)
 #     return gkern2d
 
-
 def gkern(l=5, sig=1.0):
-    """\
+    """
     creates gaussian kernel with side length `l` and a sigma of `sig`
     """
     ax = np.linspace(-(l - 1) / 2.0, (l - 1) / 2.0, l)
@@ -37,10 +34,8 @@ def outline(surface, thicc, color):
     outline_surface.blit(surface, (thicc // 2, thicc // 2))
     return outline_surface
 
-
 def clamp(value, a, b):
     return max(min(value, b), a)
-
 
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
@@ -94,14 +89,11 @@ def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_
     screen.blit(compass_axis[5], z_left + (2, -24))
 
 
-# If you change this function the ui breaks for some reason
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
-
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
-
 
 def round_corners(surface, radius):
     radius *= 3
