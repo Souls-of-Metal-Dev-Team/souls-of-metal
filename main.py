@@ -1,7 +1,7 @@
 import pygame
 import random
 from CountryData import Countries
-from func import outline, clamp, compass, pichart
+from func import outline, glow, shadow, clamp, compass, pichart
 from classes import (
     Button,
     MajorCountrySelect,
@@ -211,8 +211,10 @@ def main():
     )
 
     menubg = pygame.image.load(os.path.join(base_path, "ui", "menu.png"))
-    game_title = title_font.render("Souls Of Metal", fontalias, primary)
-    game_logo = pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha()
+    game_title = glow(title_font.render("Souls Of Metal", fontalias, primary), 5, primary)
+    game_logo = glow(
+        pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha(), 5, primary
+    )
 
     sprites = pygame.sprite.Group()
 
@@ -803,7 +805,7 @@ def main():
                                                         ),
                                                     )
                                 screen.blit(
-                                    outline(
+                                    shadow(
                                         title_font.render(
                                             globals.language_translations[country],
                                             fontalias,
