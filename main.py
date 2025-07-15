@@ -816,6 +816,119 @@ def main():
                                     ),
                                     (150 + sidebar_pos, 350),
                                 )
+                        case "Military":
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Manpower (Reserved):{countrystats[3]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 70),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Manpower (Active):{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 90),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Manpower (Army):{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 110),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Tanks:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 130),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Motorised:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 150),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Manpower (Air force):{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 170),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Fighters:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 190),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Bombers:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 210),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"CASes:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 230),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Manpower (Navy):{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 250),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Aircraft Carriers:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 270),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Battleships:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 290),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Destroyer/Brigates:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 310),
+                                )
+                            screen.blit(
+                                    ui_font.render(
+                                        f"Medics:{countrystats[0]}",
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    (50 + sidebar_pos, 330),
+                                )
                         case _:
                             print("uhoh")
 
