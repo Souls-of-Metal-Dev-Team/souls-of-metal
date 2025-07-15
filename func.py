@@ -91,18 +91,24 @@ def pichart(screen, pos, radius, percentages):
             screen,
             percent[0],
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 031214d (uhhhh)
             [
                 pygame.math.Vector2(pos),
                 *[
                     pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
                     for i in range(start_angle, round(percent[1] * 360))
                 ],
+<<<<<<< HEAD
 =======
             [pygame.math.Vector2(pos)]
             + [
                 pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
                 for i in range(start_angle, round(percent[1] * 360))
 >>>>>>> 540e33f (made pi charts work better)
+=======
+>>>>>>> 031214d (uhhhh)
             ],
         )
         start_angle = round(percent[1] * 360)
