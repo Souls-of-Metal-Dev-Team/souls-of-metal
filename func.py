@@ -77,19 +77,16 @@ def clamp(value, a, b):
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
     for percent in percentages.values():
-        for i in range(1, 2 * radius):
-            for j in ((0, 0), (1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, -1), (1, -1), (-1, 1)):
-                pygame.gfxdraw.pie(
-                    screen,
-                    pos[0] + j[0],
-                    pos[1] + j[1],
-                    i,
-                    int(start_angle * 360),
-                    int(percent[1] * 360),
-                    percent[0],
-                )
-
-        start_angle = percent[1] + 1
+        pygame.draw.polygon(
+            screen,
+            percent[0],
+            [pygame.math.Vector2(pos)]
+            + [
+                pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
+                for i in range(start_angle, round(percent[1] * 360))
+            ],
+        )
+        start_angle = round(percent[1] * 360)
 
 
 def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):
