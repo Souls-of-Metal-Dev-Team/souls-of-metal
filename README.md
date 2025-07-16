@@ -1,31 +1,53 @@
+# Souls of Metal
+
+A ripoff of a ripoff of Hearts of Iron 4. Inspired by Gav's *Spirits of Sand: A 
+New Dawn*.
+
+### Licensing
+
+The code is licensed under GPLv3.  
+Sprites and music are copyrighted by their respective owners.  
+(TODO: Credit people.)
+
 # HOW 2 PLAY
 
 ### Requirements
 - python3
 
-Download the code.
+### Instructions
+
+Download the code and change directory.
+
 ```
-git clone https://github.com/Soilad/souls-of-metal.git
+git clone https://github.com/Soilad/souls-of-metal.git  
+cd souls-of-metal
 ```
-Install pygame community edition.
+
+Install requirements.
+
 ```
-pip install pygame-ce
+pip install -r requirements.txt
 ```
-Go in the game directory and run the game.
+
+Run the game.
+
 ```
 python main.py
 ```
 
+# Other information
 
-# todo list
->RE: add stuff to countryData.json[this is never gonna end is it]<br />
->military ui<br />
->add hqx scaling<br />
->add glow and drop shadows :pointing_left::pointing_right:<br />
->make characters do smthng to the estates<br />
->add country relations buttons<br />
->troop types<br />
->figure out text near pi chart<br />
->get provinces to work[i mean kinda]<br />
+Bug reports and feature requests at https://github.com/Soilad/souls-of-metal/issues  
 
+Discord : https://discord.gg/7USMp3uR9G
 
+# TODO
+> RE: add stuff to countryData.json[this is never gonna end is it]  
+> Military ui  
+> Add hqx scaling  
+> Add glow and drop shadows :pointing_left: :pointing_right:  
+> Make characters do smthng to the estates  
+> Add country relations buttons  
+> Troop types  
+> Figure out text near pi chart  
+> Get provinces to work[i mean kinda]  
