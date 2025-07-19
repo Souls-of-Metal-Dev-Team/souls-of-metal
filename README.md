@@ -1,6 +1,6 @@
 # Souls of Metal
 
-A ripoff of a ripoff of Hearts of Iron 4. Inspired by Gav's *Spirits of Sand: A 
+A ripoff of a ripoff of Hearts of Iron 4. Inspired by Gav's *Spirits of Steel: A 
 New Dawn*.
 
 ### Licensing
