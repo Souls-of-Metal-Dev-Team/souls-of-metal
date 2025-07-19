@@ -1,19 +1,100 @@
 import os
 from json import load
 import pygame
-from pygame.rect import Rect
 from func import round_corners, clamp, truncate
 import globals
+from enum import Enum, auto, IntEnum
+from pygame import image, transform
+import itertools
+from dataclasses import dataclass, field
+from typing import Optional
 
 base_path = os.path.dirname(__file__)
 
 cwd = os.getcwd()
-with open(os.path.join(base_path, "theme.json")) as f:
+with open(os.path.join(base_path, "ui", "theme.json")) as f:
     theme = load(f)
     primary = tuple(theme["primary"])
     secondary = tuple(theme["secondary"])
     tertiary = tuple(theme["tertiary"])
     fontalias = theme["fontalias"]
+
+
+@dataclass
+class ButtonConfig:
+    string: str = ""
+    thicc: int = 0
+    image: Optional[pygame.Surface] = None
+
+
+@dataclass
+class Vec2i:
+    x: int = 0
+    y: int = 0
+
+    def to_tuple(self):
+        return (self.x, self.y)
+
+
+@dataclass
+class ButtonDraw:
+    pos: Vec2i = field(default_factory=Vec2i)
+    size: Vec2i = field(default_factory=Vec2i)
+    button: ButtonConfig = field(default_factory=ButtonConfig)
+    text: Optional[str] = None
+    text_font: Optional[pygame.font.Font] = None
+
+
+class Menu(Enum):
+    MAIN_MENU = (auto(),)
+    COUNTRY_SELECT = auto()
+    SETTINGS = (auto(),)
+    CREDITS = (auto(),)
+    GAME = (auto(),)
+    ESCAPEMENU = auto()
+
+
+class CustomEvents(IntEnum):
+    SONG_FINISHED = pygame.USEREVENT + 1
+
+
+class Countries:
+    def __init__(self, data):
+        self.countryData = data
+        self.colorsToCountries = {tuple(v[0]): k for k, v in self.countryData.items()}
+        self.countriesToFlags = {}
+        self.Characters = {}
+
+        for k in self.countryData:
+            # print(f'''"{k}": "{k.replace("_", " ")}",''')
+            try:
+                flag_path = os.path.join(base_path, "flags", f"{k.lower()}_flag.png")
+                raw_flag = image.load(flag_path)
+            except FileNotFoundError:
+                raw_flag = image.load(os.path.join(base_path, "unknown.jpg"))
+
+            scaled = transform.scale_by(raw_flag, 475 / raw_flag.get_width())
+            rounded = round_corners(scaled, 16)
+            self.countriesToFlags[k] = rounded
+        with open(os.path.join(base_path, "starts", "Modern World", "Characters.json")) as f:
+            for country, characters in load(f).items():
+                self.Characters[country] = {
+                    image.load(
+                        os.path.join(
+                            base_path,
+                            "starts",
+                            "Modern World",
+                            "Characters",
+                            f"{k}.png",
+                        )
+                    ).convert_alpha(): v
+                    for k, v in characters.items()
+                }
+        # NOTE(soi): doing this bcuz countries can hv like 50 ppl and ion wanna show all tht
+        self.Display_Characters = {
+            k: dict(itertools.islice(v.items(), 4)) for k, v in self.Characters.items()
+        }
+        print(self.Display_Characters)
 
 
 class Button:

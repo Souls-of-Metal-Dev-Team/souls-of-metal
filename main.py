@@ -1,128 +1,33 @@
 import pygame
 import random
-from CountryData import Countries
-from func import outline, glow, shadow, clamp, compass, pichart
+from func import glow, shadow, clamp, compass, pichart
 from classes import (
+    Countries,
     Button,
     MajorCountrySelect,
     Map,
     MinorCountrySelect,
+    Menu,
+    CustomEvents,
+    ButtonConfig,
+    Vec2i,
+    ButtonDraw,
     fontalias,
     primary,
     secondary,
     tertiary,
 )
+from classfuncs import draw_button
 from json import load, dump
-from enum import Enum, auto, IntEnum
 import globals
 import os
 import sys
 import datetime
-from dataclasses import dataclass, field
-from typing import Optional
 
 if getattr(sys, "frozen", False):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
-
-THICCMAX = 5
-
-
-class Menu(Enum):
-    MAIN_MENU = (auto(),)
-    COUNTRY_SELECT = auto()
-    SETTINGS = (auto(),)
-    CREDITS = (auto(),)
-    GAME = (auto(),)
-    ESCAPEMENU = auto()
-
-
-class CustomEvents(IntEnum):
-    SONG_FINISHED = pygame.USEREVENT + 1
-
-
-
-@dataclass
-class ButtonConfig:
-    string: str = ""
-    thicc: int = 0
-    image: Optional[pygame.Surface] = None
-
-
-@dataclass
-class Vec2i:
-    x: int = 0
-    y: int = 0
-
-    def to_tuple(self):
-        return (self.x, self.y)
-
-
-@dataclass
-class ButtonDraw:
-    pos: Vec2i = field(default_factory=Vec2i)
-    size: Vec2i = field(default_factory=Vec2i)
-    button: ButtonConfig = field(default_factory=ButtonConfig)
-    text: Optional[str] = None
-    text_font: Optional[pygame.font.Font] = None
-
-
-def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw):
-    pos = button_draw.pos.to_tuple()
-    size = button_draw.size.to_tuple()
-    button = button_draw.button
-    text = button_draw.text or button.string
-    text_font = button_draw.text_font
-
-    rect = pygame.Rect(pos, size)
-
-    hovered = pygame.Rect.collidepoint(rect, mouse_pos)
-
-    if hovered:
-        if button.thicc < THICCMAX:
-            button.thicc += 1
-    else:
-        button.thicc = max(button.thicc - 1, 0)
-
-    scaled_thicc = button.thicc * globals.ui_scale
-
-    if scaled_thicc:
-        pygame.draw.rect(
-            screen,
-            secondary,
-            pygame.Rect(
-                rect.x - scaled_thicc,
-                rect.y - scaled_thicc,
-                rect.width + scaled_thicc * 2,
-                rect.height + scaled_thicc * 2,
-            ),
-            border_radius=rect.height * scaled_thicc // 2,
-        )
-
-    pygame.draw.rect(screen, tertiary, rect, border_radius=rect.height)
-
-    if button.image:
-        screen.blit(
-            button.image,
-            (
-                rect.centerx - button.image.get_width() / 2,
-                rect.y,
-            ),
-        )
-
-    if text and text_font:
-        text_color = secondary if hovered else primary
-        text_surface: pygame.Surface = text_font.render(text, fontalias, text_color)
-        screen.blit(
-            text_surface,
-            (
-                rect.centerx - text_surface.get_width() / 2,
-                rect.y + (THICCMAX * globals.ui_scale),
-            ),
-        )
-
-    return hovered
 
 
 def main():
@@ -139,7 +44,7 @@ def main():
 
     chara_desc = pygame.Rect((0, 0), (200, 200))
 
-    file_path = os.path.join(base_path, "date.txt")
+    file_path = os.path.join(base_path, "starts", "Modern World", "date.txt")
 
     with open(file_path) as f:
         lines = f.readlines()
@@ -177,7 +82,7 @@ def main():
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
 
-    with open(os.path.join(base_path, "province-centers.json")) as f:
+    with open(os.path.join(base_path, "starts", "Modern World", "province-centers.json")) as f:
         province_centers = load(f)
 
     pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
@@ -213,13 +118,10 @@ def main():
     game_logo = glow(
         pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha(), 5, primary
     )
-<<<<<<< HEAD
-=======
 
     current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
->>>>>>> 95cfff4 (idk wtdf i added its been a week)
 
     sprites = pygame.sprite.Group()
 
@@ -233,7 +135,7 @@ def main():
         os.path.join(base_path, "starts", "Modern World", "minors.txt"), 5, sprites
     )
 
-    with open(os.path.join(base_path, "CountryData.json")) as f:
+    with open(os.path.join(base_path, "starts", "Modern World", "CountryData.json")) as f:
         countries_data = load(f)
     countries = Countries(countries_data)
 
@@ -246,12 +148,6 @@ def main():
     selected_country_rgb = 0
 
     countryselectbuttons = [
-<<<<<<< HEAD
-        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font, True),
-        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font, True),
-        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font, True),
-        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font, True),
-=======
         Button(
             "Back",
             (1125, 570),
@@ -284,18 +180,66 @@ def main():
             settings_json,
             ui_font,
         ),
->>>>>>> 1ff1538 (uhhhh)
     ]
 
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font, True),
-        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font, True),
+        Button(
+            "/:diplo Diplomacy",
+            (65, 25),
+            (120, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Building",
+            (195, 25),
+            (120, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Military",
+            (325, 25),
+            (120, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Estates",
+            (455, 25),
+            (120, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "-",
+            (770, 25),
+            (40, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "+",
+            (1150, 25),
+            (40, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font, True),
+        Button(
+            display_date,
+            (960, 25),
+            (320, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -343,7 +287,9 @@ def main():
                     music_path = random.choice(music_tracks)
                     random.shuffle(music_tracks)
                     if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                        pygame.mixer.music.load(
+                            os.path.join(base_path, "sound", "music", music_path)
+                        )
                         pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         pygame.mixer.music.play(0)

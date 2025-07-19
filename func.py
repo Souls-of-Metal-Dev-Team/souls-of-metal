@@ -1,7 +1,4 @@
 import pygame
-<<<<<<< HEAD
-import pygame.gfxdraw
-from pygame.transform import scale
 from math import cos, sin
 import numpy as np
 
@@ -32,11 +29,6 @@ def gkern(l=5, sig=1.0):
 
 
 def outline(surface, thicc, color):
-    convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
-    convolution_mask.set_at((0, 0), value=0)
-    convolution_mask.set_at((thicc - 1, 0), value=0)
-    convolution_mask.set_at((0, thicc - 1), value=0)
-    convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
     convolution_mask = gkern(thicc)
     mask = pygame.mask.from_surface(surface)
     outline_surface = mask.convolve(convolution_mask).to_surface(
@@ -70,19 +62,10 @@ def shadow(surface, thicc, color):
     a.blit(surface, (2 * thicc, 2 * thicc))
     return a
 
-<<<<<<< HEAD
-=======
->>>>>>> 53967ea (Remove some useless things.)
-=======
->>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def clamp(value, a, b):
     return max(min(value, b), a)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
@@ -90,25 +73,12 @@ def pichart(screen, pos, radius, percentages):
         pygame.draw.polygon(
             screen,
             percent[0],
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 031214d (uhhhh)
             [
                 pygame.math.Vector2(pos),
                 *[
                     pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
                     for i in range(start_angle, round(percent[1] * 360))
                 ],
-<<<<<<< HEAD
-=======
-            [pygame.math.Vector2(pos)]
-            + [
-                pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
-                for i in range(start_angle, round(percent[1] * 360))
->>>>>>> 540e33f (made pi charts work better)
-=======
->>>>>>> 031214d (uhhhh)
             ],
         )
         start_angle = round(percent[1] * 360)
@@ -149,8 +119,6 @@ def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_
 
 
 # If you change this function the ui breaks for some reason
-=======
->>>>>>> 53967ea (Remove some useless things.)
 def lerp(v0, v1, t):
     return v0 * (1 - t) + v1 * t
 
@@ -158,25 +126,6 @@ def lerp(v0, v1, t):
 def truncate(text, trunc_length):
     return text if len(text) < trunc_length else text[:trunc_length:] + "..."
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-def outline(surface, thicc, color):
-    convolution_mask = pygame.mask.Mask((thicc, thicc), fill=True)
-    convolution_mask.set_at((0, 0), value=0)
-    convolution_mask.set_at((thicc - 1, 0), value=0)
-    convolution_mask.set_at((0, thicc - 1), value=0)
-    convolution_mask.set_at((thicc - 1, thicc - 1), value=0)
-    mask = pygame.mask.from_surface(surface)
-    outline_surface = mask.convolve(convolution_mask).to_surface(
-        setcolor=color, unsetcolor=surface.get_colorkey()
-    )
-    outline_surface.blit(surface, (thicc // 2, thicc // 2))
-    return outline_surface
-
->>>>>>> 53967ea (Remove some useless things.)
-=======
->>>>>>> 9f5f475 (added functions tht shadow and glow a surface)
 
 def round_corners(surface, radius):
     radius *= 3
