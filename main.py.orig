@@ -20,6 +20,7 @@ import sys
 import datetime
 from dataclasses import dataclass, field
 from typing import Optional
+import networkx as nx
 
 if getattr(sys, "frozen", False):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
@@ -40,7 +41,6 @@ class Menu(Enum):
 
 class CustomEvents(IntEnum):
     SONG_FINISHED = pygame.USEREVENT + 1
-
 
 
 @dataclass
@@ -141,6 +141,15 @@ def main():
 
     file_path = os.path.join(base_path, "date.txt")
 
+    G = nx.Graph()
+
+    with open(os.path.join(base_path, "starts", "Modern World", "neighbors.json")) as json:
+        neighbours = {eval(k): [tuple(i) for i in v] for k, v in load(json).items()}
+
+    for k, v in neighbours.items():
+        for province in v:
+            G.add_edge(k, province)
+
     with open(file_path) as f:
         lines = f.readlines()
         ymd = lines[0].strip().split(",")
@@ -219,7 +228,7 @@ def main():
     current_menu = Menu.MAIN_MENU
     tick = 0
     mouse_pressed = False
->>>>>>> 95cfff4 (idk wtdf i added its been a week)
+>>>>>>> refs/remotes/origin/soi
 
     sprites = pygame.sprite.Group()
 
@@ -246,12 +255,6 @@ def main():
     selected_country_rgb = 0
 
     countryselectbuttons = [
-<<<<<<< HEAD
-        Button("Back", (1125, 570), (160, 40), 5, settings_json, ui_font, True),
-        Button("Map Select", (1375, 570), (160, 40), 5, settings_json, ui_font, True),
-        Button("Country List", (1125, 670), (160, 40), 5, settings_json, ui_font, True),
-        Button("Start", (1375, 670), (160, 40), 5, settings_json, ui_font, True),
-=======
         Button(
             "Back",
             (1125, 570),
@@ -284,18 +287,17 @@ def main():
             settings_json,
             ui_font,
         ),
->>>>>>> 1ff1538 (uhhhh)
     ]
 
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font, True),
-        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font, True),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font),
+        Button("-", (770, 25), (40, 40), 5, settings_json, ui_font),
+        Button("+", (1150, 25), (40, 40), 5, settings_json, ui_font),
         # NOTE(soi): oh so thats why buttons should have ids
-        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font, True),
+        Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
     ]
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
@@ -343,7 +345,9 @@ def main():
                     music_path = random.choice(music_tracks)
                     random.shuffle(music_tracks)
                     if os.path.exists(os.path.join(base_path, "sound", "music", music_path)):
-                        pygame.mixer.music.load(os.path.join(base_path, "sound", "music", music_path))
+                        pygame.mixer.music.load(
+                            os.path.join(base_path, "sound", "music", music_path)
+                        )
                         pygame.mixer.music.set_volume(settings_json["Music Volume"] / 100)
 
                         pygame.mixer.music.play(0)
