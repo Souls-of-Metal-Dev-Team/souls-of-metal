@@ -32,12 +32,17 @@ def ideologyname(ideology_vector):
     else:
         name = "cent-"
         fullname = "centrist-"
+    if sum(abs(x) for x in ideology_vector) > 100:
+        name = "acc-"
+        fullname = "accelerationist-"
+
     return name[:-1:], fullname[:-1:]
 
 
 def changeestates(estates: dict, change: dict) -> dict:
-    for k, v in change.items():
-        estates[k] += v
+    if change:
+        for k, v in change.items():
+            estates[k] += v
     total_influence = sum(estates.values())
     return {k: v / total_influence for k, v in estates.items()}
 
@@ -100,42 +105,45 @@ def clamp(value, a, b):
 
 
 def pichart(screen, pos, radius, percentages):
-    start_angle = 0
+    start_angle = -180
 
     estatecolors = {
         # conservative stuff
-        "oligarchs": (255, 90, 189),
-        "religious institutions": (255, 45, 78),
-        "military": (255, 45, 78),
-        "monarchy": (255, 45, 78),  # socialist stuff
-        "farmers": (255, 45, 78),
+        "oligarchs": (187, 165, 145),
+        "religious institutions": (250, 236, 195),
+        "military": (51, 102, 89),
+        "monarchy": (14, 28, 79),
+        # socialist stuff
+        "farmers": (146, 26, 28),
         "workers": (255, 45, 78),
-        "minorities": (255, 45, 78),
-        "small buisness owners": (255, 45, 78),  # liberal stuff
-        "immigrants": (255, 45, 78),
-        "intelligencia": (255, 45, 78),
-        "investors": (255, 45, 78),
-        "libertarians": (255, 45, 78),
+        "minorities": (168, 72, 73),
+        "small buisness owners": (190, 118, 119),
+        # liberal stuff
+        "immigrants": (175, 125, 119),
+        "intelligencia": (221, 200, 239),
+        "investors": (249, 230, 187),
+        "libertarians": (199, 238, 159),
         # wacc
-        "futurists": (255, 45, 78),
-        "accelerationist": (255, 45, 78),
-        "anarchists": (255, 45, 78),
-        "occultists": (255, 45, 78),
+        "futurists": (255, 0, 255),
+        "accelerationist": (255, 255, 255),
+        "anarchists": (0, 0, 0),
+        "occultists": (255, 0, 0),
     }
 
     for percent in percentages.items():
-        pygame.draw.polygon(
-            screen,
-            estatecolors[percent[0]],
-            [
-                pygame.math.Vector2(pos),
-                *[
-                    pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
-                    for i in range(start_angle, round(percent[1] * 360))
+        if percent[1] != 0:
+            pygame.draw.polygon(
+                screen,
+                estatecolors[percent[0]],
+                [
+                    pygame.math.Vector2(pos),
+                    *[
+                        pos + radius * pygame.math.Vector2(cos(i * 0.0174527), sin(i * 0.0174527))
+                        for i in range(start_angle, round(percent[1] * 360))
+                    ],
                 ],
-            ],
-        )
-        start_angle = round(percent[1] * 360)
+            )
+            start_angle = round(percent[1] * 360)
 
 
 def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):

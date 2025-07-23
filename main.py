@@ -620,6 +620,9 @@ def main():
                 )
                 if selected_country_rgb in countries.colorsToCountries:
                     country = countries.colorsToCountries[selected_country_rgb]
+                    ideology_names = ideologyname(
+                        countries.countryData[countries.colorsToCountries[selected_country_rgb]][3]
+                    )
                 if sidebar_tab:
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
@@ -670,41 +673,19 @@ def main():
                                 ),
                                 (320 + sidebar_pos, 570),
                             )
-                            screen.blit(
-                                shadow(
-                                    ui_font.render(
-                                        ideologyname(
-                                            countries.countryData[
-                                                countries.colorsToCountries[selected_country_rgb]
-                                            ][3]
-                                        )[1],
-                                        fontalias,
-                                        secondary,
-                                    ),
-                                    3,
-                                    tertiary,
-                                ),
-                                (160 + sidebar_pos, 420),
-                            )
+
                             compass(
                                 screen,
                                 pygame.math.Vector2(150 + sidebar_pos, 550),
                                 primary,
                                 secondary,
                                 compass_axis,
-                                tick / 100,
+                                tick * (7 if ideology_names[0] == "acc" else 0.01),
                                 pygame.math.Vector3(
                                     countries.countryData[
                                         countries.colorsToCountries[selected_country_rgb]
                                     ][3]
                                 ),
-                            )
-                            print(
-                                ideologyname(
-                                    countries.countryData[
-                                        countries.colorsToCountries[selected_country_rgb]
-                                    ][3]
-                                )
                             )
 
                             if country in countries.Characters:
@@ -762,6 +743,18 @@ def main():
                                                         mouse_pos[1] + 30 * i + 15,
                                                     ),
                                                 )
+                            screen.blit(
+                                glow(
+                                    ui_font.render(
+                                        ideology_names[1],
+                                        fontalias,
+                                        secondary,
+                                    ),
+                                    3,
+                                    tertiary,
+                                ),
+                                (160 + sidebar_pos, 420),
+                            )
                             screen.blit(
                                 shadow(
                                     title_font.render(

@@ -1,7 +1,7 @@
 import os
 from json import load
 import pygame
-from func import round_corners, clamp, truncate
+from func import changeestates, round_corners, clamp, truncate
 import globals
 from enum import Enum, auto, IntEnum
 from pygame import image, transform
@@ -67,6 +67,28 @@ class Countries:
         self.Characters = {}
 
         for k in self.countryData:
+            for estate in [
+                "oligarchs",
+                "religious institutions",
+                "military",
+                "monarchy",
+                "farmers",
+                "workers",
+                "minorities",
+                "small buisness owners",
+                "immigrants",
+                "intelligencia",
+                "investors",
+                "libertarians",
+                "futurists",
+                "accelerationist",
+                "anarchists",
+                "occultists",
+            ]:
+                if estate not in self.countryData[k][2]:
+                    self.countryData[k][2][estate] = 0
+            self.countryData[k][2] = changeestates(self.countryData[k][2], {"oligarchs": 0})
+            print(self.countryData[k][2])
             self.countryData[k][3] = pygame.math.Vector3(
                 [
                     randrange(-50, 50),
