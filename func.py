@@ -9,6 +9,32 @@ import numpy as np
 #     return gkern2d
 
 
+def ideologyname(ideology_vector):
+    name = str()
+    fullname = str()
+    if ideology_vector[0] > 25:
+        name += "cap-"
+        fullname += "capitalist-"
+    elif ideology_vector[0] < -25:
+        name += "soc-"
+        fullname += "socialist-"
+    if ideology_vector[1] > 25:
+        name += "iso-"
+        fullname += "isolationist-"
+    elif ideology_vector[1] < -25:
+        fullname += "globalist-"
+    if ideology_vector[2] > 25:
+        name += "aut-"
+        fullname += "authoritarianist-"
+    elif ideology_vector[2] < -25:
+        name += "ana-"
+        fullname += "anarchist-"
+    else:
+        name = "cent-"
+        fullname = "centrist-"
+    return name[:-1:], fullname[:-1:]
+
+
 def changeestates(estates: dict, change: dict) -> dict:
     for k, v in change.items():
         estates[k] += v
@@ -39,27 +65,33 @@ def outline(surface, thicc, color):
 
 
 def glow(surface, thicc, color):
+    opacity = 255
+    if isinstance(thicc, float):
+        opacity = round((thicc % 1) * 255)
+        thicc = round(thicc + 1)
     b = pygame.Surface(
         (surface.get_width() + (4 * thicc), surface.get_height() + (4 * thicc)),
         flags=pygame.SRCALPHA,
     )
     a = b.copy()
-    b.blit(surface, (2 * thicc, 2 * thicc))
+    b.blit(surface, (0, 0))
     pygame.transform.gaussian_blur(b, thicc, dest_surface=a)
     a.fill(color, special_flags=pygame.BLEND_RGBA_MIN)
-    a.blit(surface, (2 * thicc, 2 * thicc), special_flags=pygame.BLEND_RGBA_ADD)
+    a.set_alpha(opacity)
+    a.blit(surface, (0, 0), special_flags=pygame.BLEND_RGBA_MAX)
     return a
 
 
 def shadow(surface, thicc, color):
     b = pygame.Surface(
-        (surface.get_width() + 4 * thicc, surface.get_height() + 4 * thicc), flags=pygame.SRCALPHA
+        (surface.get_width() + 4 * thicc, surface.get_height() + 4 * thicc),
+        flags=pygame.SRCALPHA,
     )
     a = b.copy()
-    b.blit(surface, (2 * thicc, 2 * thicc))
+    b.blit(surface, (0, 0))
     pygame.transform.gaussian_blur(b, thicc, dest_surface=a)
     a.fill(color, special_flags=pygame.BLEND_RGBA_MIN)
-    a.blit(surface, (2 * thicc, 2 * thicc))
+    a.blit(surface, (0, 0))
     return a
 
 
@@ -69,10 +101,32 @@ def clamp(value, a, b):
 
 def pichart(screen, pos, radius, percentages):
     start_angle = 0
-    for percent in percentages.values():
+
+    estatecolors = {
+        # conservative stuff
+        "oligarchs": (255, 90, 189),
+        "religious institutions": (255, 45, 78),
+        "military": (255, 45, 78),
+        "monarchy": (255, 45, 78),  # socialist stuff
+        "farmers": (255, 45, 78),
+        "workers": (255, 45, 78),
+        "minorities": (255, 45, 78),
+        "small buisness owners": (255, 45, 78),  # liberal stuff
+        "immigrants": (255, 45, 78),
+        "intelligencia": (255, 45, 78),
+        "investors": (255, 45, 78),
+        "libertarians": (255, 45, 78),
+        # wacc
+        "futurists": (255, 45, 78),
+        "accelerationist": (255, 45, 78),
+        "anarchists": (255, 45, 78),
+        "occultists": (255, 45, 78),
+    }
+
+    for percent in percentages.items():
         pygame.draw.polygon(
             screen,
-            percent[0],
+            estatecolors[percent[0]],
             [
                 pygame.math.Vector2(pos),
                 *[
@@ -85,23 +139,21 @@ def pichart(screen, pos, radius, percentages):
 
 
 def compass(screen, pos, line_colour, point_colour, compass_axis, tick, country_ideology):
-    country_ideology /= 100
-    x_right = pygame.math.Vector2(cos(tick), -sin(tick) / (2**0.5)) * 100 + pos
-    x_left = pygame.math.Vector2(-cos(tick), sin(tick) / (2**0.5)) * 100 + pos
-    y_right = pygame.math.Vector2(-sin(tick), -cos(tick) / (2**0.5)) * 100 + pos
-    y_left = pygame.math.Vector2(sin(tick), cos(tick) / (2**0.5)) * 100 + pos
+    country_ideology /= -100
+    c = cos(tick)
+    s = sin(tick)
+    x_right = pygame.math.Vector2(c, -s / (2**0.5)) * 100 + pos
+    x_left = pygame.math.Vector2(-c, s / (2**0.5)) * 100 + pos
+    y_right = pygame.math.Vector2(-s, -c / (2**0.5)) * 100 + pos
+    y_left = pygame.math.Vector2(s, c / (2**0.5)) * 100 + pos
     z_right = pygame.math.Vector2(0, 1 / (2**0.5)) * 100 + pos
     z_left = pygame.math.Vector2(0, -1 / (2**0.5)) * 100 + pos
     projected_pos = (
         pygame.math.Vector2(
-            country_ideology[0] * cos(tick) - country_ideology[1] * sin(tick),
+            country_ideology[0] * c - country_ideology[1] * s,
             -1
             / (2**0.5)
-            * (
-                (country_ideology[1] * cos(tick))
-                + (country_ideology[0] * sin(tick))
-                - country_ideology[2]
-            ),
+            * ((country_ideology[1] * c) + (country_ideology[0] * s) - country_ideology[2]),
         )
         * 100
         + pos

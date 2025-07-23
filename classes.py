@@ -8,6 +8,7 @@ from pygame import image, transform
 import itertools
 from dataclasses import dataclass, field
 from typing import Optional
+from random import randrange
 
 base_path = os.path.dirname(__file__)
 
@@ -66,6 +67,13 @@ class Countries:
         self.Characters = {}
 
         for k in self.countryData:
+            self.countryData[k][3] = pygame.math.Vector3(
+                [
+                    randrange(-50, 50),
+                    randrange(-50, 50),
+                    randrange(-50, 50),
+                ]
+            )
             # print(f'''"{k}": "{k.replace("_", " ")}",''')
             try:
                 flag_path = os.path.join(base_path, "flags", f"{k.lower()}_flag.png")
@@ -101,10 +109,11 @@ class Button:
     # last_tick = 0
     img = False
 
-    def __init__(self, id, pos, size, thicc, settings_json, ui_font):
+    def __init__(self, id, pos, size, thicc, settings_json, ui_font, outlined=False):
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
+        self.outlined = outlined
         scaled_size = pygame.Vector2(size) * globals.ui_scale
         if id.startswith("/:"):
             self.img = pygame.image.load(
@@ -139,7 +148,7 @@ class Button:
 
         hovered = pygame.Rect.collidepoint(self.rect, mouse_pos)
 
-        if hovered:
+        if hovered or self.outlined:
             if self.thicc < self.thiccmax:
                 self.thicc += 1
                 # self.thicc = lerp(

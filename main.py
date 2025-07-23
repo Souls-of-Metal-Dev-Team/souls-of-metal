@@ -1,6 +1,6 @@
 import pygame
 import random
-from func import glow, shadow, clamp, compass, pichart
+from func import glow, ideologyname, shadow, clamp, compass, pichart
 from classes import (
     Countries,
     Button,
@@ -183,38 +183,10 @@ def main():
     ]
 
     mapbuttons = [
-        Button(
-            "/:diplo Diplomacy",
-            (65, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Building",
-            (195, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Military",
-            (325, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
-        Button(
-            "Estates",
-            (455, 25),
-            (120, 40),
-            5,
-            settings_json,
-            ui_font,
-        ),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
         Button(
             "-",
             (770, 25),
@@ -298,6 +270,8 @@ def main():
 
                 case pygame.QUIT:
                     global_run = False
+                    pygame.display.quit()
+                    pygame.quit()
 
                 case pygame.KEYDOWN:
                     match event.key:
@@ -644,139 +618,162 @@ def main():
                     border_top_right_radius=64,
                     width=10,
                 )
+                if selected_country_rgb in countries.colorsToCountries:
+                    country = countries.colorsToCountries[selected_country_rgb]
                 if sidebar_tab:
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
                         # NOTE(soi): this feels inneficient
                         case "Estates":
+                            print(selected_country_rgb)
                             pichart(
                                 screen,
                                 (150 + sidebar_pos, 200),
                                 100,
-                                {
-                                    "oligarchs": [(255, 90, 189), 0.1],
-                                    "proletariat": [(255, 45, 78), 0.2],
-                                },
+                                countries.countryData[country][2],
                             )
                         case "Diplomacy":
-                            if selected_country_rgb in countries.colorsToCountries:
-                                country = countries.colorsToCountries[selected_country_rgb]
-                                countrystats = countries.countryData[country][-1]
-                                screen.blit(
-                                    countries.countriesToFlags[country],
-                                    (80 + sidebar_pos, 85),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Political power:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 480),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Stability:{countrystats[1]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 510),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Money:{countrystats[2]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 540),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Manpower:{countrystats[3]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 570),
-                                )
-                                compass(
-                                    screen,
-                                    pygame.math.Vector2(150 + sidebar_pos, 550),
+                            countrystats = countries.countryData[country][-1]
+                            screen.blit(
+                                countries.countriesToFlags[country],
+                                (80 + sidebar_pos, 85),
+                            )
+                            screen.blit(
+                                ui_font.render(
+                                    f"Political power:{countrystats[0]}",
+                                    fontalias,
                                     primary,
-                                    secondary,
-                                    compass_axis,
-                                    tick / 100,
-                                    pygame.math.Vector3(50, 20, 31.4),
-                                )
-
-                                if country in countries.Characters:
-                                    # NOTE(soi): im doing this bcuz the characters get rendered on
-                                    # top of the character decription (theres probably a better way
-                                    # of doing this)
-                                    for i, character in reversed(
-                                        list(
-                                            enumerate(countries.Display_Characters[country].keys())
-                                        )
-                                    ):
-                                        screen.blit(character, (120 * i + sidebar_pos + 80, 255))
-                                        if character.get_rect(
-                                            left=120 * i + sidebar_pos + 80, top=255
-                                        ).collidepoint(mouse_pos):
-                                            chara_desc.left, chara_desc.top = mouse_pos
-
-                                            pygame.draw.rect(
-                                                screen,
-                                                tertiary,
-                                                chara_desc,
-                                                border_radius=16,
-                                            )
-                                            pygame.draw.rect(
-                                                screen,
-                                                secondary,
-                                                chara_desc,
-                                                border_radius=16,
-                                                width=4,
-                                            )
-                                            for i, trait in enumerate(
-                                                countries.Characters[country][character]
-                                            ):
-                                                if ":" not in trait:
-                                                    screen.blit(
-                                                        ui_font.render(
-                                                            trait.split(".")[1]
-                                                            .replace("=", "")
-                                                            .capitalize(),
-                                                            fontalias,
-                                                            secondary,
-                                                        ),
-                                                        (
-                                                            mouse_pos[0] + 15,
-                                                            mouse_pos[1] + 30 * i + 15,
-                                                        ),
-                                                    )
-                                                else:
-                                                    screen.blit(
-                                                        ui_font.render(
-                                                            trait[6::],
-                                                            fontalias,
-                                                            primary,
-                                                        ),
-                                                        (
-                                                            mouse_pos[0] + 15,
-                                                            mouse_pos[1] + 30 * i + 15,
-                                                        ),
-                                                    )
-                                screen.blit(
-                                    shadow(
-                                        title_font.render(
-                                            globals.language_translations[country],
-                                            fontalias,
-                                            primary,
-                                        ),
-                                        7,
-                                        tertiary,
+                                ),
+                                (320 + sidebar_pos, 480),
+                            )
+                            screen.blit(
+                                ui_font.render(
+                                    f"Stability:{countrystats[1]}",
+                                    fontalias,
+                                    primary,
+                                ),
+                                (320 + sidebar_pos, 510),
+                            )
+                            screen.blit(
+                                ui_font.render(
+                                    f"Money:{countrystats[2]}",
+                                    fontalias,
+                                    primary,
+                                ),
+                                (320 + sidebar_pos, 540),
+                            )
+                            screen.blit(
+                                ui_font.render(
+                                    f"Manpower:{countrystats[3]}",
+                                    fontalias,
+                                    primary,
+                                ),
+                                (320 + sidebar_pos, 570),
+                            )
+                            screen.blit(
+                                shadow(
+                                    ui_font.render(
+                                        ideologyname(
+                                            countries.countryData[
+                                                countries.colorsToCountries[selected_country_rgb]
+                                            ][3]
+                                        )[1],
+                                        fontalias,
+                                        secondary,
                                     ),
-                                    (150 + sidebar_pos, 350),
+                                    3,
+                                    tertiary,
+                                ),
+                                (160 + sidebar_pos, 420),
+                            )
+                            compass(
+                                screen,
+                                pygame.math.Vector2(150 + sidebar_pos, 550),
+                                primary,
+                                secondary,
+                                compass_axis,
+                                tick / 100,
+                                pygame.math.Vector3(
+                                    countries.countryData[
+                                        countries.colorsToCountries[selected_country_rgb]
+                                    ][3]
+                                ),
+                            )
+                            print(
+                                ideologyname(
+                                    countries.countryData[
+                                        countries.colorsToCountries[selected_country_rgb]
+                                    ][3]
                                 )
+                            )
+
+                            if country in countries.Characters:
+                                # NOTE(soi): im doing this bcuz the characters get rendered on
+                                # top of the character decription (theres probably a better way
+                                # of doing this)
+                                for i, character in reversed(
+                                    list(enumerate(countries.Display_Characters[country].keys()))
+                                ):
+                                    screen.blit(character, (120 * i + sidebar_pos + 80, 255))
+                                    if character.get_rect(
+                                        left=120 * i + sidebar_pos + 80, top=255
+                                    ).collidepoint(mouse_pos):
+                                        chara_desc.left, chara_desc.top = mouse_pos
+
+                                        pygame.draw.rect(
+                                            screen,
+                                            tertiary,
+                                            chara_desc,
+                                            border_radius=16,
+                                        )
+                                        pygame.draw.rect(
+                                            screen,
+                                            secondary,
+                                            chara_desc,
+                                            border_radius=16,
+                                            width=4,
+                                        )
+                                        for i, trait in enumerate(
+                                            countries.Characters[country][character]
+                                        ):
+                                            if ":" not in trait:
+                                                screen.blit(
+                                                    ui_font.render(
+                                                        trait.split(".")[1]
+                                                        .replace("=", "")
+                                                        .capitalize(),
+                                                        fontalias,
+                                                        secondary,
+                                                    ),
+                                                    (
+                                                        mouse_pos[0] + 15,
+                                                        mouse_pos[1] + 30 * i + 15,
+                                                    ),
+                                                )
+                                            else:
+                                                screen.blit(
+                                                    ui_font.render(
+                                                        trait[6::],
+                                                        fontalias,
+                                                        primary,
+                                                    ),
+                                                    (
+                                                        mouse_pos[0] + 15,
+                                                        mouse_pos[1] + 30 * i + 15,
+                                                    ),
+                                                )
+                            screen.blit(
+                                shadow(
+                                    title_font.render(
+                                        globals.language_translations[country],
+                                        fontalias,
+                                        primary,
+                                    ),
+                                    7,
+                                    tertiary,
+                                ),
+                                (150 + sidebar_pos, 350),
+                            )
                         case _:
                             print("uhoh")
 
