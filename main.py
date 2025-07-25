@@ -41,6 +41,11 @@ class CustomEvents(IntEnum):
     SONG_FINISHED = pygame.USEREVENT+1
 
 @dataclass
+class Division:
+    pos: pygame.Vector2
+    target: pygame.Vector2
+
+@dataclass
 class ButtonConfig:
     string: str = ""
     thicc: int = 0
@@ -279,6 +284,12 @@ def main():
         # NOTE(soi): oh so thats why buttons should have ids
         Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
     ]
+
+    divisions = []
+    for i in range(0, 100):
+        x = random.randrange(0, map.cmap.get_width())
+        y = random.randrange(0, map.cmap.get_height())
+        divisions.append(Division(pos=pygame.Vector2(x, y), target=pygame.Vector2(x, y)))
 
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
@@ -610,6 +621,10 @@ def main():
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
                         camera_pos.y -= mouse_rel[1] * mouse_sensitivity
 
+                # NOTE(pol): Replace your values, trial error or smth
+                camera_pos.x = clamp(camera_pos.x, -1000, 1000)
+                camera_pos.y = clamp(camera_pos.y, -1000, 1000)
+
                 scaled_map = scaled_maps[map.scale - 1]
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
@@ -659,14 +674,15 @@ def main():
                 else:
                     division_pos = division_target
 
+                # START: DIVISION RENDERING LOGIC
                 # Transform coord relative to map to screen coord
-                division_screen_pos = pygame.Vector2()
-                division_screen_pos.x = division_pos.x * map_rect.width / map.cmap.get_width()
-                division_screen_pos.y = division_pos.y * map_rect.height / map.cmap.get_height()
-                division_screen_pos += map_rect.topleft
-
-                # Draw division
-                pygame.draw.circle(screen, secondary, division_screen_pos, 5)
+                for division in divisions:
+                    division_screen_pos = pygame.Vector2()
+                    division_screen_pos.x = division.pos.x * map_rect.width / map.cmap.get_width()
+                    division_screen_pos.y = division.pos.y * map_rect.height / map.cmap.get_height()
+                    division_screen_pos += map_rect.topleft
+                    pygame.draw.circle(screen, secondary, division_screen_pos, 5)
+                # END DIVISION RENDERING LOGIC
 
                 pygame.draw.rect(
                     screen,
