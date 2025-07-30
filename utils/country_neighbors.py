@@ -10,6 +10,9 @@ def get_neighboring_colors(pixels, x, y):
             if i == 0 and j == 0:
                 continue
 
+            if x+i < 0 or y+j < 0:
+                continue
+
             try:
                 neighbors.add(pixels[x+i, y+j])
             except IndexError:
