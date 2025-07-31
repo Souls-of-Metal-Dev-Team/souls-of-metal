@@ -565,7 +565,7 @@ def main():
                 )
                 lines = [
                     "                                                                       Souls Of Metal",
-                    "                                                                       Original Creator: 123456",
+                    "                                                                       Original Creator: Søilad",
                     "                                                     Developer(s): 123456789, 1234567890, 12345678",
                     "                                                                       Tester(s): 1234567",
                     "",
@@ -666,6 +666,9 @@ def main():
                 division_screen_pos += map_rect.topleft
 
                 # Draw division
+                division_icon = pygame.image.load(os.path.join(base_path, "icons", "plane_icon.png")).convert_alpha()
+                division_icon = pygame.transform.smoothscale(division_icon, (24, 24))
+                screen.blit(division_icon, division_icon.get_rect(center=division_screen_pos))
                 pygame.draw.circle(screen, secondary, division_screen_pos, 5)
 
                 pygame.draw.rect(
