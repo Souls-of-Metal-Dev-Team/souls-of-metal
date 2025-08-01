@@ -134,15 +134,6 @@ def main():
 
     file_path = os.path.join(base_path, "date.txt")
 
-    G = nx.Graph()
-
-    with open(os.path.join(base_path, "starts", "Modern World", "neighbors.json")) as json:
-        neighbours = {eval(k): [tuple(i) for i in v] for k, v in load(json).items()}
-
-    for k, v in neighbours.items():
-        for province in v:
-            G.add_edge(k, province)
-
     with open(file_path) as f:
         lines = f.readlines()
         ymd = lines[0].strip().split(",")
@@ -280,8 +271,22 @@ def main():
         Button(display_date, (960, 25), (320, 40), 5, settings_json, ui_font),
     ]
 
+    with open(os.path.join(base_path, "starts", "Modern World", "neighbors.json")) as json:
+        neighbours = {
+            eval(k): [tuple(i) for i in v]
+            for k, v in load(json).items()
+        }
+    G = nx.Graph()
+    for k, v in neighbours.items():
+        for province in v:
+            G.add_edge(k, province)
+
     division_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
     division_target = division_pos
+    division_path = {}
+    division_timer_s = 1.0
+
+    clock = pygame.Clock()
 
     camera_pos = pygame.Vector2()
 
@@ -599,12 +604,12 @@ def main():
 
                 # Zoom
                 map.scale += mouse_scroll
-                map.scale = clamp(map.scale, 2, 10)
+                map.scale = clamp(map.scale, 1, 10)
 
                 camera_pos = mouse_world_pos * map.scale - pygame.Vector2(mouse_pos)
 
                 # Panning
-                mouse_sensitivity = 1 / 5
+                mouse_sensitivity = 1
                 match pygame.mouse.get_pressed():
                     case (_, 1, _):
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
@@ -642,22 +647,21 @@ def main():
                     r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
                     selected_province_id = f"{r}, {g}, {b}"
                     if selected_country_rgb != (0, 0, 0):
-                        sidebar_tab = (
-                            "Diplomacy"
-                            if selected_country_rgb in countries.colorsToCountries.keys()
-                            else ""
-                        )
+                        sidebar_tab = ( "Diplomacy" if selected_country_rgb in countries.colorsToCountries.keys() else "")
                         center = province_centers[selected_province_id]
                         division_target = pygame.Vector2(center)
+
+                        division_path = nx.shortest_path(G, source=(0, 1, 0), target=(r, g, b))
+
                     else:
                         sidebar_tab = ""
 
-                delta = division_target - division_pos
-                division_speed = 10
-                if delta.length() > 10:
-                    division_pos += delta.normalize() * division_speed
-                else:
-                    division_pos = division_target
+                # delta = division_target - division_pos
+                # division_speed = 10
+                # if delta.length() > 10:
+                #     division_pos += delta.normalize() * division_speed
+                # else:
+                #     division_pos = division_target
 
                 # Transform coord relative to map to screen coord
                 division_screen_pos = pygame.Vector2()
@@ -968,8 +972,15 @@ def main():
 
         tick += 1
 
-        pygame.time.Clock().tick(settings_json["FPS"])
-        pygame.display.update()
+        division_timer_s -= clock.tick(settings_json["FPS"])/1000.0
 
+        if division_timer_s <= 0:
+            print("timeout")
+            division_timer_s = 1.0
+            if len(division_path) > 0:
+                r, g, b = division_path.pop(0)
+                division_pos = pygame.Vector2(province_centers[f"{r}, {g}, {b}"])
+
+        pygame.display.update()
 
 main()
