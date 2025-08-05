@@ -131,10 +131,11 @@ class Button:
     # last_tick = 0
     img = False
 
-    def __init__(self, id, pos, size, thicc, settings_json, ui_font, outlined=False):
+    def __init__(self, id, pos, size, thicc, settings_json, ui_font, outlined=False, rotund=False):
         self.id = id
         self.thicc = 0
         self.thiccmax = thicc
+        self.rotund = rotund
         self.outlined = outlined
         scaled_size = pygame.Vector2(size) * globals.ui_scale
         if id.startswith("/:"):
@@ -194,19 +195,16 @@ class Button:
                     self.rect.width + scaled_thicc * 2,
                     self.rect.height + scaled_thicc * 2,
                 ),
-                border_radius=self.rect.height * scaled_thicc // 2,
+                border_radius=(self.rect.height * scaled_thicc // 2 if self.rotund else 0),
             )
 
-        pygame.draw.rect(screen, tertiary, self.rect, border_radius=self.rect.height)
+        pygame.draw.rect(
+            screen,
+            tertiary,
+            self.rect,
+            border_radius=(self.rect.height * scaled_thicc // 2 if self.rotund else 0),
+        )
 
-        if self.img:
-            screen.blit(
-                self.img,
-                (
-                    self.rect.centerx - self.img.get_width() / 2,
-                    self.rect.y,
-                ),
-            )
         if self.text:
             text_surface = self.hovered_text if hovered else self.normal_text
             screen.blit(
@@ -214,6 +212,15 @@ class Button:
                 (
                     self.rect.centerx - text_surface.get_width() / 2,
                     self.rect.y + (self.thiccmax * globals.ui_scale),
+                ),
+            )
+
+        if self.img:
+            screen.blit(
+                self.img,
+                (
+                    self.rect.centerx - self.img.get_width() / 2,
+                    self.rect.y,
                 ),
             )
         if condition:

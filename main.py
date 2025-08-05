@@ -118,6 +118,7 @@ def main():
     game_logo = glow(
         pygame.image.load(os.path.join(base_path, "ui", "logo.png")).convert_alpha(), 5, primary
     )
+    sidebar = pygame.image.load(os.path.join(base_path, "ui", "sidebar.png")).convert_alpha()
 
     current_menu = Menu.MAIN_MENU
     tick = 0
@@ -182,11 +183,88 @@ def main():
         ),
     ]
 
+    buildingbuttons = [
+        Button(
+            "Build Factories",
+            (312, 100),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Build Farms",
+            (312, 150),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Build College",
+            (312, 200),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Build Infrastructure",
+            (312, 250),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Build Conentration Camps",
+            (312, 250),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+    ]
+    militarybuttons = [
+        Button(
+            "Deploy Infantry",
+            (312, 100),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Deploy Tank",
+            (312, 150),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Deploy Artilery",
+            (312, 200),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+        Button(
+            "Deploy Paratroopers",
+            (312, 250),
+            (240, 40),
+            5,
+            settings_json,
+            ui_font,
+        ),
+    ]
+
     mapbuttons = [
-        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Building", (195, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Military", (325, 25), (120, 40), 5, settings_json, ui_font, True),
-        Button("Estates", (455, 25), (120, 40), 5, settings_json, ui_font, True),
+        Button("/:diplo Diplomacy", (65, 25), (120, 40), 5, settings_json, ui_font, False),
+        Button("/:buil Buildings", (195, 25), (120, 40), 5, settings_json, ui_font, False),
+        Button("/:mili Military", (325, 25), (120, 40), 5, settings_json, ui_font, False),
+        Button("/:esta Estates", (455, 25), (120, 40), 5, settings_json, ui_font, False),
         Button(
             "-",
             (770, 25),
@@ -539,13 +617,15 @@ def main():
                 camera_pos = mouse_world_pos * map.scale - pygame.Vector2(mouse_pos)
 
                 # Panning
-                mouse_sensitivity = 1 / 5
+                scaled_map = scaled_maps[map.scale - 1]
+                mouse_sensitivity = 1 / 3
                 match pygame.mouse.get_pressed():
                     case (_, 1, _):
                         camera_pos.x -= mouse_rel[0] * mouse_sensitivity
                         camera_pos.y -= mouse_rel[1] * mouse_sensitivity
 
-                scaled_map = scaled_maps[map.scale - 1]
+                camera_pos.y = clamp(camera_pos.y, 0, scaled_map.get_height() - 1080)
+
                 map_rect = scaled_map.get_rect()
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
@@ -563,7 +643,6 @@ def main():
 
                 # Get selected country
                 hovered = map_rect.collidepoint(mouse_pos)
-                # NOTE(soi): I should fix the part whre it lags frm zoom
                 if hovered and mouse_just_pressed:
                     coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
                     pixel = pygame.Vector2()
@@ -601,28 +680,36 @@ def main():
                 division_screen_pos += map_rect.topleft
 
                 # Draw division
-                pygame.draw.circle(screen, secondary, division_screen_pos, 5)
+                pygame.draw.rect(
+                    screen, tertiary, (division_screen_pos, (40, 20)), border_radius=10
+                )
+                pygame.draw.rect(
+                    screen, secondary, (division_screen_pos, (40, 20)), width=3, border_radius=10
+                )
 
-                pygame.draw.rect(
-                    screen,
-                    tertiary,
-                    pygame.Rect((sidebar_pos, 15), (625, 1065)),
-                    border_bottom_right_radius=64,
-                    border_top_right_radius=64,
-                )
-                pygame.draw.rect(
-                    screen,
-                    secondary,
-                    pygame.Rect((sidebar_pos, 15), (625, 1065)),
-                    border_bottom_right_radius=64,
-                    border_top_right_radius=64,
-                    width=10,
-                )
+                pygame.draw.rect(screen, tertiary, ((sidebar_pos, 0), (625, 50)))
+                screen.blit(sidebar, (sidebar_pos, 15))
+                # pygame.draw.rect(
+                #     screen,
+                #     tertiary,
+                #     pygame.Rect((sidebar_pos, 15), (625, 1065)),
+                #     border_bottom_right_radius=64,
+                #     border_top_right_radius=64,
+                # )
+                # pygame.draw.rect(
+                #     screen,
+                #     secondary,
+                #     pygame.Rect((sidebar_pos, 15), (625, 1065)),
+                #     border_bottom_right_radius=64,
+                #     border_top_right_radius=64,
+                #     width=10,
+                # )
                 if selected_country_rgb in countries.colorsToCountries:
                     country = countries.colorsToCountries[selected_country_rgb]
                     ideology_names = ideologyname(
                         countries.countryData[countries.colorsToCountries[selected_country_rgb]][3]
                     )
+                print(sidebar_tab)
                 if sidebar_tab:
                     sidebar_pos = min(sidebar_pos + 45, -10)
                     match sidebar_tab:
@@ -635,6 +722,16 @@ def main():
                                 100,
                                 countries.countryData[country][2],
                             )
+                        case "Buildings":
+                            for button in buildingbuttons:
+                                hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                                if not mouse_just_pressed or not hovered:
+                                    continue
+                        case "Military":
+                            for button in militarybuttons:
+                                hovered = button.draw(screen, mouse_pos, mouse_just_pressed, tick)
+                                if not mouse_just_pressed or not hovered:
+                                    continue
                         case "Diplomacy":
                             countrystats = countries.countryData[country][-1]
                             screen.blit(
@@ -788,6 +885,8 @@ def main():
                             sidebar_tab = "Diplomacy"
                         case "Military":
                             sidebar_tab = "Military"
+                        case "Buildings":
+                            sidebar_tab = "Buildings"
                         case "Estates":
                             sidebar_tab = "Estates"
 
