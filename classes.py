@@ -22,6 +22,14 @@ with open(os.path.join(base_path, "ui", "theme.json")) as f:
 
 
 @dataclass
+class Division:
+    type: str = ""
+    province_id: list = [0, 0, 0]
+    size: int = 1
+    morale: int = 100
+
+
+@dataclass
 class ButtonConfig:
     string: str = ""
     thicc: int = 0

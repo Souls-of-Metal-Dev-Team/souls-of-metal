@@ -12,6 +12,7 @@ from classes import (
     ButtonConfig,
     Vec2i,
     ButtonDraw,
+    Division,
     fontalias,
     primary,
     secondary,
@@ -84,6 +85,9 @@ def main():
 
     with open(os.path.join(base_path, "starts", "Modern World", "province-centers.json")) as f:
         province_centers = load(f)
+
+    with open(os.path.join(base_path, "starts", "Modern World", "divisions.json")) as f:
+        divisions = {k: Division(*v) for k, v in load(f).items()}
 
     pygame.mixer.music.set_endevent(CustomEvents.SONG_FINISHED)
     music_tracks = os.listdir(os.path.join(base_path, "sound", "music"))
