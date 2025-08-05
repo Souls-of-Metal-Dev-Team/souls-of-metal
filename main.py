@@ -19,7 +19,7 @@ import os
 import sys
 import datetime
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Any
 import networkx as nx
 
 if getattr(sys, "frozen", False):
@@ -51,7 +51,7 @@ class Vec2i:
     x: int = 0
     y: int = 0
     
-    def to_tuple(self):
+    def to_tuple(self) -> tuple[int, int]:
         return (self.x, self.y)
 
 @dataclass
@@ -62,7 +62,7 @@ class ButtonDraw:
     text: Optional[str] = None
     text_font: Optional[pygame.font.Font] = None
 
-def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw):
+def draw_button(screen: pygame.Surface, mouse_pos: tuple[int, int], button_draw: ButtonDraw) -> bool:
     pos = button_draw.pos.to_tuple()
     size = button_draw.size.to_tuple()
     button = button_draw.button
@@ -154,19 +154,21 @@ def main():
     mouse_just_pressed = False
     mouse_scroll = 0
 
-    settings_json = None
+    # As you can see you can just initialize settings_json first, this plays nicer with strict typing.
+
+    settings_json: dict[str, Any] = {
+        "Scroll Invert": 1,
+        "UI Size": 14,
+        "FPS": 60,
+        "Sound Volume": 50,
+        "Music Volume": 50,
+        "Music Track": "FDJ"
+    }
+
     try:
         with open(os.path.join(base_path, "settings.json")) as f:
             settings_json = load(f)
     except FileNotFoundError:
-        settings_json = {
-            "Scroll Invert": 1,
-            "UI Size": 14,
-            "FPS": 60,
-            "Sound Volume": 50,
-            "Music Volume": 50,
-            "Music Track": "FDJ"
-        }
         with open(os.path.join(base_path, "settings.json"), "w") as f:
             dump(settings_json, f)
 
@@ -377,6 +379,9 @@ def main():
                 case pygame.MOUSEBUTTONUP:
                     if event.button == 1:
                         mouse_just_pressed = False
+
+                case _: 
+                    pass
 
         # Clear screen
         screen.fill((0, 0, 0))
@@ -620,15 +625,8 @@ def main():
                 map_rect.x -= int(camera_pos.x)
                 map_rect.y -= int(camera_pos.y)
 
-                # Render map
-                # screen.blit(scaled_map, map_rect.topleft)
-                screen.blit(scaled_map, (map_rect.x % scaled_map.get_width(), map_rect.y))
-                screen.blit(
-                    scaled_map,
-                    (
-                        (map_rect.x % scaled_map.get_width()) - scaled_map.get_width(),
-                        map_rect.y,
-                    ),
+                screen.fblits(
+                    [(scaled_map, (i, map_rect.y)) for i in range(map_rect.x % scaled_map.get_width() - scaled_map.get_width(), 1920, scaled_map.get_width())]
                 )
 
                 # Get selected country
@@ -708,41 +706,45 @@ def main():
                             if selected_country_rgb in countries.colorsToCountries:
                                 country = countries.colorsToCountries[selected_country_rgb]
                                 countrystats = countries.countryData[country][-1]
-                                screen.blit(
-                                    countries.countriesToFlags[country],
-                                    (80 + sidebar_pos, 85),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Political power:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 480),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Stability:{countrystats[1]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 510),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Money:{countrystats[2]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 540),
-                                )
-                                screen.blit(
-                                    ui_font.render(
-                                        f"Manpower:{countrystats[3]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (320 + sidebar_pos, 570),
+                                screen.fblits(
+                                    [
+                                        (
+                                            countries.countriesToFlags[country], 
+                                            (80 + sidebar_pos, 85)
+                                        ),
+                                        (
+                                            ui_font.render(
+                                                f"Political power:{countrystats[0]}",
+                                                fontalias,
+                                                primary
+                                            ), 
+                                            (320 + sidebar_pos, 480)
+                                        ),
+                                        (
+                                            ui_font.render(
+                                                f"Stability:{countrystats[1]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (320 + sidebar_pos, 510)
+                                        ),
+                                        (
+                                            ui_font.render(
+                                                f"Money:{countrystats[2]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (320 + sidebar_pos, 540)
+                                        ),
+                                        (
+                                            ui_font.render(
+                                                f"Manpower:{countrystats[3]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (320 + sidebar_pos, 570)
+                                        )
+                                    ]
                                 )
                                 compass(
                                     screen,
@@ -824,118 +826,121 @@ def main():
                                     (150 + sidebar_pos, 350),
                                 )
                         case "Military":
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Manpower (Reserved):{countrystats[3]}",
-                                        fontalias,
-                                        primary,
+                            screen.fblits(
+                                [
+                                    (
+                                        ui_font.render(
+                                            f"Manpower (Reserved):{countrystats[3]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 70)
                                     ),
-                                    (50 + sidebar_pos, 70),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Manpower (Active):{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Manpower (Active):{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 90)
                                     ),
-                                    (50 + sidebar_pos, 90),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Manpower (Army):{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Manpower (Army):{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 110)
                                     ),
-                                    (50 + sidebar_pos, 110),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Tanks:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Tanks:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 130)
                                     ),
-                                    (50 + sidebar_pos, 130),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Motorised:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Motorised:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 150)
                                     ),
-                                    (50 + sidebar_pos, 150),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Manpower (Air force):{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Manpower (Air force):{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 170)
                                     ),
-                                    (50 + sidebar_pos, 170),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Fighters:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Fighters:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 190)
                                     ),
-                                    (50 + sidebar_pos, 190),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Bombers:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Bombers:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 210)
                                     ),
-                                    (50 + sidebar_pos, 210),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"CASes:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"CASes:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 230)
                                     ),
-                                    (50 + sidebar_pos, 230),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Manpower (Navy):{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Manpower (Navy):{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 250)
                                     ),
-                                    (50 + sidebar_pos, 250),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Aircraft Carriers:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Aircraft Carriers:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 270)
                                     ),
-                                    (50 + sidebar_pos, 270),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Battleships:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Battleships:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 290)
                                     ),
-                                    (50 + sidebar_pos, 290),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Destroyer/Brigates:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
+                                    (
+                                        ui_font.render(
+                                            f"Destroyer/Brigates:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 310)
                                     ),
-                                    (50 + sidebar_pos, 310),
-                                )
-                            screen.blit(
-                                    ui_font.render(
-                                        f"Medics:{countrystats[0]}",
-                                        fontalias,
-                                        primary,
-                                    ),
-                                    (50 + sidebar_pos, 330),
-                                )
+                                    (
+                                        ui_font.render(
+                                            f"Medics:{countrystats[0]}",
+                                            fontalias,
+                                            primary,
+                                        ),
+                                        (50 + sidebar_pos, 330)
+                                    )
+                                ])
                         case _:
                             print("uhoh")
 
