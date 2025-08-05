@@ -826,121 +826,124 @@ def main():
                                     (150 + sidebar_pos, 350),
                                 )
                         case "Military":
-                            screen.fblits(
-                                [
-                                    (
-                                        ui_font.render(
-                                            f"Manpower (Reserved):{countrystats[3]}",
-                                            fontalias,
-                                            primary,
+                            if selected_country_rgb in countries.colorsToCountries:
+                                country = countries.colorsToCountries[selected_country_rgb]
+                                countrystats = countries.countryData[country][-1]
+                                screen.fblits(
+                                    [
+                                        (
+                                            ui_font.render(
+                                                f"Manpower (Reserved):{countrystats[3]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 70)
                                         ),
-                                        (50 + sidebar_pos, 70)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Manpower (Active):{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Manpower (Active):{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 90)
                                         ),
-                                        (50 + sidebar_pos, 90)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Manpower (Army):{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Manpower (Army):{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 110)
                                         ),
-                                        (50 + sidebar_pos, 110)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Tanks:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Tanks:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 130)
                                         ),
-                                        (50 + sidebar_pos, 130)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Motorised:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Motorised:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 150)
                                         ),
-                                        (50 + sidebar_pos, 150)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Manpower (Air force):{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Manpower (Air force):{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 170)
                                         ),
-                                        (50 + sidebar_pos, 170)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Fighters:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Fighters:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 190)
                                         ),
-                                        (50 + sidebar_pos, 190)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Bombers:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Bombers:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 210)
                                         ),
-                                        (50 + sidebar_pos, 210)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"CASes:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"CASes:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 230)
                                         ),
-                                        (50 + sidebar_pos, 230)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Manpower (Navy):{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Manpower (Navy):{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 250)
                                         ),
-                                        (50 + sidebar_pos, 250)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Aircraft Carriers:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Aircraft Carriers:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 270)
                                         ),
-                                        (50 + sidebar_pos, 270)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Battleships:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Battleships:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 290)
                                         ),
-                                        (50 + sidebar_pos, 290)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Destroyer/Brigates:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
+                                        (
+                                            ui_font.render(
+                                                f"Destroyer/Brigates:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 310)
                                         ),
-                                        (50 + sidebar_pos, 310)
-                                    ),
-                                    (
-                                        ui_font.render(
-                                            f"Medics:{countrystats[0]}",
-                                            fontalias,
-                                            primary,
-                                        ),
-                                        (50 + sidebar_pos, 330)
-                                    )
-                                ])
+                                        (
+                                            ui_font.render(
+                                                f"Medics:{countrystats[0]}",
+                                                fontalias,
+                                                primary,
+                                            ),
+                                            (50 + sidebar_pos, 330)
+                                        )
+                                    ])
                         case _:
                             print("uhoh")
 
