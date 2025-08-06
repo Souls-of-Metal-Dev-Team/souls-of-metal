@@ -1,8 +1,5 @@
 from PIL import Image, ImageDraw
 
-def wrap(value, max):
-    return value % max
-
 def main():
     image = Image.open("map.png").convert("RGB")
     pixels = image.load()
@@ -11,33 +8,24 @@ def main():
 
     width, height = image.size
 
-    BLACK = (0,0,0)
-    colors = set()
+    colors = {(0,0,0)}
 
-    r = 1
-    g = 0
-    b = 0
+    counter = 0
 
-    for y in range(height):
-        for x in range(width):
-            c = pixels[x, y]
-            if c == BLACK or c in colors:
-                continue
+    for i in range(height * width):
+        c = pixels[i % width, i // width]
+        if c in colors: # I assume you can't just put BLACK in colors?
+            continue
+        counter += 1
+        new_color = (counter % 256, (counter // 256) % 256, (counter // 65536) % 256)
+        colors.add(new_color)
 
-            new_color = (g, r, b)
-            colors.add(new_color)
+        ImageDraw.floodfill(image, (i % width, i // width), new_color)
 
-            ImageDraw.floodfill(image, (x, y), new_color)
-
-            r = wrap(r+1, 256)
-            if r == 0:
-                g = wrap(g+1, 256)
-                if g == 0:
-                    b = wrap(b+1, 256)
-                    if b == 256:
-                        print("Ran out of unique colors !!!")
+        # If you want just check for black here for validation or something.
  
     print("Saved image to 'provinces.png'")
     image.save("provinces.png")
 
-main()
+if __name__ == "__main__":
+    main()
