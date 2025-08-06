@@ -630,19 +630,25 @@ def main():
                 )
 
                 # Get selected country
-                hovered = map_rect.collidepoint(mouse_pos)
+                hovered = 0 <= mouse_world_pos.y <= scaled_map.height
                 # NOTE(soi): I should fix the part whre it lags frm zoom
+                #screen.blit(
+                #    ui_font.render(
+                #        f"({camera_pos.x:.1f}, {camera_pos.y:.1f}) : ({mouse_world_pos.x:.1f}, {mouse_world_pos.y:.1f}) : ({(mouse_world_pos.x % scaled_map.get_width()):.1f}, {mouse_world_pos.y:.1f})", 
+                #        False, 
+                #        (255, 255, 255), 
+                #        (0, 0, 0)
+                #    ), 
+                #    (200, 200)
+                #)
+
                 if hovered and mouse_just_pressed:
-                    coord = pygame.Vector2(mouse_pos) - pygame.Vector2(map_rect.topleft)
-                    pixel = pygame.Vector2()
-                    pixel.x = coord.x * map.cmap.get_width() / map_rect.width
-                    pixel.y = coord.y * map.cmap.get_height() / map_rect.height
-                    r, g, b, _ = map.cmap.get_at((int(pixel.x), int(pixel.y)))
+                    coord = mouse_world_pos
+                    coord.x %= scaled_map.get_width()
+                    r, g, b, _ = map.cmap.get_at((int(coord.x), int(coord.y)))
                     selected_country_rgb = (r, g, b)
 
-                    pixel.x = coord.x * map.pmap.get_width() / map_rect.width
-                    pixel.y = coord.y * map.pmap.get_height() / map_rect.height
-                    r, g, b, _ = map.pmap.get_at((int(pixel.x), int(pixel.y)))
+                    r, g, b, _ = map.pmap.get_at((int(coord.x), int(coord.y)))
                     selected_province_id = f"{r}, {g}, {b}"
                     if selected_country_rgb != (0, 0, 0):
                         sidebar_tab = ( "Diplomacy" if selected_country_rgb in countries.colorsToCountries.keys() else "")
